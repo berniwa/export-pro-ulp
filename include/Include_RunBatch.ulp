@@ -1,0 +1,22 @@
+/**
+ * This ULP will run several image crop/mirror operations
+ *
+ * @author 		Tobias Hofer <thofer@xdevelop.at>
+ * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @copyright	2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
+
+//it has to be an ulp, otherwise it would run the batch-file befor creating it
+string batPath = argv[1];
+string tmp = " :";
+tmp[0]=batPath[0];
+
+output(batPath, "at"){
+	printf(tmp+"\n");
+	printf("CD \""+filedir(batPath)+"\"\n");
+	printf("DEL \"./tmp.scr\"\n");
+	printf("DEL \"./"+filename(batPath)+"\"\n");
+}
+
+system(argv[2]+"\""+batPath+"\""); 

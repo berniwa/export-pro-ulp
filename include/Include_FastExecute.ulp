@@ -1,0 +1,26 @@
+/**
+ * This ULP is used to speed up SCR imports
+ *
+ * @note 	The speed advantage in EAGLE 9 is marginal, as SCR import in EAGLE 9 is slow as ****
+ * 
+ * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @copyright	2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
+
+void executeAndExit(string cmd)
+{
+	string working_dir = "";
+	
+	if (schematic)	schematic(S) 	{working_dir = filedir(S.name);} 
+	if (board) 		board(B) 		{working_dir = filedir(B.name);} 
+	if (library)	library(L) 		{working_dir = filedir(L.name);} 
+	
+	string scr = working_dir + "tmp.scr";
+
+	output(scr, "w")
+	{
+		printf("%s", cmd);
+	}
+	exit(";SCRIPT '" + scr + "';");	
+}

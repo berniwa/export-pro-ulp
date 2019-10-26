@@ -1,0 +1,21 @@
+/**
+ * This ULP generates a farnell compatible bom list
+ *
+ * @author    Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @copyright 2009-2019, Bernhard Wörndl-Aichriedler
+ * @license   BSD-3-Clause
+ */
+
+void bomOutputFarnellBom(string ofilename, real multi)
+{
+  output(ofilename, "w")
+  {
+    for (int i = 0;i < bomInfoCount; i++) 
+    {
+      if(strstr(bomAttributeDistributor[i], "farnell") >= 0)
+      {
+        printf("%s,%d\n", bomXMLSafe(bomAttributeOrderNo[i]), int(ceil(bomInfoPartCount[i] * multi)));
+      }
+    }    
+  } 
+}
