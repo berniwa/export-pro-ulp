@@ -24,7 +24,7 @@ if(OS_SIGNATURE == "Windows_7" || OS_SIGNATURE == "Windows_8" || OS_SIGNATURE ==
 }
 else if(OS_SIGNATURE == "Linux")
 {
-	string WinProgPath = getUlpDir("../LibPNGImage");
+	string WinProgPath = getUlpDir("../PNGMirrorCrop-lin32.run");
 	system("chmod +x " + WinProgPath);	//getting execute-rights
 	string Space = " ";
 	string Param1 = "\"" + argv[1] + "\"" ;
