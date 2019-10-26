@@ -1,19 +1,19 @@
-/************************************************************/
-/* HTLExportPro_ImageExport.ulp                             */
-/* Exports images of what the PCB will look like            */
-/************************************************************/
-/* (c) Copyright 2011, Bernhard Wörndl-Aichriedler          */
-/* E-Mail: bwa@berniwa.com                                  */
-/* Homepage: www.berniwa.com                                */
-/************************************************************/
-/* Letzte Änderung am 18.02.2011                            */
-/* Version 1                                                */
-/************************************************************/
-
+/**
+ * This ULP will export PCB preview images.
+ * Yes, it is black magic
+ *
+ * @note	Due to limitations in the export, stop mask opening will 
+ * 			not be handled corrrectly. It should still produce sufficient
+ * 			results 			
+ * 
+ * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @author 	  	Tobias Hofer <thofer@xdevelop.at>
+ * @copyright	2011-2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
 #include "Include_FastExecute.ulp";
 #include "Include_Misc.ulp";
 #include "Include_String.ulp";
-
 
 int ram = 2147483647;	//in byte
 int bytePerPixel = 4;	//R,G,B,Alpha

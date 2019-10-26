@@ -1,3 +1,12 @@
+/**
+ * This ULP is just a collection of random string functions
+ *
+ * @author    Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @copyright 2009-2019, Bernhard Wörndl-Aichriedler
+ * @license   BSD-3-Clause
+ */
+
+
 /* WILDCARD */
 string STRING_WILDCARD_STR = "%%";
 

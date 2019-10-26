@@ -1,17 +1,10 @@
-/************************************************************/
-/* Include_BomCategory.ulp                                  */
-/* - Contains defines for proper BOM generator			    */
-/************************************************************/
-/* (c) Copyright 2016, Bernhard Wörndl-Aichriedler          */
-/* xDevelop OG - Hardware Developer							*/
-/* E-Mail: bwa@xdevelop.Autors            				    */
-/* Homepage: www.xdevelop.at 								*/
-/************************************************************/
-/* Letzte Änderung am 15.02.2016                            */
-/* Version 1.0 				                                */
-/************************************************************/
-
-
+/**
+ * This ULP is used to categorize parts in the BOM
+ *
+ * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @copyright	2016-2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
 int bomCategorize(
 	string name, string value, 
 	string device, string package2, 

@@ -1,16 +1,10 @@
-/************************************************************/
-/* HTLExportPro_SilkGen.ulp                                 */
-/* - Generiert den Silkscreen des Boardes auf einem         */
-/*   separaten Layer                                        */
-/************************************************************/
-/* (c) Copyright 2011, Bernhard Wörndl-Aichriedler          */
-/* E-Mail: bwa@berniwa.com                                  */
-/* Homepage: www.berniwa.com                                */
-/************************************************************/
-/* Letzte Änderung am 20.02.2011                            */
-/* Version 1                                                */
-/************************************************************/
-
+/**
+ * This ULP is used copy certain parts of the silkscreen, holes an drills
+ *
+ * @author    Richard Hammerl <support@cadsoft.com>
+ * @author    Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @author    Tobias Hofer <thofer@xdevelop.at>
+ */
 #usage "<b>Generate new silk screen layers</b>\n"
        "<p>"
        "Some board manufacturers specify a minimum width for silk "

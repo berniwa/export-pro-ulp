@@ -1,3 +1,13 @@
+/**
+ * This ULP generates the embedded pdf BOM
+ *
+ * @author 		Tobias Hofer <thofer@xdevelop.at>
+ * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @copyright	2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
+
+
 #include "Include_FastExecute.ulp";
 
 real startX=0, startY=0;

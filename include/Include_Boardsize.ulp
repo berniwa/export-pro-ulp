@@ -1,10 +1,21 @@
+/**
+ * This ULP is used to calculate the dimensions of a PCB
+ * This is done, by traversing through all elements on the
+ * dimension layer
+ *
+ * @note 	This ulp is not supposed to run stand-alone
+ *
+ * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @author 		Patricia Schöndorfer <ps@xdevelop.at>
+ * @copyright	2018-2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
 
 int initialized = 0;
 int max_x = 0;
 int min_x = 0;
 int max_y = 0;
 int min_y = 0;
-
 
 void setCoordinates(int x, int y)
 {

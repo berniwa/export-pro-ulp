@@ -1,3 +1,11 @@
+/**
+ * This ULP generates a dbase database from the BOM
+ *
+ * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @copyright	2009-2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
+
 string BOM_DBASE_COLUMNS[] = {"Stueckzahl", "Kurzb.", "Wert", "Bauform", "Refkennz.", "Lieferant", "Best. Nr.", "Hersteller", "Hs. Kennz.", "Barcode", "Preis/Stk.", "Reserv. 1", "Reserv. 2"};
 int BOM_DBASE_COLUMN_WIDTH = 250;
 string dbaseLine[];

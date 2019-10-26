@@ -12,6 +12,7 @@
  *
  * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
  * @copyright	2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
  */
 
 #include "Include_Misc.ulp";

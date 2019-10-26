@@ -1,14 +1,15 @@
-/************************************************************/
-/* HTLExportPro.ulp                                         */
-/* Allows proper BOM management directly in Eagle 			*/
-/************************************************************/
-/* (c) Copyright 2016, Bernhard Wörndl-Aichriedler          */
-/* E-Mail: bwa@xdevelop.at  	                            */
-/* Homepage: www.xdevelop.at                                */
-/************************************************************/
-/* Letzte Änderung am 15.02.2016                            */
-/* Version 2.0                                              */
-/************************************************************/
+/**
+ * Allows proper BOM management for EAGLE
+ *
+ * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @author 		Patricia Schöndorfer <ps@xdevelop.at>
+ * @author 		Tobias Hofer <thofer@xdevelop.at>
+ * @copyright	2016-2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
+
+ #usage "<b>Allows proper BOM management</b>\n"
+       "<author>Bernhard Wörndl-Aichriedler 2006-2019 </author>"
 
 #include "include/Include_Misc.ulp"
 #include "include/Include_FastExecute.ulp"

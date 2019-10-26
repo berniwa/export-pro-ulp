@@ -1,7 +1,13 @@
-#include "Include_Config.ulp";
+/**
+ * This ULP is used to download/request the pricing for a part
+ *
+ * @author    Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @author 	  Tobias Hofer <thofer@xdevelop.at>
+ * @copyright 2009-2019, Bernhard Wörndl-Aichriedler
+ * @license   BSD-3-Clause
+ */
 
-//string 	DOWNLOAD_URL 			= "http://eagle.berniwa.com/price.php";
-//string 	DOWNLOAD_URL 			= "http://localhost/EaglePriceRequester/price.php";
+#include "Include_Config.ulp";
 
 string bomPricingTsv = "";
 string bomPricingIds[];

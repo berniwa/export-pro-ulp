@@ -1,3 +1,11 @@
+/**
+ * This ULP will handle multilanguage support for the main gui		
+ * 
+ * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @author 	  	Tobias Hofer <thofer@xdevelop.at>
+ * @copyright	2011-2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
 #include "Include_String.ulp"
 
 string  lanContent = "";

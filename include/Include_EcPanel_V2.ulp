@@ -1,5 +1,17 @@
-#include "Include_Boardsize.ulp"
+/**
+ * This ULP is used to panalise the board according to eurocircuits'
+ * eC Panel standard
+ * 
+ * @Note: This ULP currently only works with a square outline
+ *
+ * @author 		Patricia Schöndorfer <ps@xdevelop.at>
+ * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @author 		Tobias Hofer <thofer@xdevelop.at>
+ * @copyright	2009-2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
 
+#include "Include_Boardsize.ulp"
 
 void dbgMsg(string msg,real val){
 	//to prevent debug messages to apear in releace
@@ -7,7 +19,6 @@ void dbgMsg(string msg,real val){
 	sprintf(tmp,msg+"%f",val);
 	dlgMessageBox(tmp);
 }
-
 
 real wireX1[];
 real wireY1[];

@@ -1,3 +1,11 @@
+/**
+ * This ULP generates a pnp BOM, that is eurocircuits compatible
+ *
+ * @author    Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @copyright 2009-2019, Bernhard Wörndl-Aichriedler
+ * @license   BSD-3-Clause
+ */
+
 void bomOutputPnpFile(string ofilename)
 {
   output(ofilename)

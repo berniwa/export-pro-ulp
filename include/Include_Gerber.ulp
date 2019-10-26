@@ -1,15 +1,12 @@
-/************************************************************/
-/* Include_Gerber.ulp                                       */
-/* - Generiert Gerber Dateien automatisch                   */
-/************************************************************/
-/* (c) Copyright 2013, Bernhard Wörndl-Aichriedler          */
-/* E-Mail: bwa@berniwa.com                                  */
-/* Homepage: www.berniwa.com                                */
-/************************************************************/
-/* Letzte Änderung am 06.06.2013                            */
-/* Version 1                                                */
-/************************************************************/
-
+/**
+ * This ULP is used to control the gerber export
+ *
+ * @note 	This ULP will start additional eagle instances
+ *
+ * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @copyright	2013-2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
 
 #usage ""
 

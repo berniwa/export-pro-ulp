@@ -1,42 +1,18 @@
-/************************************************************/
-/* HTLExportPro.ulp                                         */
-/* - Generiert die Bemaßung des Boards                      */
-/* - Generiert den Drill Table                              */
-/* - Exportiert Images von:                                 */
-/*           - Layout TOP                                   */
-/*           - Layout BOTTOM                                */
-/*           - Bestückungsplan TOP                          */
-/*           - Bestückungsplan BOTTOM                       */
-/*           - Bohrplan                                     */
-/* - Spiegel Bottom Layer Images                            */
-/* - Exportiert die Stückliste                              */
-/************************************************************/
-/* (c) Copyright 2009, Bernhard Wörndl-Aichriedler          */
-/* Schüler der 5HNc(5cHELi) 2008/09 HTL Salzburg Elektronik */
-/* E-Mail: bwa@berniwa.com                                  */
-/* Homepage: www.berniwa.com                                */
-/************************************************************/
-/* Letzte Änderung am 28.01.2009                            */
-/* Version 3.3                                              */
-/************************************************************/
-/* Letzte Änderung am 11.12.2009                            */
-/* Version 4                                                */
-/************************************************************/
-/* Letzte Änderung am 19.02.2010                            */
-/* Version 5                                                */
-/************************************************************/
-/* Letzte Änderung am 18.02.2011                            */
-/* Version 6                                                */
-/************************************************************/
-/* Letzte Änderung am 06.06.2013                            */
-/* Version 7                                                */
-/************************************************************/
-/* Letzte Änderung am 20.03.2016                            */
-/* Version 8                                                */
-/************************************************************/
-/* Letzte Änderung am 12.07.2018                            */
-/* Version 9                                                */
-/************************************************************/
+/**
+ * This ULP is black magic
+ * This ULP will handle all export/documentation tasks
+ * with a view clicks
+ *
+ * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @author 		Patricia Schöndorfer <ps@xdevelop.at>
+ * @author 		Tobias Hofer <thofer@xdevelop.at>
+ * @author 		Philipp Doppelhammer <philipp@xdevelop.at>
+ * @copyright	2006-2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
+
+ #usage "<b>Generate and export project documentation and files</b>\n"
+       "<author>Bernhard Wörndl-Aichriedler 2006-2019 </author>"
 
 #include "include/Include_Misc.ulp";
 #include "include/Include_Dru.ulp";

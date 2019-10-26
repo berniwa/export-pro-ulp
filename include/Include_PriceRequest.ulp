@@ -1,3 +1,12 @@
+/**
+ * This ULP is used to download/request the pricing for a part
+ *
+ * @author    Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @author 	  Tobias Hofer <thofer@xdevelop.at>
+ * @copyright 2009-2019, Bernhard Wörndl-Aichriedler
+ * @license   BSD-3-Clause
+ */
+
 #include "Include_Misc.ulp"
 #include "Include_FastExecute.ulp";
 #include "Include_BomConfig.ulp";

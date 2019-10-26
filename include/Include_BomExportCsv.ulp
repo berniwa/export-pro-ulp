@@ -1,3 +1,11 @@
+/**
+ * This ULP generates a CSV BOM
+ *
+ * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @copyright	2016-2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
+
 string bomCsvSafe(string str) {
   str = stringReplace(str, "\"", "\\\"");
 

@@ -1,3 +1,12 @@
+/**
+ * This ULP contains the category definitions for the BOM 
+ * generator
+ *
+ * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @copyright	2016-2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
+
 /************************************************************/
 /* Include_BomConfig.ulp                                    */
 /* - Contains defines for proper BOM generator			    */

@@ -1,3 +1,12 @@
+/**
+ * This ULP handles the default ULP configuration
+ *
+ * @author 		Tobias Hofer <thofer@xdevelop.at>
+ * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @copyright	2009-2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
+
 #include "Include_Misc.ulp";
 #include "Include_Language.ulp";
 #include "Include_String.ulp";

@@ -1,15 +1,11 @@
- /************************************************************/
-/* Include_Eagle.ulp                                        */
-/* - Export(kopiert) Eagle Dateien                          */
-/************************************************************/
-/* (c) Copyright 2013, Bernhard Wörndl-Aichriedler          */
-/* E-Mail: bwa@berniwa.com                                  */
-/* Homepage: www.berniwa.com                                */
-/************************************************************/
-/* Letzte Änderung am 07.06.2013                            */
-/* Version 1                                                */
-/************************************************************/
-
+/**
+ * This ULP simply copies the eagle files to a backup directory
+ *
+ * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @author 		Tobias Hofer <thofer@xdevelop.at>
+ * @copyright	2013-2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
 
 #usage ""
 string tmp =filedir(argv[1]);

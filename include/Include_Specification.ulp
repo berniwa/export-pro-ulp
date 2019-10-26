@@ -1,16 +1,11 @@
-/************************************************************/
-/* Include_Eagle.ulp                                        */
-/* - Export(kopiert) Eagle Dateien                          */
-/************************************************************/
-/* (c) Copyright 2013, Bernhard Wörndl-Aichriedler          */
-/* E-Mail: bwa@berniwa.com                                  */
-/* Homepage: www.berniwa.com                                */
-/************************************************************/
-/* Letzte Änderung am 07.06.2013                            */
-/* Version 1                                                */
-/************************************************************/
-
-
+/**
+ * This ULP will write a simple specficaition file, 
+ * containing the board details
+ *
+ * @author 		Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @copyright	2013-2019, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
 #usage ""
 
 output(argv[1], "wt") {

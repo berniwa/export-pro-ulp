@@ -1,15 +1,10 @@
-/************************************************************/
-/* HTLExportPro_Renumber.ulp                                */
-/* - Numberiert die Bauteile anhand der Schaltplan position */
-/*	 neu													*/
-/************************************************************/
-/* (c) Copyright 2011, Bernhard Wörndl-Aichriedler          */
-/* E-Mail: bwa@berniwa.com                                  */
-/* Homepage: www.berniwa.com                                */
-/************************************************************/
-/* Letzte Änderung am 29.05.2011                            */
-/* Version 1                                                */
-/************************************************************/
+/**
+ * This ULP is used to renumber the parts in the schematic
+ *
+ * @author    Neil Allison <avon.tech.solutions@clear.net.nz>
+ * @author    Bernhard Wörndl-Aichriedler <bwa@xdevelop.at>
+ * @author    Tobias Hofer <thofer@xdevelop.at>
+ */
 
 #usage "<b>Renumber the parts of a schematic, optionally specifying start number, skipping digits and/or only those parts within a user specified rectangular area</b>\n"
        "<p>"
