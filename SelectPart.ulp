@@ -399,7 +399,7 @@ void editDevice(int selected){
 int showListOfDevices(char singelPart){
 
 	if(board){
-		exit("EDIT .sch; RUN "+argv[0]+";");
+		exit("EDIT .sch; RUN '"+argv[0]+"';");
 	}
 
 	int selected = 0;
@@ -492,7 +492,7 @@ int showListOfDevices(char singelPart){
 						dlgStretch(1); 
 						dlgPushButton("⚙") {
 							if(editUserConfig()){
-								exit("RUN " + argv[0] + ";");
+								exit("RUN '" + argv[0] + "';");
 							}
 						};
 						dlgPushButton(lanGetText("button.cancel")){dlgReject(); return 0;}
