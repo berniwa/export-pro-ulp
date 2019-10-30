@@ -51,9 +51,7 @@ string getTolerance(int select){
 		else{
 			tol = strsub(values[select],(strchr(values[select],' ')+1));
 		}
-	}
-	
-
+	}	
 	return tol;
 }
 
@@ -66,6 +64,7 @@ string getVoltage(int select){
 	else {
 		return cfg_defaultVoltage;
 	}
+	
 }
 
 string getOrderNo(int select){
@@ -307,7 +306,6 @@ void editDevice(int selected){
 			string tol = "";
 
 			tol = getTolerance(selected);
-			if (tol) tol+="/";
 			volt = getVoltage(selected);
 			orderNr=getOrderNo(selected);
 
@@ -330,7 +328,15 @@ void editDevice(int selected){
 							distributor[selected]=stdDistributor;
 							order_no[selected]=orderNr;
 							manufacturer[selected]="any";
-							part_no[selected]=strsub(values[selected],0,strchr(values[selected],' '))+"/"+volt+"/"+tol+orderNr;
+
+							//If the voltage is the default voltage, it is already in the value
+							part_no[selected]=strsub(values[selected],0,strchr(values[selected],' '));
+							if(volt == cfg_defaultVoltage){
+								part_no[selected] += "/" + volt;
+							}
+							if(tol == cfg_defaultTolerance){
+								part_no[selected] += "/" + tol;
+							}
 							bomPricingRequest(selected);
 						}
 					}
