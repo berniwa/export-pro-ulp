@@ -64,7 +64,7 @@ string itos(int num) {
 string rtos(real num) {
      string temp;
 
-     sprintf(temp, "%f", num);
+     sprintf(temp, "%1.6f", num);
 
      return temp;
 }
@@ -739,11 +739,11 @@ string GetComponentOutline(
 
           if (foundPackage) {
                //load to array
-               sprintf(temp, "%s\t%f\t%f\t%f\t%f", packageName, maxX, maxY, minX,
+               sprintf(temp, "%s\t%1.6f\t%1.6f\t%1.6f\t%1.6f", packageName, maxX, maxY, minX,
                          minY);
 
           } else {
-               sprintf(temp, "%s\t%f\t%f\t%f\t%f", packageName, maxX, maxY, minX,
+               sprintf(temp, "%s\t%1.6f\t%1.6f\t%1.6f\t%1.6f", packageName, maxX, maxY, minX,
                          minY);
           }  //end if-else for found package check
 
@@ -1088,7 +1088,7 @@ string FlipPoints(string line) {
      real arc = GetArcFromPtString(line);
      if (arc != 0){
           arc = arc*-1;
-     sprintf(tmp, "%f", arc);
+     sprintf(tmp, "%1.6f", arc);
      } else {
           tmp = "0";
      }
@@ -1355,21 +1355,21 @@ string GetEmnBoardOutline() {
                          incy = (sin(deg2rad * (angle1)) * GetDimInBoardUnits(  W.arc.radius))  + centery;
 
                        // string foo;
-                       //  sprintf(foo, "%f   %f   \n%f   %f", incx, incy, bx1, by1);
+                       //  sprintf(foo, "%1.6f   %1.6f   \n%1.6f   %1.6f", incx, incy, bx1, by1);
                        //  dlgMessageBox(foo);
 
                          if (!(CompareReals(incx, bx1) && CompareReals(incy, by1))){
                               arcAngle = arcAngle * -1;
                          }
 
-                         sprintf(temp, "%f\t%f\t%f\t%f\t%f\tn\n", bx1, by1, bx2, by2, arcAngle);
+                         sprintf(temp, "%1.6f\t%1.6f\t%1.6f\t%1.6f\t%1.6f\tn\n", bx1, by1, bx2, by2, arcAngle);
 
                          outlinePoints[wireCount] = temp;
                          wireCount++;
                 
                     } else {
                          //process lines
-                         sprintf(temp, "%f\t%f\t%f\t%f\t%d\tn\n", bx1, by1, bx2, by2, 0);
+                         sprintf(temp, "%1.6f\t%1.6f\t%1.6f\t%1.6f\t%d\tn\n", bx1, by1, bx2, by2, 0);
 
                          outlinePoints[wireCount] = temp;
 
@@ -1404,12 +1404,12 @@ string GetEmnBoardOutline() {
                         
                          /*   **  NEW ** */
 
-                         sprintf(temp, "%f\t%f\t%f\t%f\t%d\tn\n", bx1, by1, bx2,by1, 180);
+                         sprintf(temp, "%1.6f\t%1.6f\t%1.6f\t%1.6f\t%d\tn\n", bx1, by1, bx2,by1, 180);
 
                          outlinePoints[wireCount] = temp;
                          wireCount++;
 
-                         sprintf(temp, "%f\t%f\t%f\t%f\t%d\tn\n", bx2, by1, bx1, by1, 180);
+                         sprintf(temp, "%1.6f\t%1.6f\t%1.6f\t%1.6f\t%d\tn\n", bx2, by1, bx1, by1, 180);
 
                          outlinePoints[wireCount] = temp;
                          wireCount++;
@@ -1427,7 +1427,7 @@ string GetEmnBoardOutline() {
                                    incy = (sin(deg2rad * (angle1 + currentAngle)) * radius) + centery;
                                    }  //end if-else for current angle = 0
                               // CWIN: TODO
-                              sprintf(temp, "%f\t%f\t%f\t%f\t%d\tn\n", bx1, by1, incx,incy, 0);
+                              sprintf(temp, "%1.6f\t%1.6f\t%1.6f\t%1.6f\t%d\tn\n", bx1, by1, incx,incy, 0);
 
                               outlinePoints[wireCount] = temp;
 
@@ -1665,7 +1665,7 @@ string GetEmnBoardOutline() {
                                    + outlinePoints[j];
 
                          //update matched point start points to prev line end points to fix the gap
-                         sprintf(temp, "%f\t%f\t%f\t%f\tn\n", bx2, by2,
+                         sprintf(temp, "%1.6f\t%1.6f\t%1.6f\t%1.6f\tn\n", bx2, by2,
                                    GetX2FromPtString(outlinePoints[j]),
                                    GetY2FromPtString(outlinePoints[j]));
 
@@ -1713,7 +1713,7 @@ string GetEmnBoardOutline() {
                                    + outlinePoints[j];
 
                          //update matched point start points to prev line end points to fix the gap
-                         sprintf(temp, "%f\t%f\t%f\t%f\tn\n",
+                         sprintf(temp, "%1.6f\t%1.6f\t%1.6f\t%1.6f\tn\n",
                                    GetX1FromPtString(outlinePoints[j]),
                                    GetY1FromPtString(outlinePoints[j]), bx2, by2);
 
@@ -1770,7 +1770,7 @@ string GetEmnBoardOutline() {
                string circleDefectCommands;
                string runCommands;
 
-               sprintf(circleDefectCommands, "CIRCLE (%f %f) (%f %f);",
+               sprintf(circleDefectCommands, "CIRCLE (%1.6f %1.6f) (%1.6f %1.6f);",
                          BackConvertDimensions(bx2), BackConvertDimensions(by2),
                          BackConvertDimensions(bx2 + 2.0),
                          BackConvertDimensions(by2));
@@ -2030,7 +2030,7 @@ string GetEmnPlacements() {
 
                //if default height then dont append to altname. otherwise put unique height on altname
                if( height == "1.0" ){
-                    sprintf(temp, "%s %s %s\n%f %f 0 %f %s PLACED\n", ftprint,
+                    sprintf(temp, "%s %s %s\n%1.6f %1.6f 0 %1.6f %s PLACED\n", ftprint,
                          altname, ref_id, GetDimInBoardUnits(E.x),
                          GetDimInBoardUnits(E.y), E.angle, side);
 
@@ -2038,7 +2038,7 @@ string GetEmnPlacements() {
                     components[i] = ftprint + "~" + altname;
                }
                else{
-                    sprintf(temp, "%s %s %s\n%f %f 0 %f %s PLACED\n", ftprint + "_" + height,
+                    sprintf(temp, "%s %s %s\n%1.6f %1.6f 0 %1.6f %s PLACED\n", ftprint + "_" + height,
                          altname + "_" + height, ref_id, GetDimInBoardUnits(E.x),
                          GetDimInBoardUnits(E.y), E.angle, side);
 
