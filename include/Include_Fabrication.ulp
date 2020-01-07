@@ -123,7 +123,7 @@ void analyzeDru(){
 		//dlgMessageBox("S: " + layerSetup[i]);
 		if(layerSetup[i] == '('){			//Via start
 			viaLayerStart[viaLayerStartCurrent++]	= layerCurrent;
-		} else if (layerSetup[i] == '('){	//Via ends
+		} else if (layerSetup[i] == ')'){	//Via ends
 			viaLayerStop[viaLayerStopCurrent++]	= layerCurrent;
 		} else if (layerSetup[i] == '['){	//Blind via start
 
