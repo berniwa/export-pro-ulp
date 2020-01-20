@@ -185,6 +185,16 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 	cmd += "SET COLOR_LAYER 16 1;\n";
 	cmd += "SET COLOR_LAYER 17 2;\n";
 	cmd += "SET COLOR_LAYER 18 2;\n";
+	cmd += "SET COLOR_LAYER 20 13;\n";
+	cmd += "SET COLOR_LAYER 21 7;\n";
+	cmd += "SET COLOR_LAYER 22 7;\n";
+	cmd += "SET COLOR_LAYER 25 7;\n";
+	cmd += "SET COLOR_LAYER 26 7;\n";
+	cmd += "SET COLOR_LAYER 27 7;\n";
+	cmd += "SET COLOR_LAYER 28 7;\n";
+	cmd += "SET COLOR_LAYER 51 7;\n";
+	cmd += "SET COLOR_LAYER 52 7;\n";
+	
 	
 
 	string layers = "";
