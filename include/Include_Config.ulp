@@ -83,14 +83,14 @@ void setToMenu(){
 		fileread(scrI,pathSCR);
 
 		scrO  = strsub(scrI,0,strstr(scrI,"MENU",strstr(scrI,"BRD:"))+5);
-		scrO += "'Export Pro: RUN "+pathULP+"ExportPro.ulp;'\\\n\t";
-		scrO += "'Select Part: RUN "+pathULP+"SelectPart.ulp;'\\\n\t";
+		scrO += "'Export Pro: RUN \""+pathULP+"ExportPro.ulp;\"'\\\n\t";
+		scrO += "'Select Part: RUN \""+pathULP+"SelectPart.ulp;\"'\\\n\t";
 		scrO += strsub(scrI,strstr(scrI,"MENU",strstr(scrI,"BRD:"))+5,(strstr(scrI,"MENU",strstr(scrI,"SCH:"))-strstr(scrI,"MENU",strstr(scrI,"BRD:"))));
-		scrO += "'Export Pro: RUN "+pathULP+"ExportPro.ulp;'\\\n\t";
-		scrO += "'Select Part: RUN "+pathULP+"SelectPart.ulp;'\\\n\t";
+		scrO += "'Export Pro: RUN \""+pathULP+"ExportPro.ulp;\"'\\\n\t";
+		scrO += "'Select Part: RUN \""+pathULP+"SelectPart.ulp;\"'\\\n\t";
 		scrO += strsub(scrI,strstr(scrI,"MENU",strstr(scrI,"SCH:"))+5);
 
-		scrO = stringReplace(scrO,"SCH:","SCH:\nSET CONTEXT instance SelectPart 'run "+getUlpDir("../SelectPart.ulp")+" 1';");
+		scrO = stringReplace(scrO,"SCH:","SCH:\nSET CONTEXT instance SelectPart 'run \""+getUlpDir("../SelectPart.ulp")+"\" 1';");
 
 		output(pathSCR){
 			printf(scrO);
