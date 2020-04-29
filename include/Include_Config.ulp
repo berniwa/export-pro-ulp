@@ -52,23 +52,27 @@ void saveConfig() {
 	}
 }
 
-string isNotMenu(){
-	string pathSCR="",scrI;
-	string pathO="";
-
+string getScrPath(){
+	string pathSCR="";
 	for(int i=0;path_scr[i];i++){
 		pathSCR = path_scr[i]+"/eagle.scr";
 		
 		if(filesize(pathSCR)){
-			string scrI, scrO;
-
-			fileread(scrI,pathSCR);
-
-			if(strstr(scrI,"/ExportPro.ulp")==-1){
-				pathO=pathSCR;
-			}
 			break;
 		}
+	}
+	return pathSCR;
+}
+
+string isNotMenu(){
+	string pathSCR = getScrPath();
+	string pathO="";
+	string scrI;
+
+	fileread(scrI,pathSCR);
+
+	if(strstr(scrI,"/ExportPro.ulp")==-1){
+		pathO=pathSCR;
 	}
 
 	return pathO;
@@ -78,22 +82,21 @@ void setToMenu(){
 	string pathULP = filedir(argv[0]);
 	string pathSCR = isNotMenu();
 	if(pathSCR){
-		string scrO,scrI;
+		string scr;
+		int index;
 
-		fileread(scrI,pathSCR);
+		fileread(scr,pathSCR);
+		
+		index = strstr(scr,"MENU",strstr(scr,"BRD:"))+5;
+		scr = stringApend(scr, "'Export Pro: RUN "+pathULP+"ExportPro.ulp;'\\\n\t'Select Part: RUN "+pathULP+"SelectPart.ulp;'\\\n\t",index);
+		
+		index = strstr(scr,"MENU",strstr(scr,"SCH:"))+5;
+		scr = stringApend(scr, "'Export Pro: RUN "+pathULP+"ExportPro.ulp;'\\\n\t'Select Part: RUN "+pathULP+"SelectPart.ulp;'\\\n\t",index);
 
-		scrO  = strsub(scrI,0,strstr(scrI,"MENU",strstr(scrI,"BRD:"))+5);
-		scrO += "'Export Pro: RUN "+pathULP+"ExportPro.ulp;'\\\n\t";
-		scrO += "'Select Part: RUN "+pathULP+"SelectPart.ulp;'\\\n\t";
-		scrO += strsub(scrI,strstr(scrI,"MENU",strstr(scrI,"BRD:"))+5,(strstr(scrI,"MENU",strstr(scrI,"SCH:"))-strstr(scrI,"MENU",strstr(scrI,"BRD:"))));
-		scrO += "'Export Pro: RUN "+pathULP+"ExportPro.ulp;'\\\n\t";
-		scrO += "'Select Part: RUN "+pathULP+"SelectPart.ulp;'\\\n\t";
-		scrO += strsub(scrI,strstr(scrI,"MENU",strstr(scrI,"SCH:"))+5);
-
-		scrO = stringReplace(scrO,"SCH:","SCH:\nSET CONTEXT instance SelectPart 'run \""+getUlpDir("../SelectPart.ulp")+"\" 1';");
+		scr = stringReplace(scr,"SCH:","SCH:\nSET CONTEXT instance SelectPart 'run "+getUlpDir("../SelectPart.ulp")+" 1';");
 
 		output(pathSCR){
-			printf(scrO);
+			printf(scr);
 		}
 	}	
 }
