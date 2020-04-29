@@ -1509,6 +1509,8 @@ void export(){
 		cmd+="USE \'-"+filepath+"fabrication.lbr\';";
 	}
 
+	cmd += "RUN '" + include_path + "EndMessage.ulp' '" + lanGetText("dlg.ExportCompleted") +"';\n";
+
 	exit(cmd);
 }
 

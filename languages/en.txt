@@ -20,6 +20,7 @@ dlg.username = Pleace enter your name and short-name
 dlg.cantEdit = Can not edit "Last"
 dlg.DrillError = :Not all diameters have asigned drill symbols. <br>Please assign drill symbol in EAGLE menu! 
 dlg.add2Menu = Would you like to ad the ULP to the text menu?
+dlg.ExportCompleted = The export is finished
 
 general.copper = Copper
 general.side = Side
