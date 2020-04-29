@@ -93,12 +93,45 @@ void setToMenu(){
 		index = strstr(scr,"MENU",strstr(scr,"SCH:"))+5;
 		scr = stringApend(scr, "'Export Pro: RUN "+pathULP+"ExportPro.ulp;'\\\n\t'Select Part: RUN "+pathULP+"SelectPart.ulp;'\\\n\t",index);
 
-		scr = stringReplace(scr,"SCH:","SCH:\nSET CONTEXT instance SelectPart 'run "+getUlpDir("../SelectPart.ulp")+" 1';");
+		scr = stringReplace(scr,"SCH:","SCH:\nSET CONTEXT instance 'Select Part' 'run "+getUlpDir("../SelectPart.ulp")+" 1';");
 
 		output(pathSCR){
 			printf(scr);
 		}
 	}	
+}
+
+void removeFromMenu(){
+	string pathSCR = getScrPath();
+	string scr, tmp;
+	int start, end;
+
+	fileread(scr,pathSCR);
+	
+	start = strstr(scr,"'Export Pro",strstr(scr,"MENU",strstr(scr,"BRD:")));
+	end = strstr(scr, ";'",strstr(scr, "'Select Part", start))+2;
+	scr = stringCutout(scr, start, end);
+
+	start = strstr(scr,"'Export Pro",strstr(scr,"MENU",strstr(scr,"SCH:")));
+	end = strstr(scr, ";'",strstr(scr, "'Select Part", start))+2;
+	scr = stringCutout(scr, start, end);
+
+	start = strstr(scr,"'SelectPart",strstr(scr,"SET CONTEXT",strstr(scr,"BRD:")));
+	tmp = strsub(scr, 0, start);				//to just remove the one entery
+	start = strrstr(tmp,"SET CONTEXT");
+	end = strstr(scr, ";", start)+1;
+	scr = stringCutout(scr, start, end);
+
+	dlgMessageBox(scr);
+
+	output(pathSCR){
+		printf(scr);
+	}
+}
+
+void updateManu(){
+	removeFromMenu();
+	setToMenu();
 }
 
 char editUserConfig(){
@@ -159,6 +192,9 @@ char editUserConfig(){
 				}
 				if(isNotMenu()){
 					dlgPushButton(lanGetText("settings.menu")){setToMenu();};
+				}
+				else{
+					dlgPushButton("test updateManu"){updateManu();};
 				}
 			}
 
