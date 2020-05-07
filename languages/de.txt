@@ -173,5 +173,8 @@ tab.QuantityMulti = Qty. Mul.
 tab.populate = Bestückt
 tab.category = Kategorie
 tab.note = Notizen
+tab.minTemp = Min. Temp.
+tab.maxTemp = Max. Temp.
+tab.rohs = Rohs Status
 
 button.setpopulate = Aktualisieren

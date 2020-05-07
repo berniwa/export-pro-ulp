@@ -173,6 +173,9 @@ tab.QuantityMulti = Qty. Mul.
 tab.populate = Populate
 tab.category = Category
 tab.note = Note
+tab.minTemp = Min. Temp.
+tab.maxTemp = Max. Temp.
+tab.rohs = Rohs state
 
 button.setpopulate = Update
 

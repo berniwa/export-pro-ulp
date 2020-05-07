@@ -444,7 +444,9 @@ int showListOfDevices(char singelPart){
 						lanGetText("tab.populate")+"\t"+
 						lanGetText("tab.category")+"\t"+
 						lanGetText("tab.note")+"\t"+
-						"minTemp\tmaxTemp\trohs", 
+						lanGetText("tab.minTemp")+"\t"+
+						lanGetText("tab.maxTemp")+"\t"+
+						lanGetText("tab.rohs"), 
 						list, selected, sorted)
 					{
 						if (dlgSelectionChanged()){
