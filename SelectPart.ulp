@@ -194,12 +194,13 @@ void requestAllPrices(){
 
 void updateAttributeList(){
 	for(int i = 0; i < partcount; i++){
-		sprintf(list[i], "%s\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s", 
+		sprintf(list[i], "%s\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s", 
 			names[i], values[i], packages[i] , pages[i], 
 			distributor[i], order_no[i], 
 			manufacturer[i], part_no[i],
 			price[i], available[i], per_pkg[i], min_qty[i], qty_mul[i], 
-			populate[i], BOM_PART_CATEGORIES[category[i]], note[i]
+			populate[i], BOM_PART_CATEGORIES[category[i]], note[i],
+			minTemp[i], maxTemp[i], rohs[i]
 		);	
 	}
 		
@@ -442,7 +443,8 @@ int showListOfDevices(char singelPart){
 						lanGetText("tab.QuantityMulti")+"\t"+
 						lanGetText("tab.populate")+"\t"+
 						lanGetText("tab.category")+"\t"+
-						lanGetText("tab.note"), 
+						lanGetText("tab.note")+"\t"+
+						"minTemp\tmaxTemp\trohs", 
 						list, selected, sorted)
 					{
 						if (dlgSelectionChanged()){

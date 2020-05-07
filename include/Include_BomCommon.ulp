@@ -11,7 +11,8 @@ string
 	part_no[],		price[], 		prices[], 		
 	datasheet[],	min_qty[], 		qty_mul[],
 	per_pkg[], 		available[], 	populate[], 
-	note[], 		device[], 		description[];
+	note[], 		device[], 		description[],
+	minTemp[],		maxTemp[],		rohs[];
 
 int 	category[], pages[];
 
@@ -45,6 +46,9 @@ void bomLoadSchematic(UL_PART P, int s, string prefix){
 		available[partcount]	= P.attribute["AVAILABLE_QUANTITY"];	
 		populate[partcount]		= P.attribute["POPULATE"];
 		note[partcount]			= P.attribute["NOTE"];
+		minTemp[partcount]		= P.attribute["MIN_TEMP"];
+		maxTemp[partcount]		= P.attribute["MAX_TEMP"];
+		rohs[partcount]			= P.attribute["ROHS"];
 		if(P.attribute["CATEGORY"])
 		{
 			category[partcount]	= strtol(P.attribute["CATEGORY"]);
@@ -122,6 +126,9 @@ void bomUpdatePart(int selected, int mode)
 			available[i]	= available[selected];
 			note[i]			= note[selected];
 			category[i]		= category[selected];
+			minTemp[i]		= minTemp[selected];
+			maxTemp[i]		= maxTemp[selected];
+			rohs[i]			= rohs[selected];
 
 			found = 1;
 		}	
@@ -195,6 +202,9 @@ string bomChangeSchematics(UL_PART P, string mysheet, string myprefix){
 			if(note[i] 			!= P.attribute["NOTE"]) 				{sprintf(execute_part, "%s ATTRIBUTE %s NOTE \'%s\';\n", 				execute_part, part_name, note[i]);}
 			if(category[i] 		!= strtol(P.attribute["CATEGORY"]))		{sprintf(execute_part, "%s ATTRIBUTE %s CATEGORY \'%d\';\n", 			execute_part, part_name, category[i]);}		
 			if(populate[i] 		!= P.attribute["POPULATE"])				{sprintf(execute_part, "%s ATTRIBUTE %s POPULATE \'%s\';\n", 			execute_part, part_name, populate[i]);}
+			if(minTemp[i] 		!= P.attribute["MIN_TEMP"]) 			{sprintf(execute_part, "%s ATTRIBUTE %s MIN_TEMP \'%s\';\n", 			execute_part, part_name, minTemp[i]);}
+			if(maxTemp[i] 		!= P.attribute["MAX_TEMP"]) 			{sprintf(execute_part, "%s ATTRIBUTE %s MAX_TEMP \'%s\';\n", 			execute_part, part_name, maxTemp[i]);}
+			if(rohs[i] 			!= P.attribute["ROHS"]) 				{sprintf(execute_part, "%s ATTRIBUTE %s ROHS \'%s\';\n", 				execute_part, part_name, rohs[i]);}
 			
 			if(execute_part != ""){
 				sprintf(execute, "%s EDIT %s;\n%s",  execute, mysheet, execute_part);
