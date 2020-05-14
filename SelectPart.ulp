@@ -372,8 +372,14 @@ void editDevice(int selected){
 				dlgCell(5, 1) dlgStringEdit(datasheet[selected]);
 				dlgCell(5, 2) dlgLabel(lanGetText("tab.category"));
 				dlgCell(5, 3) dlgComboBox(BOM_PART_CATEGORIES, category[selected]);
-				dlgCell(6, 0, 6, 2) dlgLabel(lanGetText("dlg.newVal.footnote"));	
-				dlgCell(6, 3, 6, 3) dlgPushButton(lanGetText("button.request")) { 
+				dlgCell(6, 0) dlgLabel(lanGetText("tab.minTemp")+"*");
+				dlgCell(6, 1) dlgStringEdit(minTemp[selected]);	
+				dlgCell(6, 2) dlgLabel(lanGetText("tab.maxTemp")+"*");
+				dlgCell(6, 3) dlgStringEdit(maxTemp[selected]);
+				dlgCell(7, 0) dlgLabel(lanGetText("tab.rohs")+"*");
+				dlgCell(7, 1) dlgStringEdit(rohs[selected]);	
+				dlgCell(8, 0, 8, 2) dlgLabel(lanGetText("dlg.newVal.footnote"));	
+				dlgCell(8, 3, 8, 3) dlgPushButton(lanGetText("button.request")) { 
 					bomPricingRequest(selected); 
 				} 	
 			}
