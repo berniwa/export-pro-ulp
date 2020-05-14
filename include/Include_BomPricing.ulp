@@ -18,7 +18,7 @@ void bomPricingRequestStart()
 	bomPricingTsv = "";
 	bomPricingIdCount = 0;
 
-	string headline[] = {"ID", "DISTRIBUTOR", "ORDER_NO", "QUANTITY", "PRICES", "PRICE", "AVAILABLE_QUANTITY", "PARTS_PER_PACKAGE", "MINIMUM_QUANTITY", "QUANTITY_MULTIPLIER", "DATASHEET", "OPERATING_TEMP_MIN", "OPERATION_TEMP_MAX", "ROHS"};
+	string headline[] = {"ID", "DISTRIBUTOR", "ORDER_NO", "QUANTITY", "PRICES", "PRICE", "AVAILABLE_QUANTITY", "PARTS_PER_PACKAGE", "MINIMUM_QUANTITY", "QUANTITY_MULTIPLIER", "DATASHEET", "MANUFACTURER", "OPERATING_TEMP_MIN", "OPERATION_TEMP_MAX", "ROHS"};
 	sprintf(bomPricingTsv, "%s%s\n", bomPricingTsv,  strjoin(headline,'\t'));
 
 }
@@ -61,12 +61,12 @@ void bomPricingRequestDo()
 	int nlines = netpost(lines, cfg_pricingURL, "tsv=" + escapeString(bomPricingTsv));
 
 	/*
-	output("W:\\Hardware\\ulptest\\input.txt", "wt")
+	output("C:\\Work\\tmp\\input.txt", "wt")
 	{
 		printf("%s", bomPricingTsv);
 		//printf("%s", escapeString(bomPricingTsv));
 	}	
-	output("W:\\Hardware\\ulptest\\output.txt", "wt")
+	output("C:\\Work\\tmp\\output.txt", "wt")
 	{
 		for(int i = 0; i < nlines; i++)
 		{
@@ -74,7 +74,8 @@ void bomPricingRequestDo()
 		}
 	}
 	*/
-	lines[0] = "ID	DISTRIBUTOR	ORDER_NO	QUANTITY	PRICES	PRICE	AVAILABLE_QUANTITY	PARTS_PER_PACKAGE	MINIMUM_QUANTITY	QUANTITY_MULTIPLIER	DATASHEET	OPERATING_TEMP_MIN	OPERATION_TEMP_MAX	ROHS";
+	
+	lines[0] = "ID	DISTRIBUTOR	ORDER_NO	QUANTITY	PRICES	PRICE	AVAILABLE_QUANTITY	PARTS_PER_PACKAGE	MINIMUM_QUANTITY	QUANTITY_MULTIPLIER	DATASHEET	MANUFACTURER	MANUFACTURER_PART_NR	OPERATING_TEMP_MIN	OPERATION_TEMP_MAX	ROHS";
 	if(nlines >= 0)
 	{
 		for(int i = 0; i < partcount; i++)
