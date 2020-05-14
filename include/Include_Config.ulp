@@ -122,7 +122,7 @@ void removeFromMenu(){
 	end = strstr(scr, ";", start)+1;
 	scr = stringCutout(scr, start, end);
 
-	dlgMessageBox(scr);
+	//dlgMessageBox(scr);
 
 	output(pathSCR){
 		printf(scr);
