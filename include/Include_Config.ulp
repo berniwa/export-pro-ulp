@@ -164,6 +164,9 @@ char editUserConfig(){
 		if (!opt){
 			setToMenu();
 		}
+	} 
+	else if(!isNotMenu()){
+		updateManu();
 	}
 
 	real tol = strtod(cfg_defaultTolerance);
@@ -192,9 +195,6 @@ char editUserConfig(){
 				}
 				if(isNotMenu()){
 					dlgPushButton(lanGetText("settings.menu")){setToMenu();};
-				}
-				else{
-					dlgPushButton("test updateManu"){updateManu();};
 				}
 			}
 
