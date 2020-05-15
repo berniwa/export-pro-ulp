@@ -165,9 +165,6 @@ char editUserConfig(){
 			setToMenu();
 		}
 	} 
-	else if(!isNotMenu()){
-		updateManu();
-	}
 
 	real tol = strtod(cfg_defaultTolerance);
 	real volt = strtod(cfg_defaultVoltage);
@@ -225,6 +222,10 @@ void loadConfig(){
 	cfg_defaultTolerance = cfgget("ULP:ExportPro.defaultTolerance",cfg_defaultTolerance);
 	cfg_defaultVoltage = cfgget("ULP:ExportPro.defaultVoltage",cfg_defaultVoltage);
 	string tmp = cfgget("ULP:ExportPro.bomPresets");
+
+	if(!isNotMenu()){
+		updateManu();
+	}
 	if(tmp!=""){
 		string tmpa[];
 		string tmpb[];
