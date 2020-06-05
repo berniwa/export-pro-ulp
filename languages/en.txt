@@ -21,6 +21,7 @@ dlg.cantEdit = Can not edit "Last"
 dlg.DrillError = :Not all diameters have asigned drill symbols. <br>Please set them in Options>Set>Drill! 
 dlg.add2Menu = Would you like to ad the ULP to the text menu?
 dlg.ExportCompleted = The export is finished
+dlg.setup.expl = erkärung was das easy setup macht
 
 general.copper = Copper
 general.side = Side

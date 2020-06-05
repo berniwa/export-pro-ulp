@@ -1,0 +1,89 @@
+#include "include/Include_Misc.ulp";
+#include "include/Include_Language.ulp";
+#include "include/Include_Config.ulp";
+
+void debugMsg(string msg){
+	//to prevent debug messages to apear in releace
+	dlgMessageBox(msg);
+}
+
+void debugVal(string msg, int val){
+	sprintf(msg,"%s%d",msg,val);
+	debugMsg(msg);
+}
+
+string cmd="";
+
+void detectDrillsymbols(UL_BOARD B){
+	char cDrillSymbols = 1;
+	B.holes(H) {
+		if(!H.drillsymbol){
+			cDrillSymbols=0;
+		}
+	}
+	B.signals(S){
+		S.vias(V){
+			if(!V.drillsymbol){
+				cDrillSymbols=0;
+			}
+		}
+	}
+	B.elements(E) {
+		E.package.contacts(C) {
+			if(C.pad && (!C.pad.drillsymbol)){
+				cDrillSymbols=0;
+			}
+		}
+		E.package.holes(H) {
+			if(!H.drillsymbol){
+				cDrillSymbols=0;
+			}
+		}
+	}
+
+	if(!cDrillSymbols){
+		int opt=dlgMessageBox(lanGetText("dlg.DrillError"),lanGetText("button.continue"),lanGetText("button.cancel"));
+		
+		if(opt){
+			exit("");
+		}
+	}
+}
+
+void run(int runOrder){
+	loadConfig();
+
+	lanLoadText(cfg_textLanguage);
+
+	if(runOrder==0){
+		dlgMessageBox(lanGetText("dlg.setup.expl"));
+	}
+
+	if(board){
+		board(B){
+			detectDrillsymbols(B);
+
+			B.layers(L){
+				if(153<=L.number && L.number<=155 &&
+					(!L.used || !L.visible)){
+					sprintf(cmd, "%sLAYER %d FabDoc%d;", cmd, L.number, (L.number - 152));
+				}
+			}
+		}
+		cmd+="EDIT .sch;";
+	}
+	else if(schematic){
+
+
+
+		cmd+="EDIT .brd;";
+	}
+
+
+	if(runOrder<1){
+		sprintf(cmd, "%sRUN \'%s\' %d", cmd, argv[0], (++runOrder));
+ 	}
+	exit(cmd);
+}
+
+run(strtol(argv[1]));
