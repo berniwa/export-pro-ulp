@@ -55,24 +55,77 @@ void run(int runOrder){
 
 	lanLoadText(cfg_textLanguage);
 
-	if(runOrder==0){
+	if (runOrder==0){
 		dlgMessageBox(lanGetText("dlg.setup.expl"));
+
+		//checking if pdftk is installed
+		if(system("CMD.EXE /C " + filedir(argv[0]) + "bin/CheckPDFTK.bat")==-1){
+			int opt = dlgMessageBox(":To merge the pdf-files we use pdftk_server.<br>"+
+							"You can get this tool <a href=\"https://www.pdflabs.com/tools/pdftk-server/\">here</a>.",
+							lanGetText("button.continue"),lanGetText("button.cancel"));
+			if (opt){
+				exit("");
+			}
+		}
 	}
 
-	if(board){
+	if (board){
 		board(B){
 			detectDrillsymbols(B);
 
+			//detecting if all Fabdoc layers are visible
+			char isFabDoc1Activ = 1;
 			B.layers(L){
-				if(153<=L.number && L.number<=155 &&
+				if (153<=L.number && L.number<=155 &&
 					(!L.used || !L.visible)){
 					sprintf(cmd, "%sLAYER %d FabDoc%d;", cmd, L.number, (L.number - 152));
+					if (L.number == 153) {
+						isFabDoc1Activ=0;
+					}
 				}
 			}
+
+			if(!isFabDoc1Activ){
+				dlgMessageBox(lanGetText("dlg.noFrame"));
+			}
+			else{
+				char isFrameAdded = 0;
+				B.elements(E){
+					if(strstr(strupr(E.package.name),"FRAME")!=-1){
+					    isFrameAdded = 1;
+					}
+				}
+
+				if (!isFrameAdded){
+					dlgMessageBox(lanGetText("dlg.noFrame"));
+				}
+			}
+
+
+			//Check if printer options are correct
+			if (cfgget("EAGLE:Printer.Border.Top")!="50000" ||
+				cfgget("EAGLE:Printer.Border.Bottom")!="50000" ||
+				cfgget("EAGLE:Printer.Border.Right")!="50000" ||
+				cfgget("EAGLE:Printer.Border.Left")!="200000")||
+				cfgget("EAGLE:Printer.Caption")!="0"){
+				int opt = dlgMessageBox(lanGetText("dlg.editPrintSettings"), lanGetText("general.yes"), lanGetText("general.no"));
+
+				if(opt == 0){
+					cfgset("EAGLE:Printer.Border.Top","50000");
+					cfgset("EAGLE:Printer.Border.Bottom","50000");
+					cfgset("EAGLE:Printer.Border.Right","50000");
+					cfgset("EAGLE:Printer.Border.Left","200000");
+					cfgset("EAGLE:Printer.Caption","0");
+				}
+			}
+
+			//todo: sind standard drus geladen? 
 		}
 		cmd+="EDIT .sch;";
 	}
 	else if(schematic){
+		//toDo: überprüfen ob stückliste vorhanden
+
 
 
 
