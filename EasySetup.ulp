@@ -86,6 +86,7 @@ void run(int runOrder){
 			}
 
 			if(!isFabDoc1Activ){
+				//todo: add options
 				dlgMessageBox(lanGetText("dlg.noFrame"));
 			}
 			else{
@@ -98,6 +99,7 @@ void run(int runOrder){
 
 				if (!isFrameAdded){
 					dlgMessageBox(lanGetText("dlg.noFrame"));
+					//todo: add options
 				}
 			}
 
