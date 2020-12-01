@@ -107,34 +107,30 @@ void run(int runOrder){
 			detectDrillsymbols(B);
 
 			//detecting if all Fabdoc layers are visible
-			char isFabDoc1Activ = 1;
 			B.layers(L){
-				if (153<=L.number && L.number<=155 &&
-					(!L.used || !L.visible)){
+				if (153<=L.number && L.number<=155 && !L.visible){
 					sprintf(cmd, "%sLAYER %d FabDoc%d;", cmd, L.number, (L.number - 152));
-					if (L.number == 153) {
-						isFabDoc1Activ=0;
-					}
+				}
+			}
+			
+			//todo: check ob die fabdoc layer schon benuzt werden
+
+			//checking if frame is placed
+			char isFrameAdded = 0;
+			B.elements(E){
+				if(strstr(strupr(E.package.name),"FRAME")!=-1){
+				    isFrameAdded = 1;
 				}
 			}
 
-			if(!isFabDoc1Activ){
-				//todo: add options
-				dlgMessageBox(lanGetText("dlg.setup.noFrame"));
-			}
-			else{
-				char isFrameAdded = 0;
-				B.elements(E){
-					if(strstr(strupr(E.package.name),"FRAME")!=-1){
-					    isFrameAdded = 1;
-					}
-				}
-
-				if (!isFrameAdded){
-					dlgMessageBox(lanGetText("dlg.setup.noFrame"));
-					//todo: add options
+			if (!isFrameAdded){
+				int opt = dlgMessageBox(lanGetText("dlg.setup.noFrame"),lanGetText("general.yes"),lanGetText("button.continue"));
+				if (opt == 0){
+					cmd += "add 'FRAME*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
+					exit(cmd);
 				}
 			}
+			
 
 			//todo: sind standard drus geladen? 
 		}
