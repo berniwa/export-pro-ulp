@@ -67,13 +67,13 @@ void main(){
 		//printf("echo on\n");
 
 		printf("%s:\n",strsub(path,0,1));
-		printf("cd \"%s\"\n",path);//W:\Tobias\Projects\fpga\docu\2019-09-03\pdf
+		printf("cd \"%s\"\n",path);
 		
 		printf("pdftk ");
 
 		if (!dateFolder){
 			if(filesize(filesetext(outputFile,"-schematic.pdf"))){
-				printf("*schematic.pdf ");
+				printf("%s ", filesetext(outputFile, "-schematic.pdf"));
 			}
 			tmpFile=outputFile;
 		}
@@ -88,25 +88,25 @@ void main(){
 
 		if(dateFolder){
 			printf("del \"%s*.pdf\"\n",filesetext(filename(outputFile),""));
-			printf("cd ..\n");				//W:\Tobias\Projects\fpga\docu\2019-09-03
+			printf("cd ..\n");				
 
 			if (bom||sch) {
 				printf("pdftk ");
 				if (sch){
-					printf("*-schematic.pdf ");
+					printf("%s ", filesetext(filename(outputFile), "-schematic.pdf"));
 				}
 
 				printf("\"%s\" ", tmpFile);
 
 				if (bom) {
-					printf("*-bom.pdf ");
+					printf("%s ", filesetext(filename(outputFile), "-bom.pdf"));
 				}
 
 				printf("cat output \"%s\"\n",outputFile);
 				printf("del \"%s\"\n", tmpFile);
 
 				if (bom) {
-					printf("del *-bom.pdf\n");
+					printf("del %s\n", filesetext(filename(outputFile), "-bom.pdf"));
 				}
 			}
 			else {

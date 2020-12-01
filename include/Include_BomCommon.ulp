@@ -173,9 +173,9 @@ int bomMatchModuleName(string partname, string name, string prefix){
 string bomChangeSchematics(UL_PART P, string mysheet, string myprefix){
 	string execute = "";
 
-	if(names[partNr]!=(myprefix + P.name)) {	//toprvent multiparts from being set multipe times
-		return execute;
-	}
+	//if(names[partNr]!=(myprefix + P.name)) {	//toprvent multiparts from being set multipe times
+	//	return execute;
+	//}
 
 	//Match the first module instance
 	string match_name = P.name;
@@ -235,7 +235,7 @@ string bomUpdateChanges()
 		}
 		SCH.modules(M) {
 			M.parts(P){
-				sprintf(mysheet, "%s.mod", M.name + ":");
+				sprintf(mysheet, "%s.mod", M.name);
 				execute += bomChangeSchematics(P, mysheet, M.name);
 			}
 		}
