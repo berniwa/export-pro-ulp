@@ -55,11 +55,19 @@ void run(int runOrder){
 
 	lanLoadText(cfg_textLanguage);
 
-	if (runOrder==0){
+	//getting the filename to export/readout the dru
+	string druname = "";
+	project.board(B){
+		druname=filesetext(B.name,"-exportpro.dru");
+	}
+
+	if (runOrder==0){ //execution #1
+		//not file type specific settings 
 		dlgMessageBox(lanGetText("dlg.setup.expl"));
 
 		//checking if pdftk is installed
 		if(system("CMD.EXE /C " + filedir(argv[0]) + "bin/CheckPDFTK.bat")==-1){
+			//todo put text in language file
 			int opt = dlgMessageBox(":To merge the pdf-files we use pdftk_server.<br>"+
 							"You can get this tool <a href=\"https://www.pdflabs.com/tools/pdftk-server/\">here</a>.",
 							lanGetText("button.continue"),lanGetText("button.cancel"));
@@ -67,10 +75,35 @@ void run(int runOrder){
 				exit("");
 			}
 		}
-	}
 
-	if (board){
-		board(B){
+		//Check if printer options are correct
+		if (cfgget("EAGLE:Printer.Border.Top")!="50000" ||
+			cfgget("EAGLE:Printer.Border.Bottom")!="50000" ||
+			cfgget("EAGLE:Printer.Border.Right")!="50000" ||
+			cfgget("EAGLE:Printer.Border.Left")!="200000"||
+			cfgget("EAGLE:Printer.Caption")!="0"){
+
+			int opt = dlgMessageBox(lanGetText("dlg.editPrintSettings"), lanGetText("general.yes"), lanGetText("general.no"));
+
+			if(opt == 0){
+				cfgset("EAGLE:Printer.Border.Top","50000");
+				cfgset("EAGLE:Printer.Border.Bottom","50000");
+				cfgset("EAGLE:Printer.Border.Right","50000");
+				cfgset("EAGLE:Printer.Border.Left","200000");
+				cfgset("EAGLE:Printer.Caption","0");
+			}
+		}
+
+		if(schematic){
+			cmd += "EDIT .brd; ";
+		}
+
+		cmd += "DRC SAVE \'" + druname + "\'; ";
+
+	}
+	else if (runOrder == 1){ //execution #2
+		//Settings that only can be edited in the .brd file
+		project.board(B){
 			detectDrillsymbols(B);
 
 			//detecting if all Fabdoc layers are visible
@@ -103,41 +136,36 @@ void run(int runOrder){
 				}
 			}
 
-
-			//Check if printer options are correct
-			if (cfgget("EAGLE:Printer.Border.Top")!="50000" ||
-				cfgget("EAGLE:Printer.Border.Bottom")!="50000" ||
-				cfgget("EAGLE:Printer.Border.Right")!="50000" ||
-				cfgget("EAGLE:Printer.Border.Left")!="200000")||
-				cfgget("EAGLE:Printer.Caption")!="0"){
-				int opt = dlgMessageBox(lanGetText("dlg.editPrintSettings"), lanGetText("general.yes"), lanGetText("general.no"));
-
-				if(opt == 0){
-					cfgset("EAGLE:Printer.Border.Top","50000");
-					cfgset("EAGLE:Printer.Border.Bottom","50000");
-					cfgset("EAGLE:Printer.Border.Right","50000");
-					cfgset("EAGLE:Printer.Border.Left","200000");
-					cfgset("EAGLE:Printer.Caption","0");
-				}
-			}
-
 			//todo: sind standard drus geladen? 
 		}
+
+		//checking if the default dru file is loaded
+		if(filesize(druname)) {
+			string data;
+			fileread(data, druname);
+
+			if (strstr(data, "Eurocircuits-EAGLE design rules")!=-1){
+				int opt = dlgMessageBox(lanGetText("dlg.stdDRU"), lanGetText("general.yes"), lanGetText("general.no"));
+
+				if (opt==0){
+					cmd += "DRC *;";
+					exit(cmd);
+				}
+			}
+		}
+
 		cmd+="EDIT .sch;";
-	}
-	else if(schematic){
+
+		//Settings that only can be edited in the .sch file
 		//toDo: überprüfen ob stückliste vorhanden
-
-
-
-
-		cmd+="EDIT .brd;";
 	}
 
 
 	if(runOrder<1){
 		sprintf(cmd, "%sRUN \'%s\' %d", cmd, argv[0], (++runOrder));
  	}
+
+ 	debugVal(cmd+"\n\nRun Nr. ",runOrder);
 	exit(cmd);
 }
 
