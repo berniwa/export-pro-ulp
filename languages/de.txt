@@ -21,7 +21,10 @@ dlg.cantEdit = Editieren von "Letztes" nicht möglich
 dlg.DrillError = :Nicht alle Bohrungen haben zugehörige Bohrsymbole. <br>Bitte erzeugen Sie diese in Optionen>Einstellungen>Bohrsymbole!
 dlg.add2Menu = Möchten Sie die ULP zum Textmenu hinzufügen?
 dlg.ExportCompleted = Der Export ist abgeschlossen
-dlg.setup.expl = erkärung was das easy setup macht
+dlg.setup.expl = //todo: erkärung was das easy setup macht
+dlg.noFrame = //todo: es ist kein Ramen eingefügt
+dlg.editPrintSettings = //todo: falsche print settings
+dlg.stdDRU = //todo: standard dru ist geladen
 
 general.copper = Kupfer
 general.side = Seite
