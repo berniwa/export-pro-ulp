@@ -83,7 +83,7 @@ void run(int runOrder){
 			cfgget("EAGLE:Printer.Border.Left")!="200000"||
 			cfgget("EAGLE:Printer.Caption")!="0"){
 
-			int opt = dlgMessageBox(lanGetText("dlg.editPrintSettings"), lanGetText("general.yes"), lanGetText("general.no"));
+			int opt = dlgMessageBox(lanGetText("dlg.setup.editPrintSettings"), lanGetText("general.yes"), lanGetText("general.no"));
 
 			if(opt == 0){
 				cfgset("EAGLE:Printer.Border.Top","50000");
@@ -120,7 +120,7 @@ void run(int runOrder){
 
 			if(!isFabDoc1Activ){
 				//todo: add options
-				dlgMessageBox(lanGetText("dlg.noFrame"));
+				dlgMessageBox(lanGetText("dlg.setup.noFrame"));
 			}
 			else{
 				char isFrameAdded = 0;
@@ -131,7 +131,7 @@ void run(int runOrder){
 				}
 
 				if (!isFrameAdded){
-					dlgMessageBox(lanGetText("dlg.noFrame"));
+					dlgMessageBox(lanGetText("dlg.setup.noFrame"));
 					//todo: add options
 				}
 			}
@@ -145,7 +145,7 @@ void run(int runOrder){
 			fileread(data, druname);
 
 			if (strstr(data, "Eurocircuits-EAGLE design rules")!=-1){
-				int opt = dlgMessageBox(lanGetText("dlg.stdDRU"), lanGetText("general.yes"), lanGetText("general.no"));
+				int opt = dlgMessageBox(lanGetText("dlg.setup.stdDRU"), lanGetText("general.yes"), lanGetText("button.continue"));
 
 				if (opt==0){
 					cmd += "DRC *;";

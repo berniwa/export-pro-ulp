@@ -2,7 +2,7 @@
 button.select = Auswählen
 button.ok = OK
 button.cancel = Abbrechen
-button.continue = Export fortsetzen
+button.continue = mit ULP fortsetzen
 button.priceRequest = Alle Preise aktualisieren
 button.save = Speichern
 button.request = Preise abfragen
@@ -22,9 +22,9 @@ dlg.DrillError = :Nicht alle Bohrungen haben zugehörige Bohrsymbole. <br>Bitte 
 dlg.add2Menu = Möchten Sie die ULP zum Textmenu hinzufügen?
 dlg.ExportCompleted = Der Export ist abgeschlossen
 dlg.setup.expl = //todo: erkärung was das easy setup macht
-dlg.noFrame = //todo: es ist kein Ramen eingefügt
-dlg.editPrintSettings = //todo: falsche print settings
-dlg.stdDRU = //todo: standard dru ist geladen
+dlg.setup.noFrame = //todo: es ist kein Ramen eingefügt
+dlg.setup.editPrintSettings = !Die Druckereinstellungen entschprechen nicht dem xDevelop-Rahmen.<br>Soll das geändert werden?
+dlg.setup.stdDRU = !Es sind die Standard Eagle Design geladen.<br>Willst du das ändern?
 
 general.copper = Kupfer
 general.side = Seite
