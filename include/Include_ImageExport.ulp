@@ -144,7 +144,7 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 	{
 		cmd += "DISPLAY NONE;DISPLAY 1 18 29 "+tsilcLayers+" "+versionLayer+";\n";
 		if (imgExport) {
-			sprintf(cmd, "%s EXPORT IMAGE '%s' %d;\n", cmd, topImage, resolution);
+			sprintf(cmd, "%s EXPORT IMAGE '%s'  %d;\n", cmd, topImage, resolution);
 		}
 		
 		if (pdfExport) {
@@ -159,8 +159,11 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 	if(exportBot)
 	{
 		cmd += "DISPLAY NONE;DISPLAY 16 18 30 "+bsilcLayers+" "+versionLayer+";\n";
+
 		if (imgExport) {
+			cmd += mirror?"window flip;":"";
 			sprintf(cmd, "%s EXPORT IMAGE '%s' %d;\n", cmd, botImage, resolution);
+			cmd += mirror?"window flip;":"";
 		}
 		
 		if (pdfExport) {
@@ -237,12 +240,6 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 	{
 		sprintf(cmd, "%s RUN '%sCropColor.ulp' '%s' %d '%s';\n", cmd, getUlpDir("Include_"), topImage, resolution,filesetext(bname,".bat"));
 	}
-
-	if(exportBot && mirror && imgExport)
-	{
-		sprintf(cmd, "%s RUN '%sMirrorColor.ulp' '%s' '%s';\n", cmd, getUlpDir("Include_"), botImage,filesetext(bname,".bat"));
-	}	
-	
 	executeAndExit(cmd);
 }
 

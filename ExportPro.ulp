@@ -1011,13 +1011,16 @@ string pngExport(string folder, string index){
 	string fields[];
 	int count = strsplit(fields, ExportSetup[i], ';');
 
+	
 	string tmp;
 	sprintf(tmp,"%d",pcbImageResolutions[image_resolution]);
-	return 	"DISPLAY NONE; "+
+	return 	((mirror_bot && (strchr(fields[6],'1')!=-1))?"WINDOW FLIP;":"") + //to mirror the png within eagle
+			"DISPLAY NONE; "+
 			"DISPLAY " + fields[2] + "; " + 
 			"DISPLAY " + fields[3] + "; " + 
 			"SET CONFIRM YES; " + 
-			"EXPORT IMAGE '" + folder + stringTrim(fields[1]) + ".png' MONOCHROME "+tmp+";";		
+			"EXPORT IMAGE '" + folder + stringTrim(fields[1]) + ".png' MONOCHROME "+tmp+";" +
+			(mirror_bot && (strchr(fields[6],'1')!=-1)?"WINDOW FLIP;":"");		
 }
 
 string pngCrop(string folder, string index){
@@ -1375,32 +1378,32 @@ void export(){
 		layer_pdf += "-" + mb + " " + mt;
 
 		int row = 0;
-		//Index, Filenames, Default Layers, Layers PNG, Layers PDF
-		ExportSetup[row++] = "L1 	;-l01-top		;1 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L1 - Top";
-		ExportSetup[row++] = "L2 	;-l02			;2 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L2";
-		ExportSetup[row++] = "L3 	;-l03			;3 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L3";
-		ExportSetup[row++] = "L4 	;-l04			;4 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L4";
-		ExportSetup[row++] = "L5 	;-l05			;5 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L5";
-		ExportSetup[row++] = "L6 	;-l06			;6 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L6";
-		ExportSetup[row++] = "L7 	;-l07			;7 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L7";
-		ExportSetup[row++] = "L8 	;-l08			;8 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L8";
-		ExportSetup[row++] = "L9 	;-l09			;9 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L9";
-		ExportSetup[row++] = "L10 	;-l10 			;10 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L10";
-		ExportSetup[row++] = "L11 	;-l11 			;11 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L11";
-		ExportSetup[row++] = "L12 	;-l12 			;12 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L12";
-		ExportSetup[row++] = "L13 	;-l13 			;13 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L13";
-		ExportSetup[row++] = "L14 	;-l14 			;14 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L14";
-		ExportSetup[row++] = "L15 	;-l15 			;15 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L15";
-		ExportSetup[row++] = "L16	;-l16-bot		;16 17 18 20 " + mb + "						;" + layer_image + ";" + layer_pdf + "; Copper L16 - Bottom";
-		ExportSetup[row++] = "PT 	;-parts-top		;20 " + ltx + tsilcsreenLayer + " " + mt + ";" + layer_image + ";" + layer_pdf + "; Silkscreen - Top";
-		ExportSetup[row++] = "PB 	;-parts-bottom	;20 " + lbx + bsilcsreenLayer + " " + mb + ";" + layer_image + ";" + layer_pdf + "; Silkscreen - Bottom";
-		ExportSetup[row++] = "ST 	;-stop-top		;20 29 " + mt + "							;" + layer_image + ";" + layer_pdf + "; Stopmask - Top";
-		ExportSetup[row++] = "SB 	;-stop-bottom	;20 30 " + mb + "							;" + layer_image + ";" + layer_pdf + "; Stopmask - Bottom";
-		ExportSetup[row++] = "CT 	;-paste-top		;20 31 " + mt + "							;" + layer_image + ";" + layer_pdf + "; Paste - Top";
-		ExportSetup[row++] = "CB 	;-paste-bottom	;20 32 " + mb + "							;" + layer_image + ";" + layer_pdf + "; Paste - Bottom";
-		ExportSetup[row++] = "FAB	;-fabrication 	;44 45 20 154 "  + mt + "					;" + layer_image + ";" + layer_pdf + "; Fabrication";
-		ExportSetup[row++] = "MECH	;-construction 	;111 20 									;" + layer_image + ";" + layer_pdf + " -" + mt + "; Mechanical";
-		ExportSetup[row++] = "REF	;-reference 	;111 49										;" + layer_image + ";" + layer_pdf + "; Reference";
+		//Index, Filenames, Default Layers, Layers PNG, Layers PDF, Drawing, png mirror
+		ExportSetup[row++] = "L1 	;-l01-top		;1 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L1 - Top			;0";
+		ExportSetup[row++] = "L2 	;-l02			;2 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L2				;0";
+		ExportSetup[row++] = "L3 	;-l03			;3 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L3				;0";
+		ExportSetup[row++] = "L4 	;-l04			;4 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L4				;0";
+		ExportSetup[row++] = "L5 	;-l05			;5 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L5				;0";
+		ExportSetup[row++] = "L6 	;-l06			;6 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L6				;0";
+		ExportSetup[row++] = "L7 	;-l07			;7 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L7				;0";
+		ExportSetup[row++] = "L8 	;-l08			;8 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L8				;0";
+		ExportSetup[row++] = "L9 	;-l09			;9 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L9				;0";
+		ExportSetup[row++] = "L10 	;-l10 			;10 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L10				;0";
+		ExportSetup[row++] = "L11 	;-l11 			;11 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L11				;0";
+		ExportSetup[row++] = "L12 	;-l12 			;12 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L12				;0";
+		ExportSetup[row++] = "L13 	;-l13 			;13 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L13				;0";
+		ExportSetup[row++] = "L14 	;-l14 			;14 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L14				;0";
+		ExportSetup[row++] = "L15 	;-l15 			;15 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L15				;0";
+		ExportSetup[row++] = "L16	;-l16-bot		;16 17 18 20 " + mb + "						;" + layer_image + ";" + layer_pdf + "; Copper L16 - Bottom		;1";
+		ExportSetup[row++] = "PT 	;-parts-top		;20 " + ltx + tsilcsreenLayer + " " + mt + ";" + layer_image + ";" + layer_pdf + "; Silkscreen - Top		;0";
+		ExportSetup[row++] = "PB 	;-parts-bottom	;20 " + lbx + bsilcsreenLayer + " " + mb + ";" + layer_image + ";" + layer_pdf + "; Silkscreen - Bottom		;1";
+		ExportSetup[row++] = "ST 	;-stop-top		;20 29 " + mt + "							;" + layer_image + ";" + layer_pdf + "; Stopmask - Top			;0";
+		ExportSetup[row++] = "SB 	;-stop-bottom	;20 30 " + mb + "							;" + layer_image + ";" + layer_pdf + "; Stopmask - Bottom		;1";
+		ExportSetup[row++] = "CT 	;-paste-top		;20 31 " + mt + "							;" + layer_image + ";" + layer_pdf + "; Paste - Top				;0";
+		ExportSetup[row++] = "CB 	;-paste-bottom	;20 32 " + mb + "							;" + layer_image + ";" + layer_pdf + "; Paste - Bottom			;1";
+		ExportSetup[row++] = "FAB	;-fabrication 	;44 45 20 154 "  + mt + "					;" + layer_image + ";" + layer_pdf + "; Fabrication				;0";
+		ExportSetup[row++] = "MECH	;-construction 	;111 20 									;" + layer_image + ";" + layer_pdf + " -" + mt + "; Mechanical	;0";
+		ExportSetup[row++] = "REF	;-reference 	;111 49										;" + layer_image + ";" + layer_pdf + "; Reference				;0";
 
 		//Switch palette if export is enabled
 		cmd += "SET PALETTE WHITE;";
@@ -1451,15 +1454,7 @@ void export(){
 				if(drills)		{cmd += pngCrop(output_folder_image, "FAB");}
 				if(construction){cmd += pngCrop(output_folder_image, "MECH");}
 				if(reference)	{cmd += pngCrop(output_folder_image, "REF");}
-			}
-
-			//Mirror
-			if(mirror_bot) {
-				if(layout_bot)	{cmd += pngMirror(output_folder_image, "L16");}
-				if(parts_bot)	{cmd += pngMirror(output_folder_image, "PB");}
-				if(stop_bot)	{cmd += pngMirror(output_folder_image, "SB");}
-				if(creap_bot)	{cmd += pngMirror(output_folder_image, "CB");}
-			}			
+			}		
 		}
 
 
