@@ -818,7 +818,96 @@ int exportSetupLookup(string index){
 	return -1;
 }
 
-string updateFrameInformation(string drawing){
+string updateFrameInformationSch(){
+	string name[];
+	int she[]; //sheet is a reserved name
+	string attributes[];
+	string attribute;
+	string schname;
+
+	char numNames = 0;
+
+	project.schematic(S) {
+		schname=S.name;
+		S.sheets(ST){
+			ST.parts(P) {
+				if(strstr(P.device.library, "frame") != -1){
+					name[numNames] = P.name;
+					she[numNames] = ST.number;
+					numNames++;
+					int i=0;
+					P.attributes(A) {
+						attributes[i]=A.name;
+						i++;
+					}
+					attribute = strjoin(attributes,';');
+				}
+			}
+		}
+	}
+
+	string cmd = "EDIT .sch;\n";
+
+	for(int j=0; j<numNames; j++) {
+
+
+		sprintf(cmd,"%sEDIT .s%d;\n",cmd,she[j]);
+
+		cmd += "CHANGE DISPLAY OFF;\n";
+	 	
+		if(strstr(attribute,"TITLE")==-1) {
+			cmd += "ATTRIBUTE " + name[j] + " TITLE DELETE;\n";
+		}
+		if(strstr(attribute,"SUBTITLE")==-1) {
+			cmd += "ATTRIBUTE " + name[j] + " SUBTITLE DELETE;\n";
+		}
+	 	if(strstr(attribute,"DRAWING")!=-1) {
+			cmd += "ATTRIBUTE " + name[j] + " DRAWING DELETE;\n";
+		}
+		/*
+		if(strstr(attribute,"EDIT_DATE")!=-1) {
+			cmd += "ATTRIBUTE " + name[j] + " EDIT_DATE DELETE;";
+		}
+		*/
+		if(strstr(attribute,"FILENAME")!=-1) {
+			cmd += "ATTRIBUTE " + name[j] + " FILENAME DELETE;\n";
+		}
+		if(strstr(attribute,"USERNAME")!=-1) {
+			cmd += "ATTRIBUTE " + name[j] + " USERNAME DELETE;\n";
+		}
+		if (schematic_format){
+			if(strstr(attribute,"OBJECT_NO")==-1) {
+				cmd += "ATTRIBUTE " + name[j] + " OBJECT_NO '';\n";
+			}
+			if(strstr(attribute,"CREATE_DATE")==-1) {
+				cmd += "ATTRIBUTE " + name[j] + " CREATE_DATE '';\n";
+			}
+		}
+
+
+		/*
+	 	int t = time();
+	 	if(UI_LESS){
+	 		t=0;
+	 	}
+	 	sprintf(cmd, "%sATTRIBUTE %s EDIT_DATE \'%s\'; ", cmd, name, t2string(t, "dd.MM.yy"));
+	 	*/
+	 	sprintf(cmd, "%sATTRIBUTE %s DRAWING \'Schematic\';\n", cmd, name[j]);
+	 	sprintf(cmd, "%sATTRIBUTE %s FILENAME \'%s\';\n", cmd, name[j], schname);
+	 	sprintf(cmd, "%sATTRIBUTE %s USERNAME \'%s\';\n", cmd, name[j], cfg_userName);
+	 	//sprintf(cmd, "%sATTRIBUTE %s SHORTNAME \'%s\'; ", cmd, name[j], cfg_shortUserName);
+	 	sprintf(cmd, "%sATTRIBUTE %s TITLE \'%s\';\n", cmd, name[j], board_title);
+	 	sprintf(cmd, "%sATTRIBUTE %s SUBTITLE \'%s\';\n", cmd, name[j], board_subtitle);
+
+	 	if(EAGLE_VERSION>=9){
+	 		cmd += "REPOSITION " + name[j] + ";\n\n";
+	 	}
+	 }
+
+	return cmd;
+}
+
+string updateFrameInformationBrd(string drawing){
 	string name = "";
 	string attributes[];
 	string attribute;
@@ -905,7 +994,7 @@ string exportSetup(string index) {
 	int count = strsplit(fields, ExportSetup[i], ';');
 
 	string cmd = "";
-	cmd += updateFrameInformation(fields[5]);
+	cmd += updateFrameInformationBrd(fields[5]);
 	cmd += 	"DISPLAY NONE; "+
 			"DISPLAY " + fields[2] + "; ";
 
@@ -1183,6 +1272,8 @@ void export(){
 		if(schematic_format == 1) {
 			format = "A3 landscape";
 		}
+
+		cmd+=updateFrameInformationSch();
 		
 		if(schematic_bw) {
 			cmd += "SET CONFIRM YES;PRINT SHEETS ALL HIERARCHY PAPER " + format + " BLACK FILE '" + output_file_schematic_bw + "';";
