@@ -144,7 +144,8 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 	{
 		cmd += "DISPLAY NONE;DISPLAY 1 18 29 "+tsilcLayers+" "+versionLayer+";\n";
 		if (imgExport) {
-			sprintf(cmd, "%s EXPORT IMAGE '%s'  %d;\n", cmd, topImage, resolution);
+			cmd += "RUN " + getUlpDir("Include_") + "ZoomVisible.ulp;";
+			sprintf(cmd, "%s EXPORT IMAGE '%s' WINDOW  %d;\n", cmd, topImage, resolution);
 		}
 		
 		if (pdfExport) {
@@ -162,7 +163,8 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 
 		if (imgExport) {
 			cmd += mirror?"window flip;":"";
-			sprintf(cmd, "%s EXPORT IMAGE '%s' %d;\n", cmd, botImage, resolution);
+			cmd += "RUN " + getUlpDir("Include_") + "ZoomVisible.ulp;";
+			sprintf(cmd, "%s EXPORT IMAGE '%s' WINDOW %d;\n", cmd, botImage, resolution);
 			cmd += mirror?"window flip;":"";
 		}
 		

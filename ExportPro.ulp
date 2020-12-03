@@ -1016,9 +1016,10 @@ string pngExport(string folder, string index){
 	sprintf(tmp,"%d",pcbImageResolutions[image_resolution]);
 	string cmd =	"DISPLAY NONE; "+
 					"DISPLAY " + fields[2] + "; " + 
-					"DISPLAY " + fields[3] + "; " + 
+					"DISPLAY " + fields[3] + "; " +
+					"RUN " + include_path + "ZoomVisible.ulp; " + 
 					"SET CONFIRM YES; " + 
-					"EXPORT IMAGE '" + folder + stringTrim(fields[1]) + ".png' MONOCHROME "+tmp+";";	
+					"EXPORT IMAGE '" + folder + stringTrim(fields[1]) + ".png' WINDOW MONOCHROME "+tmp+";";	
 
 	//to mirror the png within eagle
 	if(mirror_bot && (strchr(fields[6],'1')!=-1)){

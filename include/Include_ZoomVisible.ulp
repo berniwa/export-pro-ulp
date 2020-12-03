@@ -1,0 +1,128 @@
+int minX, maxX, minY, maxY; // determening visible min and max x & y cordinates
+char visLayer[];
+char init=0;
+project.board(B){
+	int visLayer[];
+	char init = 0;
+	char i = 0;
+
+	B.layers(L){
+		if(L.visible){
+			visLayer[i++]=L.number;
+		}
+	}
+
+	B.wires(W){
+		char isLayerVisible=0;
+		for(char j=0; j<i; j++){
+			if(W.layer==visLayer[j]){
+				isLayerVisible=1;
+				break;
+			}
+		}
+
+		if(isLayerVisible){
+			if(!init){
+				init=1;
+				if(W.x1<=W.x2){
+					minX = W.x1;
+					maxX = W.x2;
+				}
+				else{
+					minX = W.x2;
+					maxX = W.x1;						
+				}
+
+				if(W.y1<=W.y2){
+					minY = W.y1;
+					maxY = W.y2;
+				}
+				else{
+					minY = W.y2;
+					maxY = W.y1;						
+				}
+			}
+			else{
+				if(minX>W.x1)
+					minX=W.x1;
+				else if(maxX<W.x1)
+					maxX=W.x1;
+
+				if(minX>W.x2)
+					minX=W.x2;
+				else if(maxX<W.x2)
+					maxX=W.x2;
+
+				if(minY>W.y1)
+					minY=W.y1;
+				else if(maxY<W.y1)
+					maxY=W.y1;
+
+				if(minY>W.y2)
+					minY=W.y2;
+				else if(maxY<W.y2)
+					maxY=W.y2;
+			}
+		}
+	}
+
+	B.elements(E){
+		E.package.wires(W){
+			char isLayerVisible=0;
+			for(char j=0; j<i; j++){
+				if(W.layer==visLayer[j]){
+					isLayerVisible=1;
+					break;
+				}
+			}
+
+			if(isLayerVisible){
+				if(!init){
+					init=1;
+					if(W.x1<=W.x2){
+						minX = W.x1;
+						maxX = W.x2;
+					}
+					else{
+						minX = W.x2;
+						maxX = W.x1;						
+					}
+
+					if(W.y1<=W.y2){
+						minY = W.y1;
+						maxY = W.y2;
+					}
+					else{
+						minY = W.y2;
+						maxY = W.y1;						
+					}
+				}
+				else{
+					if(minX>W.x1)
+						minX=W.x1;
+					else if(maxX<W.x1)
+						maxX=W.x1;
+
+					if(minX>W.x2)
+						minX=W.x2;
+					else if(maxX<W.x2)
+						maxX=W.x2;
+
+					if(minY>W.y1)
+						minY=W.y1;
+					else if(maxY<W.y1)
+						maxY=W.y1;
+
+					if(minY>W.y2)
+						minY=W.y2;
+					else if(maxY<W.y2)
+						maxY=W.y2;
+				}
+			}
+		}
+	}
+}
+
+string cmd;
+sprintf(cmd,"WINDOW (%fmm %fmm) (%fmm %fmm);", (u2mm(maxX) + 0.2), (u2mm(maxY) + 0.2), (u2mm(minX) - 0.2), (u2mm(minY) - 0.2));
+exit(cmd);
