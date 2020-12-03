@@ -1014,13 +1014,18 @@ string pngExport(string folder, string index){
 	
 	string tmp;
 	sprintf(tmp,"%d",pcbImageResolutions[image_resolution]);
-	return 	((mirror_bot && (strchr(fields[6],'1')!=-1))?"WINDOW FLIP;":"") + //to mirror the png within eagle
-			"DISPLAY NONE; "+
-			"DISPLAY " + fields[2] + "; " + 
-			"DISPLAY " + fields[3] + "; " + 
-			"SET CONFIRM YES; " + 
-			"EXPORT IMAGE '" + folder + stringTrim(fields[1]) + ".png' MONOCHROME "+tmp+";" +
-			(mirror_bot && (strchr(fields[6],'1')!=-1)?"WINDOW FLIP;":"");		
+	string cmd =	"DISPLAY NONE; "+
+					"DISPLAY " + fields[2] + "; " + 
+					"DISPLAY " + fields[3] + "; " + 
+					"SET CONFIRM YES; " + 
+					"EXPORT IMAGE '" + folder + stringTrim(fields[1]) + ".png' MONOCHROME "+tmp+";";	
+
+	//to mirror the png within eagle
+	if(mirror_bot && (strchr(fields[6],'1')!=-1)){
+		cmd = "WINDOW FLIP;" + cmd + "WINDOW FLIP;";
+	}
+
+	return cmd;	
 }
 
 string pngCrop(string folder, string index){
