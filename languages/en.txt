@@ -25,6 +25,7 @@ dlg.setup.expl = //todo: erkärung was das easy setup macht
 dlg.setup.noFrame = !There was no frame detected. <br>Should the ulp place one automatically?
 dlg.setup.editPrintSettings = !The printer settings are not adjusted to the xDevelop frame.<br>Should that be changed?
 dlg.setup.stdDRU = !The default Eagle Design Rules are loaded.<br>Do you want to change that?
+dlg.setup.noBom = //todo: es wurden keine bom einträge gefunden, soll das geändert werden
 
 general.copper = Copper
 general.side = Side

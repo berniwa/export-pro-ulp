@@ -24,7 +24,8 @@ dlg.ExportCompleted = Der Export ist abgeschlossen
 dlg.setup.expl = //todo: erkärung was das easy setup macht
 dlg.setup.noFrame = !Es wurde kein Rahmen gefunden. <br>Soll ein passender Rahmen automatisch plaziert werden?
 dlg.setup.editPrintSettings = !Die Druckereinstellungen entschprechen nicht dem xDevelop-Rahmen.<br>Soll das geändert werden?
-dlg.setup.stdDRU = !Es sind die Standard Eagle Design geladen. <br>Willst du das ändern?
+dlg.setup.stdDRU = !Es sind die Standard Eagle Design geladen. <br>Willst du das ändern??
+dlg.setup.noBom = //todo: es wurden keine bom einträge gefunden, soll das geändert werden
 
 general.copper = Kupfer
 general.side = Seite

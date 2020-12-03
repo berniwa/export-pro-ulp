@@ -2,6 +2,11 @@
 #include "include/Include_Language.ulp";
 #include "include/Include_Config.ulp";
 #include "include/Include_Boardsize.ulp";
+#include "include/Include_BomCommon.ulp";
+#include "include/Include_BomCategory.ulp";
+#include "include/Include_BomConfig.ulp";
+#include "include/Include_BomPricing.ulp";
+#include "include/Include_Si.ulp";
 
 void debugMsg(string msg){
 	//to prevent debug messages to apear in releace
@@ -13,6 +18,132 @@ void debugVal(string msg, int val){
 	debugMsg(msg);
 }
 
+char prefix[] = {'R', 'k', 'M', 'G', 'T'};
+string stdDistributor = "xdevelop";
+
+string getTolerance(int select){
+	string tol="";
+
+	if(category[select]==0){
+		if(strchr(values[select],'%')==-1){
+			tol = cfg_defaultTolerance;
+		}
+		else{
+			tol = strsub(values[select],(strchr(values[select],' ')+1));
+		}
+	}	
+	return tol;
+}
+
+string getVoltage(int select){
+	int tmp = strchr(values[select],'/');
+
+	if(tmp>=0){
+		return strsub(values[select],(tmp+1));
+	}
+	else {
+		return cfg_defaultVoltage;
+	}
+}
+
+string getOrderNo(int select){
+	if(category[select]!=0&&category[select]!=2){
+		return "";
+	}
+
+	string orderNo = "GP";
+
+	if (category[select]==0){
+		orderNo+="R";
+	}
+	else if(category[select]==2){
+		orderNo+="C";
+	}
+
+	int l=0, a=0;
+	for (int i = 0; i < strlen(packages[select]); i++){
+		if(isdigit(packages[select][i])){
+			l++;
+			if(l>=4){
+				break;
+			}
+		}
+		else{
+			l=0;
+			a=i+1;
+		}
+	}
+	orderNo+=strsub(packages[select],a,l);
+
+	real val;
+	val=siParseValue(values[select]);
+	if (category[select]==0){
+		val*=10;
+
+		string tmp = "";
+		sprintf(tmp,"%d",int(val));
+		val=(((strlen(tmp)+1)%3)+1);
+
+		orderNo+=strsub(tmp,0,int(val))+prefix[(strlen(tmp)-2)/3];
+
+		tmp=strsub(tmp,int(val),(strchr(tmp,'0')-int(val)));
+
+		if(strtod(tmp)==0){
+			tmp="";
+		}
+
+		orderNo+=tmp;
+	}
+	else if(category[select]==2){
+		val*=pow(10,12); //to get value in pF
+
+		string tmp = "";
+		sprintf(tmp,"%d",int(val));
+
+		val=strlen(tmp)-2;
+		tmp=strsub(tmp,0,2);
+
+		sprintf(orderNo,"%s%s%d",orderNo,tmp,int(val));
+	}
+
+	string v=getVoltage(select);
+
+	if(v!="50V"){
+		orderNo+="-"+strsub(v,0,strlen(v)-1);
+	}
+
+	return orderNo;
+}
+
+string addBomValues(){
+	for(int i=0; i<partcount; i++){
+		if (category[i]==0||category[i]==2){
+			string orderNr = "";
+			string volt = "";
+			string tol = "";
+
+			tol = getTolerance(i);
+			volt = getVoltage(i);
+			orderNr=getOrderNo(i);
+
+			distributor[i]=stdDistributor;
+			order_no[i]=orderNr;
+			manufacturer[i]="any";
+
+			//If the voltage is the default voltage, it is already in the value
+			part_no[i]=strsub(values[i],0,strchr(values[i],' '));
+			if(volt == cfg_defaultVoltage){
+				part_no[i] += "/" + volt;
+			}
+			if(tol == cfg_defaultTolerance){
+				part_no[i] += "/" + tol;
+			}
+			bomPricingRequest(i);
+		}
+	}
+
+	return bomUpdateChanges();
+}
 
 void detectDrillsymbols(UL_BOARD B){
 	char cDrillSymbols = 1;
@@ -122,7 +253,6 @@ void run(int runOrder){
 		}
 
 		cmd += "DRC SAVE \'" + druname + "\'; ";
-
 	}
 	else if (runOrder == 1){ //execution #2
 		//Settings that only can be edited in the .brd file
@@ -175,18 +305,39 @@ void run(int runOrder){
 		}
 
 		cmd+="EDIT .sch;";
-
+	}
+	else if (runOrder==2){
 		//Settings that only can be edited in the .sch file
 		//toDo: überprüfen ob stückliste vorhanden
 
+		bomLoadData();
+		string hasBom="";
+		for(int l=0; l<partcount; l++){
+			if(distributor[l])
+				hasBom+=distributor[l]+"\n";
+			
+			if(manufacturer[l])
+				hasBom+=manufacturer[l]+"\n";
+			
+			if(populate[l])
+				hasBom+=populate[l]+"\n";
+		}
+
+		if(hasBom==""){
+			int opt = dlgMessageBox(lanGetText("dlg.setup.noBom"), lanGetText("general.yes"), lanGetText("general.no"));
+
+			if(opt==0){
+				cmd+=addBomValues();
+			}
+		} 
 	}
 
 
-	if(runOrder<1){
+	if(runOrder<2){
 		sprintf(cmd, "%sRUN \'%s\' %d", cmd, argv[0], (++runOrder));
  	}
 
- 	debugVal(cmd+"\n\nRUN Nr. ",runOrder);
+ 	// debugVal(cmd+"\n\nRUN Nr. ",runOrder);
 	exit(cmd);
 }
 
