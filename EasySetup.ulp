@@ -141,7 +141,7 @@ void run(int runOrder){
 			}
 
 			if (!isFrameAdded){
-				int opt = dlgMessageBox(lanGetText("dlg.setup.noFrame"),lanGetText("general.yes"), lanGetText("general.manuel"), lanGetText("button.continue"));
+				int opt = dlgMessageBox(lanGetText("dlg.setup.noFrame"),lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("button.continue"));
 				if(opt == 0) {
 					cmd += placeFrame();
 				}
@@ -150,9 +150,6 @@ void run(int runOrder){
 					exit(cmd);
 				}
 			}
-			
-
-			//todo: sind standard drus geladen? 
 		}
 
 		//checking if the default dru file is loaded

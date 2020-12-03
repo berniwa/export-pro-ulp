@@ -22,7 +22,7 @@ dlg.DrillError = :Not all diameters have asigned drill symbols. <br>Please set t
 dlg.add2Menu = Would you like to ad the ULP to the text menu?
 dlg.ExportCompleted = The export is finished
 dlg.setup.expl = //todo: erkärung was das easy setup macht
-dlg.setup.noFrame = //todo: es ist kein Ramen eingefügt
+dlg.setup.noFrame = !There was no frame detected. <br>Should the ulp place one automatically?
 dlg.setup.editPrintSettings = !The printer settings are not adjusted to the xDevelop frame.<br>Should that be changed?
 dlg.setup.stdDRU = !The default Eagle Design Rules are loaded.<br>Do you want to change that?
 
