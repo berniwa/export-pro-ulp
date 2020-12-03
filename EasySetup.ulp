@@ -181,7 +181,7 @@ void detectDrillsymbols(UL_BOARD B){
 	}
 }
 
-string placeFrame(){
+string placeFrameBrd(){
 	string cmd = "Add ";
 	getBoardSize();
 
@@ -201,6 +201,35 @@ string placeFrame(){
 		}
 
 	return cmd+"; ";
+}
+
+char checkFrameSch(UL_SHEET S){
+	return 0;
+}
+
+string placeFrameSch(UL_SHEET S){
+	debugVal("adding frame in sheet: ", S.number);
+
+	/*string cmd = "Add ";
+
+	if(u2mm(max_x - min_x)<155) {		//adding an A4 frame for boars smaler then 155mm to fitt multiple mesurments
+		cmd+="'XDEVELOP-A4@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
+
+		real offset=0.0;
+		if(u2mm(max_y - min_y)>80){
+			offset = u2mm(max_y - min_y) - 80;
+		}
+
+		sprintf(cmd, "%s(%fmm %fmm)", cmd, u2mm((max_x + min_x)/2), (u2mm((max_y + min_y)/2) - offset));
+	}
+	else{							//adding an A3 frame
+		cmd+="'XDEVELOP-A3@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
+		sprintf(cmd, "%s(%fmm %fmm)", cmd, (u2mm((max_x + min_x)/2)-195), (u2mm((max_y + min_y)/2)-185));
+		}
+
+	return cmd+"; ";*/
+
+	return "";
 }
 
 void run(int runOrder){
@@ -279,7 +308,7 @@ void run(int runOrder){
 			if (!isFrameAdded){
 				int opt = dlgMessageBox(lanGetText("dlg.setup.noFrame"),lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("button.continue"));
 				if(opt == 0) {
-					cmd += placeFrame();
+					cmd += placeFrameBrd();
 				}
 				else if (opt == 1){
 					cmd += "add 'FRAME*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
@@ -308,8 +337,6 @@ void run(int runOrder){
 	}
 	else if (runOrder==2){
 		//Settings that only can be edited in the .sch file
-		//toDo: überprüfen ob stückliste vorhanden
-
 		bomLoadData();
 		string hasBom="";
 		for(int l=0; l<partcount; l++){
@@ -330,6 +357,29 @@ void run(int runOrder){
 				cmd+=addBomValues();
 			}
 		} 
+
+		//toDo: überprüfen ob Rahmen in sch vorhanden
+		project.schematic(Sc){
+			int opt=10; //10 ... not initislised 
+			Sc.sheets(S){
+				if(!checkFrameSch(S)&&(opt%10)==0){
+					if(opt==10){
+						opt=dlgMessageBox(lanGetText("dlg.setup.noFrameSch"),lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("button.continue"));
+						if (opt == 0){
+							cmd+=placeFrameSch(S);
+						}
+						else if(opt==1){
+							cmd += "add 'XDEVELOP*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
+							exit(cmd);
+						}
+					}
+					else {
+						cmd+=placeFrameSch(S);
+					}
+				}
+			}
+		}
+
 	}
 
 

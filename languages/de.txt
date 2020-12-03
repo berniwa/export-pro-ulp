@@ -26,6 +26,7 @@ dlg.setup.noFrame = !Es wurde kein Rahmen gefunden. <br>Soll ein passender Rahme
 dlg.setup.editPrintSettings = !Die Druckereinstellungen entschprechen nicht dem xDevelop-Rahmen.<br>Soll das geändert werden?
 dlg.setup.stdDRU = !Es sind die Standard Eagle Design geladen. <br>Willst du das ändern??
 dlg.setup.noBom = //todo: es wurden keine bom einträge gefunden, soll das geändert werden
+dlg.setup.noFrameSch = //todo: in mindestem einem sheet wurde kein rahmen gefunden
 
 general.copper = Kupfer
 general.side = Seite

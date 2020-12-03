@@ -26,6 +26,7 @@ dlg.setup.noFrame = !There was no frame detected. <br>Should the ulp place one a
 dlg.setup.editPrintSettings = !The printer settings are not adjusted to the xDevelop frame.<br>Should that be changed?
 dlg.setup.stdDRU = !The default Eagle Design Rules are loaded.<br>Do you want to change that?
 dlg.setup.noBom = //todo: es wurden keine bom einträge gefunden, soll das geändert werden
+dlg.setup.noFrameSch = //todo: in mindestem einem sheet wurde kein rahmen gefunden
 
 general.copper = Copper
 general.side = Side
