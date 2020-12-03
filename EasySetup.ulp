@@ -1,6 +1,7 @@
 #include "include/Include_Misc.ulp";
 #include "include/Include_Language.ulp";
 #include "include/Include_Config.ulp";
+#include "include/Include_Boardsize.ulp";
 
 void debugMsg(string msg){
 	//to prevent debug messages to apear in releace
@@ -12,7 +13,6 @@ void debugVal(string msg, int val){
 	debugMsg(msg);
 }
 
-string cmd="";
 
 void detectDrillsymbols(UL_BOARD B){
 	char cDrillSymbols = 1;
@@ -50,7 +50,24 @@ void detectDrillsymbols(UL_BOARD B){
 	}
 }
 
+string placeFrame(){
+	string cmd = "Add ";
+	getBoardSize();
+
+	if(u2mm(max_x - min_x)<155) {		//adding an A4 frame for boars smaler then 155mm to fitt multiple mesurments
+		cmd+="'FRAME-A4@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
+		sprintf(cmd, "%s(%fmm %fmm)", cmd, u2mm((max_x + min_x)/2), u2mm((max_y + min_y)/2));
+	}
+	else{							//adding an A3 frame
+		cmd+="'FRAME-A3@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
+		sprintf(cmd, "%s(%fmm %fmm)", cmd, (u2mm((max_x + min_x)/2)-195), (u2mm((max_y + min_y)/2)-185));
+		}
+
+	return cmd+"; ";
+}
+
 void run(int runOrder){
+	string cmd="";
 	loadConfig();
 
 	lanLoadText(cfg_textLanguage);
@@ -124,8 +141,11 @@ void run(int runOrder){
 			}
 
 			if (!isFrameAdded){
-				int opt = dlgMessageBox(lanGetText("dlg.setup.noFrame"),lanGetText("general.yes"),lanGetText("button.continue"));
-				if (opt == 0){
+				int opt = dlgMessageBox(lanGetText("dlg.setup.noFrame"),lanGetText("general.yes"), lanGetText("general.manuel"), lanGetText("button.continue"));
+				if(opt == 0) {
+					cmd += placeFrame();
+				}
+				else if (opt == 1){
 					cmd += "add 'FRAME*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
 					exit(cmd);
 				}

@@ -52,6 +52,7 @@ general.last = Last
 general.newPreset = New preset
 general.language = Language
 general.pricingURL = Pricing URL
+general.manual = Manualy
 
 headline.settings = Board settings
 headline.staps = Steps
