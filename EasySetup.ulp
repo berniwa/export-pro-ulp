@@ -56,7 +56,13 @@ string placeFrame(){
 
 	if(u2mm(max_x - min_x)<155) {		//adding an A4 frame for boars smaler then 155mm to fitt multiple mesurments
 		cmd+="'FRAME-A4@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
-		sprintf(cmd, "%s(%fmm %fmm)", cmd, u2mm((max_x + min_x)/2), u2mm((max_y + min_y)/2));
+
+		real offset=0.0;
+		if(u2mm(max_y - min_y)>80){
+			offset = u2mm(max_y - min_y) - 80;
+		}
+
+		sprintf(cmd, "%s(%fmm %fmm)", cmd, u2mm((max_x + min_x)/2), (u2mm((max_y + min_y)/2) - offset));
 	}
 	else{							//adding an A3 frame
 		cmd+="'FRAME-A3@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
@@ -157,7 +163,8 @@ void run(int runOrder){
 			string data;
 			fileread(data, druname);
 
-			if (strstr(data, "Eurocircuits-EAGLE design rules")!=-1){
+			if ((strstr(data, "Eurocircuits-EAGLE design rules")!=-1)||
+				(strstr(data, "Standard-Design-Regeln")!=-1)){
 				int opt = dlgMessageBox(lanGetText("dlg.setup.stdDRU"), lanGetText("general.yes"), lanGetText("button.continue"));
 
 				if (opt==0){
@@ -171,6 +178,7 @@ void run(int runOrder){
 
 		//Settings that only can be edited in the .sch file
 		//toDo: überprüfen ob stückliste vorhanden
+
 	}
 
 
@@ -178,7 +186,7 @@ void run(int runOrder){
 		sprintf(cmd, "%sRUN \'%s\' %d", cmd, argv[0], (++runOrder));
  	}
 
- 	debugVal(cmd+"\n\nRun Nr. ",runOrder);
+ 	debugVal(cmd+"\n\nRUN Nr. ",runOrder);
 	exit(cmd);
 }
 
