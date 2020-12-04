@@ -145,6 +145,37 @@ string addBomValues(){
 	return bomUpdateChanges();
 }
 
+void checkPDFTK(){
+	if(system("CMD.EXE /C " + filedir(argv[0]) + "bin/CheckPDFTK.bat")==-1){
+		//todo put text in language file
+		int opt = dlgMessageBox(":To merge the pdf-files we use pdftk_server.<br>"+
+						"You can get this tool <a href=\"https://www.pdflabs.com/tools/pdftk-server/\">here</a>.",
+						lanGetText("button.continue"),lanGetText("button.cancel"));
+		if (opt){
+			exit("");
+		}
+	}
+}
+
+void checkPrintSettings(){
+	if (cfgget("EAGLE:Printer.Border.Top")!="50000" ||
+		cfgget("EAGLE:Printer.Border.Bottom")!="50000" ||
+		cfgget("EAGLE:Printer.Border.Right")!="50000" ||
+		cfgget("EAGLE:Printer.Border.Left")!="200000"||
+		cfgget("EAGLE:Printer.Caption")!="0"){
+
+		int opt = dlgMessageBox(lanGetText("dlg.setup.editPrintSettings"), lanGetText("general.yes"), lanGetText("general.no"));
+
+		if(opt == 0){
+			cfgset("EAGLE:Printer.Border.Top","50000");
+			cfgset("EAGLE:Printer.Border.Bottom","50000");
+			cfgset("EAGLE:Printer.Border.Right","50000");
+			cfgset("EAGLE:Printer.Border.Left","200000");
+			cfgset("EAGLE:Printer.Caption","0");
+		}
+	}
+}
+
 void detectDrillsymbols(UL_BOARD B){
 	char cDrillSymbols = 1;
 	B.holes(H) {
@@ -214,8 +245,13 @@ char checkFrameSch(UL_SHEET S){
 }
 
 string placeFrameSch(UL_SHEET S){
-	debugVal("adding frame in sheet: ", S.number);
-	string cmd = "Add ";
+	//debugVal("adding frame in sheet: ", S.number);
+
+	string cmd;
+
+	sprintf(cmd,"EDIT .s%d",S.number);
+
+	cmd = "Add ";
 
 	//getting the outline of the sheet 
 	//the algorythem is not perfect but good enouth for now
@@ -480,33 +516,10 @@ void run(int runOrder){
 		dlgMessageBox(lanGetText("dlg.setup.expl"));
 
 		//checking if pdftk is installed
-		if(system("CMD.EXE /C " + filedir(argv[0]) + "bin/CheckPDFTK.bat")==-1){
-			//todo put text in language file
-			int opt = dlgMessageBox(":To merge the pdf-files we use pdftk_server.<br>"+
-							"You can get this tool <a href=\"https://www.pdflabs.com/tools/pdftk-server/\">here</a>.",
-							lanGetText("button.continue"),lanGetText("button.cancel"));
-			if (opt){
-				exit("");
-			}
-		}
+		checkPDFTK();
 
 		//Check if printer options are correct
-		if (cfgget("EAGLE:Printer.Border.Top")!="50000" ||
-			cfgget("EAGLE:Printer.Border.Bottom")!="50000" ||
-			cfgget("EAGLE:Printer.Border.Right")!="50000" ||
-			cfgget("EAGLE:Printer.Border.Left")!="200000"||
-			cfgget("EAGLE:Printer.Caption")!="0"){
-
-			int opt = dlgMessageBox(lanGetText("dlg.setup.editPrintSettings"), lanGetText("general.yes"), lanGetText("general.no"));
-
-			if(opt == 0){
-				cfgset("EAGLE:Printer.Border.Top","50000");
-				cfgset("EAGLE:Printer.Border.Bottom","50000");
-				cfgset("EAGLE:Printer.Border.Right","50000");
-				cfgset("EAGLE:Printer.Border.Left","200000");
-				cfgset("EAGLE:Printer.Caption","0");
-			}
-		}
+		checkPrintSettings();
 
 		if(schematic){
 			cmd += "EDIT .brd; ";
