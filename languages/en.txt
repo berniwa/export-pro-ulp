@@ -27,6 +27,7 @@ dlg.setup.editPrintSettings = !The printer settings are not adjusted to the xDev
 dlg.setup.stdDRU = !The default Eagle Design Rules are loaded.<br>Do you want to change that?
 dlg.setup.noBom = !There were no specific BOM entrys found. <br>Should those be generated?
 dlg.setup.noFrameSch = !There was no frame in at least one sheet of the schematic detected. <br>Should the ulp place them automatically?
+dlg.setup.finished = ;EasySetup is finished. <br>Shoult the ExportPro.ulp be started?
 
 general.copper = Copper
 general.side = Side

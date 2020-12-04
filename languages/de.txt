@@ -20,13 +20,14 @@ dlg.username = Bitte geben Sie Ihren Namen und Ihr Kürzel an
 dlg.cantEdit = Editieren von "Letztes" nicht möglich
 dlg.DrillError = :Nicht alle Bohrungen haben zugehörige Bohrsymbole. <br>Bitte erzeugen Sie diese in Optionen>Einstellungen>Bohrsymbole!
 dlg.add2Menu = Möchten Sie die ULP zum Textmenu hinzufügen?
-dlg.ExportCompleted = Der Export ist abgeschlossen
+dlg.ExportCompleted = ;Der Export ist abgeschlossen
 dlg.setup.expl = //todo: erkärung was das easy setup macht
 dlg.setup.noFrame = !Es wurde kein Rahmen im Board gefunden. <br>Soll ein passender Rahmen automatisch plaziert werden?
 dlg.setup.editPrintSettings = !Die Druckereinstellungen entschprechen nicht dem xDevelop-Rahmen.<br>Soll das geändert werden?
 dlg.setup.stdDRU = !Es sind die Standard Eagle Design geladen. <br>Willst du das ändern??
 dlg.setup.noBom = !Es wurden keine genauen einträge in der Stückliste gefunden. <br>Sollen diese generiert werden?
 dlg.setup.noFrameSch = !Es wurde in mindestens einem Blat des Schaltplans kein Rahmen gefunden. <br>Sollen passende Rahmen automatisch plaziert werden?
+dlg.setup.finished = ;EasySetup ist abgeschlossen. <br>Soll die ExportPro.ulp gestarted werden?
 
 general.copper = Kupfer
 general.side = Seite

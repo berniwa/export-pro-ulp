@@ -619,9 +619,15 @@ void run(int runOrder){
 			}
 		}
 	}
+	else if(runOrder==3){
+		int opt = dlgMessageBox(lanGetText("dlg.setup.finished"), lanGetText("general.yes"), lanGetText("general.on"));
+		if (opt==0){
+			cmd+="RUN '"+filedir(argv[0])+"/ExportPro.ulp';";
+		}
+	}
 
 
-	if(runOrder<2){
+	if(runOrder<3){
 		sprintf(cmd, "%sRUN \'%s\' %d", cmd, argv[0], (++runOrder));
  	}
 
