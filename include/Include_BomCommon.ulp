@@ -6,7 +6,7 @@
  * @license 	BSD-3-Clause
  */
 
-#include "include/Include_BomCategory.ulp";
+#include "Include_BomCategory.ulp";
 
 string 	
 	names[], 		values[], 		packages[], 
