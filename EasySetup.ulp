@@ -197,39 +197,270 @@ string placeFrameBrd(){
 	}
 	else{							//adding an A3 frame
 		cmd+="'FRAME-A3@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
-		sprintf(cmd, "%s(%fmm %fmm)", cmd, (u2mm((max_x + min_x)/2)-195), (u2mm((max_y + min_y)/2)-185));
+		sprintf(cmd, "%s(%fmm %fmm)", cmd, (u2mm((max_x + min_x)/2)-195), (u2mm((max_y + min_y)/2)-160));
 		}
 
 	return cmd+"; ";
 }
 
 char checkFrameSch(UL_SHEET S){
+	S.parts(P){
+		if(strstr(P.device.name,"XDEVELOP-")!=-1){
+			return 1;
+		}
+	}
+
 	return 0;
 }
 
 string placeFrameSch(UL_SHEET S){
 	debugVal("adding frame in sheet: ", S.number);
+	string cmd = "Add ";
 
-	/*string cmd = "Add ";
+	//getting the outline of the sheet 
+	//the algorythem is not perfect but good enouth for now
+	int minX, maxX, minY, maxY;
+	char init=0;
+	S.wires(W){
+		if(!init){
+			init=1;
+			if(W.x1<=W.x2){
+				minX = W.x1;
+				maxX = W.x2;
+			}
+			else{
+				minX = W.x2;
+				maxX = W.x1;						
+			}
 
-	if(u2mm(max_x - min_x)<155) {		//adding an A4 frame for boars smaler then 155mm to fitt multiple mesurments
+			if(W.y1<=W.y2){
+				minY = W.y1;
+				maxY = W.y2;
+			}
+			else{
+				minY = W.y2;
+				maxY = W.y1;						
+			}
+		}
+		else{
+			if(minX>W.x1)
+				minX=W.x1;
+			else if(maxX<W.x1)
+				maxX=W.x1;
+
+			if(minX>W.x2)
+				minX=W.x2;
+			else if(maxX<W.x2)
+				maxX=W.x2;
+
+			if(minY>W.y1)
+				minY=W.y1;
+			else if(maxY<W.y1)
+				maxY=W.y1;
+
+			if(minY>W.y2)
+				minY=W.y2;
+			else if(maxY<W.y2)
+				maxY=W.y2;
+		}
+	}
+	S.texts(T){
+		T.wires(W){
+			if(!init){
+				init=1;
+				if(W.x1<=W.x2){
+					minX = W.x1;
+					maxX = W.x2;
+				}
+				else{
+					minX = W.x2;
+					maxX = W.x1;						
+				}
+
+				if(W.y1<=W.y2){
+					minY = W.y1;
+					maxY = W.y2;
+				}
+				else{
+					minY = W.y2;
+					maxY = W.y1;						
+				}
+			}
+			else{
+				if(minX>W.x1)
+					minX=W.x1;
+				else if(maxX<W.x1)
+					maxX=W.x1;
+
+				if(minX>W.x2)
+					minX=W.x2;
+				else if(maxX<W.x2)
+					maxX=W.x2;
+
+				if(minY>W.y1)
+					minY=W.y1;
+				else if(maxY<W.y1)
+					maxY=W.y1;
+
+				if(minY>W.y2)
+					minY=W.y2;
+				else if(maxY<W.y2)
+					maxY=W.y2;
+			}
+		}
+	}
+	S.parts(P){
+		UL_PACKAGE p = P.device.package;
+		if(p){
+			p.wires(W){
+				if(!init){
+					init=1;
+					if(W.x1<=W.x2){
+						minX = W.x1;
+						maxX = W.x2;
+					}
+					else{
+						minX = W.x2;
+						maxX = W.x1;						
+					}
+
+					if(W.y1<=W.y2){
+						minY = W.y1;
+						maxY = W.y2;
+					}
+					else{
+						minY = W.y2;
+						maxY = W.y1;						
+					}
+				}
+				else{
+					if(minX>W.x1)
+						minX=W.x1;
+					else if(maxX<W.x1)
+						maxX=W.x1;
+
+					if(minX>W.x2)
+						minX=W.x2;
+					else if(maxX<W.x2)
+						maxX=W.x2;
+
+					if(minY>W.y1)
+						minY=W.y1;
+					else if(maxY<W.y1)
+						maxY=W.y1;
+
+					if(minY>W.y2)
+						minY=W.y2;
+					else if(maxY<W.y2)
+						maxY=W.y2;
+				}
+			}
+		}
+	}
+	S.nets(N){
+		N.segments(SE){
+			SE.wires(W){
+				if(!init){
+					init=1;
+					if(W.x1<=W.x2){
+						minX = W.x1;
+						maxX = W.x2;
+					}
+					else{
+						minX = W.x2;
+						maxX = W.x1;						
+					}
+
+					if(W.y1<=W.y2){
+						minY = W.y1;
+						maxY = W.y2;
+					}
+					else{
+						minY = W.y2;
+						maxY = W.y1;						
+					}
+				}
+				else{
+					if(minX>W.x1)
+						minX=W.x1;
+					else if(maxX<W.x1)
+						maxX=W.x1;
+
+					if(minX>W.x2)
+						minX=W.x2;
+					else if(maxX<W.x2)
+						maxX=W.x2;
+
+					if(minY>W.y1)
+						minY=W.y1;
+					else if(maxY<W.y1)
+						maxY=W.y1;
+
+					if(minY>W.y2)
+						minY=W.y2;
+					else if(maxY<W.y2)
+						maxY=W.y2;
+				}
+			}
+			SE.texts(T){
+				T.wires(W){
+					if(!init){
+						init=1;
+						if(W.x1<=W.x2){
+							minX = W.x1;
+							maxX = W.x2;
+						}
+						else{
+							minX = W.x2;
+							maxX = W.x1;						
+						}
+
+						if(W.y1<=W.y2){
+							minY = W.y1;
+							maxY = W.y2;
+						}
+						else{
+							minY = W.y2;
+							maxY = W.y1;						
+						}
+					}
+					else{
+						if(minX>W.x1)
+							minX=W.x1;
+						else if(maxX<W.x1)
+							maxX=W.x1;
+
+						if(minX>W.x2)
+							minX=W.x2;
+						else if(maxX<W.x2)
+							maxX=W.x2;
+
+						if(minY>W.y1)
+							minY=W.y1;
+						else if(maxY<W.y1)
+							maxY=W.y1;
+
+						if(minY>W.y2)
+							minY=W.y2;
+						else if(maxY<W.y2)
+							maxY=W.y2;
+					}
+				}
+			}
+		}
+	}
+
+	if(u2mm(maxX - minX)<170) {		//adding an A4 frame for boars smaler then 155mm to fitt multiple mesurments
 		cmd+="'XDEVELOP-A4@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
 
-		real offset=0.0;
-		if(u2mm(max_y - min_y)>80){
-			offset = u2mm(max_y - min_y) - 80;
-		}
-
-		sprintf(cmd, "%s(%fmm %fmm)", cmd, u2mm((max_x + min_x)/2), (u2mm((max_y + min_y)/2) - offset));
+		sprintf(cmd, "%s(%fmm %fmm)", cmd, (u2mm((maxX + minX)/2) - 90), (u2mm((maxY + minY)/2) - 164));
 	}
 	else{							//adding an A3 frame
 		cmd+="'XDEVELOP-A3@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
-		sprintf(cmd, "%s(%fmm %fmm)", cmd, (u2mm((max_x + min_x)/2)-195), (u2mm((max_y + min_y)/2)-185));
+		sprintf(cmd, "%s(%fmm %fmm)", cmd, (u2mm((maxX + minX)/2) - 195), (u2mm((maxY + minY)/2) - 147));
 		}
 
-	return cmd+"; ";*/
-
-	return "";
+	return cmd+"; ";
 }
 
 void run(int runOrder){
@@ -369,7 +600,8 @@ void run(int runOrder){
 							cmd+=placeFrameSch(S);
 						}
 						else if(opt==1){
-							cmd += "add 'XDEVELOP*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
+							sprintf(cmd, "%sEDIT .s%d; ", cmd, S.number);
+							cmd += "ADD 'XDEVELOP*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
 							exit(cmd);
 						}
 					}
