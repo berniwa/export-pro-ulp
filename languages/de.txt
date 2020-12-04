@@ -22,11 +22,11 @@ dlg.DrillError = :Nicht alle Bohrungen haben zugehörige Bohrsymbole. <br>Bitte 
 dlg.add2Menu = Möchten Sie die ULP zum Textmenu hinzufügen?
 dlg.ExportCompleted = Der Export ist abgeschlossen
 dlg.setup.expl = //todo: erkärung was das easy setup macht
-dlg.setup.noFrame = !Es wurde kein Rahmen gefunden. <br>Soll ein passender Rahmen automatisch plaziert werden?
+dlg.setup.noFrame = !Es wurde kein Rahmen im Board gefunden. <br>Soll ein passender Rahmen automatisch plaziert werden?
 dlg.setup.editPrintSettings = !Die Druckereinstellungen entschprechen nicht dem xDevelop-Rahmen.<br>Soll das geändert werden?
 dlg.setup.stdDRU = !Es sind die Standard Eagle Design geladen. <br>Willst du das ändern??
-dlg.setup.noBom = //todo: es wurden keine bom einträge gefunden, soll das geändert werden
-dlg.setup.noFrameSch = //todo: in mindestem einem sheet wurde kein rahmen gefunden
+dlg.setup.noBom = !Es wurden keine genauen einträge in der Stückliste gefunden. <br>Sollen diese generiert werden?
+dlg.setup.noFrameSch = !Es wurde in mindestens einem Blat des Schaltplans kein Rahmen gefunden. <br>Sollen passende Rahmen automatisch plaziert werden?
 
 general.copper = Kupfer
 general.side = Seite

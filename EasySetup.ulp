@@ -568,6 +568,8 @@ void run(int runOrder){
 	}
 	else if (runOrder==2){
 		//Settings that only can be edited in the .sch file
+
+		//check if there are specific bom entrys
 		bomLoadData();
 		string hasBom="";
 		for(int l=0; l<partcount; l++){
@@ -581,15 +583,20 @@ void run(int runOrder){
 				hasBom+=populate[l]+"\n";
 		}
 
+		//generating bom entrys
 		if(hasBom==""){
-			int opt = dlgMessageBox(lanGetText("dlg.setup.noBom"), lanGetText("general.yes"), lanGetText("general.no"));
+			int opt = dlgMessageBox(lanGetText("dlg.setup.noBom"), lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("general.no"));
 
 			if(opt==0){
 				cmd+=addBomValues();
 			}
+			else if (opt==1){
+				cmd+="RUN '"+filedir(argv[0])+"/SelectPart.ulp';";
+				exit(cmd);
+			}
 		} 
 
-		//toDo: überprüfen ob Rahmen in sch vorhanden
+		//Checking for a frame in .sch
 		project.schematic(Sc){
 			int opt=10; //10 ... not initislised 
 			Sc.sheets(S){
@@ -611,7 +618,6 @@ void run(int runOrder){
 				}
 			}
 		}
-
 	}
 
 
