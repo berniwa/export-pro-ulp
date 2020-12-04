@@ -5,7 +5,7 @@
  * @copyright	2016-2019, Bernhard Wörndl-Aichriedler
  * @license 	BSD-3-Clause
  */
-#include "include/Include_BomConfig.ulp";
+#include "Include_BomConfig.ulp";
 int bomCategorize(
 	string name, string value, 
 	string device, string package2, 
