@@ -229,11 +229,6 @@ string placeFrameBrd(){
 	string cmd = "Add ";
 	getBoardSize();
 
-	debugVal("max x:",max_x);
-	debugVal("min x:",min_x);
-	debugVal("max y:",max_y);
-	debugVal("min y:",min_y);
-
 	if(u2mm(max_x - min_x)<155) {		//adding an A4 frame for boars smaler then 155mm to fitt multiple mesurments
 		cmd+="'FRAME-A4@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
 
