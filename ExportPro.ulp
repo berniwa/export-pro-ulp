@@ -1327,12 +1327,12 @@ void export(){
 	
 	if(drilltable || fabrication || stackup) {
 		//The drilltable ulp has been repalced with the new fabrication ULP
-		sprintf(cmd, "%s RUN '%sFabrication.ulp' %d %d %d \'%s\' \'%s\' \'%s\' \'%s\' \'%s\';", cmd, include_path, 
+		sprintf(cmd, "%s RUN '%sFabrication.ulp' %d %d %d \'%s\' \'%s\' \'%s\' \'%s\' \'%s\' \'%s\';", cmd, include_path, 
 			fabrication, drilltable, stackup, 
 			PcbType[board_type], pcbSpecColor[pcbimage_color], 
 			pcbSpecSilkscreenColor[pcbimage_silkscreen_color], 
 			pcbSpecPlating[pcbimage_plating],
-			bname
+			bname, (strtod(drcGetRule("mdCopperDimension"))==0.0)?"yes":"no"
 		);
 	}
 	cmd += "WRITE;";
