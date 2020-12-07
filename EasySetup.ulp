@@ -216,7 +216,7 @@ char detectDrillsymbols(){
 			dlgLabel("<img src=\"" + filedir(argv[0]) + "/bin/ExpDrillSymb.png\">");
 			dlgHBoxLayout{
 				dlgStretch(1);
-				dlgPushButton(lanGetText("button.ok")) {exit("");};
+				dlgPushButton(lanGetText("button.ok")) {exit("EDIT .brd;");};
 				dlgPushButton(lanGetText("button.continue")) {dlgReject();};
 			}
 		};
