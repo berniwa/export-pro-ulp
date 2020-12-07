@@ -19,7 +19,7 @@ dlg.drcError = :The DRC found some errors within this layout
 dlg.newVal.footnote = * might be overwritten when requesting the price over the internet
 dlg.username = Pleace enter your name and short-name
 dlg.cantEdit = Can not edit "Last"
-dlg.DrillError = :Not all diameters have asigned drill symbols. <br>Please set them in Options>Set>Drill! 
+dlg.DrillError = Not all diameters have asigned drill symbols. <br>Please set them in Options>Set>Drill! 
 dlg.add2Menu = Would you like to ad the ULP to the text menu?
 dlg.ExportCompleted = The export is finished
 dlg.setup.expl = //todo: erkärung was das easy setup macht
@@ -30,6 +30,7 @@ dlg.setup.noBom = !There were no specific BOM entrys found. <br>Should those be 
 dlg.setup.noFrameSch = !There was no frame in at least one sheet of the schematic detected. <br>Should the ulp place them automatically?
 dlg.setup.finished = ;EasySetup is finished. <br>Shoult the ExportPro.ulp be started?
 dlg.setup.drillSymbolsCreated = ;All necesary drill symbols are already assinged.
+dlg.setup.noFrameNeeded = ;There is no frame needed
 
 general.copper = Copper
 general.side = Side

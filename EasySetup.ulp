@@ -21,6 +21,11 @@ void debugVal(string msg, int val){
 char prefix[] = {'R', 'k', 'M', 'G', 'T'};
 string stdDistributor = "xdevelop";
 
+void executeButton(string cmd){
+	cmd += "RUN "+argv[0]+";";
+	exit(cmd);
+}
+
 string getTolerance(int select){
 	string tol="";
 
@@ -212,7 +217,7 @@ char detectDrillsymbols(){
 			dlgHBoxLayout{
 				dlgStretch(1);
 				dlgPushButton(lanGetText("button.ok")) {exit("");};
-				dlgPushButton(lanGetText("button.cancel")) {dlgReject();};
+				dlgPushButton(lanGetText("button.continue")) {dlgReject();};
 			}
 		};
 	}
@@ -223,6 +228,11 @@ char detectDrillsymbols(){
 string placeFrameBrd(){
 	string cmd = "Add ";
 	getBoardSize();
+
+	debugVal("max x:",max_x);
+	debugVal("min x:",min_x);
+	debugVal("max y:",max_y);
+	debugVal("min y:",min_y);
 
 	if(u2mm(max_x - min_x)<155) {		//adding an A4 frame for boars smaler then 155mm to fitt multiple mesurments
 		cmd+="'FRAME-A4@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
@@ -242,9 +252,37 @@ string placeFrameBrd(){
 	return cmd+"; ";
 }
 
-char checkFrameSch(UL_SHEET S){
+string addFrameBrd(char menu){
+	string cmd="";
+	project.board(B){
+		//checking if frame is placed
+		char isFrameAdded = 0;
+		B.elements(E){
+			if(strstr(strupr(E.package.name),"FRAME")!=-1){
+			    isFrameAdded = 1;
+			}
+		}
+
+		if (!isFrameAdded){
+			int opt = dlgMessageBox(lanGetText("dlg.setup.noFrame"),lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("button.continue"));
+			if(opt == 0) {
+				cmd += placeFrameBrd();
+			}
+			else if (opt == 1){
+				cmd += "add 'FRAME*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
+				exit(cmd);
+			}
+		}
+		else if (menu){
+			dlgMessageBox(lanGetText("dlg.setup.noFrameNeeded"));
+		}
+	}
+	return cmd;
+}
+
+char checkFrameSh(UL_SHEET S){
 	S.parts(P){
-		if(strstr(P.device.name,"XDEVELOP-")!=-1){
+		if((strstr(P.device.name,"XDEVELOP-")!=-1)||(strstr(P.device.library,"frame")!=-1)){
 			return 1;
 		}
 	}
@@ -252,7 +290,7 @@ char checkFrameSch(UL_SHEET S){
 	return 0;
 }
 
-string placeFrameSch(UL_SHEET S){
+string placeFrameSh(UL_SHEET S){
 	//debugVal("adding frame in sheet: ", S.number);
 
 	string cmd;
@@ -507,8 +545,61 @@ string placeFrameSch(UL_SHEET S){
 	return cmd+"; ";
 }
 
+string addFrameSch(char menu){
+	string cmd="";
+	project.schematic(Sc){
+		//Checking for a frame in .sch
+		int opt=10; //10 ... no need to place frame jet 
+		Sc.sheets(S){
+			if(!checkFrameSh(S)&&(opt%10)==0){
+				if(opt==10){
+					opt=dlgMessageBox(lanGetText("dlg.setup.noFrameSch"),lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("button.continue"));
+					if (opt == 0){
+						cmd+=placeFrameSh(S);
+					}
+					else if(opt==1){
+						sprintf(cmd, "%sEDIT .s%d; ", cmd, S.number);
+						cmd += "ADD 'XDEVELOP*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
+						exit(cmd);
+					}
+				}
+				else {
+					cmd+=placeFrameSh(S);
+				}
+			}
+		}
+		if(menu && (opt==10)){
+			dlgMessageBox(lanGetText("dlg.setup.noFrameNeeded"));
+		}
+	}
+	return cmd;
+}
+
+string checkLayerBrd(){
+	string cmd="";
+	project.board(B){
+		B.layers(L){
+			if (153<=L.number && L.number<=155 && !L.visible){
+				sprintf(cmd, "%sLAYER %d FabDoc%d;", cmd, L.number, (L.number - 152));
+			}
+		}
+	}
+	return cmd;
+}
+
+string checkLayerSch(){
+	string cmd="";
+	project.schematic(SCH){
+		SCH.layers(L){
+			if (153<=L.number && L.number<=155 && !L.visible){
+				sprintf(cmd, "%sLAYER %d FabDoc%d;", cmd, L.number, (L.number - 152));
+			}
+		}
+	}
+	return cmd;
+}
+
 void run(int runOrder){
-	char exec=0;
 	string cmd="";
 	loadConfig();
 
@@ -526,17 +617,20 @@ void run(int runOrder){
 			dlgLabel(lanGetText("dlg.setup.expl"));
 			
 			dlgGroup("necessary setup steps"){
-				dlgHBoxLayout{dlgLabel("Setup Layers"); dlgStretch(1); dlgPushButton("add");}
-				dlgHBoxLayout{dlgLabel("Frame in Layout"); dlgStretch(1); dlgPushButton("add");}
-				dlgHBoxLayout{dlgLabel("Frame in schematic"); dlgStretch(1); dlgPushButton("add");}
+				dlgHBoxLayout{dlgLabel("Setup Layers"); dlgStretch(1); dlgPushButton("add") {
+					executeButton("EDIT .brd;" + checkLayerBrd() +
+						"EDIT .sch;" + checkLayerSch());};}
+				dlgHBoxLayout{dlgLabel("Frame in Layout"); dlgStretch(1); dlgPushButton("add") {executeButton("EDIT .brd;"+addFrameBrd(1));};}
+				dlgHBoxLayout{dlgLabel("Frame in schematic"); dlgStretch(1); dlgPushButton("add") {executeButton("EDIT .sch;"+addFrameSch(1));};}
 				dlgHBoxLayout{dlgLabel("drill symbols"); dlgStretch(1); dlgPushButton("add"){if(detectDrillsymbols()) dlgMessageBox(lanGetText("dlg.setup.drillSymbolsCreated"));};}
 			}
 			dlgHBoxLayout{
 				dlgStretch(1); 
-				dlgPushButton("check setup") {exec=1; dlgAccept();};
+				dlgPushButton("check setup") { dlgAccept();};
 				dlgPushButton(lanGetText("button.cancel")){dlgReject(); exit("");};
 			}
 		};
+
 		//checking if pdftk is installed
 		checkPDFTK();
 
@@ -553,34 +647,12 @@ void run(int runOrder){
 		//Settings that only can be edited in the .brd file
 		detectDrillsymbols();
 
-		project.board(B){
-			//detecting if all Fabdoc layers are visible
-			B.layers(L){
-				if (153<=L.number && L.number<=155 && !L.visible){
-					sprintf(cmd, "%sLAYER %d FabDoc%d;", cmd, L.number, (L.number - 152));
-				}
-			}
-			
+		cmd += checkLayerBrd();
+
+		cmd += addFrameBrd(0);
+
+		project.board(B){			
 			//todo: check ob die fabdoc layer schon benuzt werden
-
-			//checking if frame is placed
-			char isFrameAdded = 0;
-			B.elements(E){
-				if(strstr(strupr(E.package.name),"FRAME")!=-1){
-				    isFrameAdded = 1;
-				}
-			}
-
-			if (!isFrameAdded){
-				int opt = dlgMessageBox(lanGetText("dlg.setup.noFrame"),lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("button.continue"));
-				if(opt == 0) {
-					cmd += placeFrameBrd();
-				}
-				else if (opt == 1){
-					cmd += "add 'FRAME*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
-					exit(cmd);
-				}
-			}
 		}
 
 		//checking if the default dru file is loaded
@@ -631,34 +703,12 @@ void run(int runOrder){
 			}
 		} 
 
-		project.schematic(Sc){
-			// checking fame layout
+		cmd += checkLayerSch();
 
-
-			//Checking for a frame in .sch
-			int opt=10; //10 ... not initislised 
-			Sc.sheets(S){
-				if(!checkFrameSch(S)&&(opt%10)==0){
-					if(opt==10){
-						opt=dlgMessageBox(lanGetText("dlg.setup.noFrameSch"),lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("button.continue"));
-						if (opt == 0){
-							cmd+=placeFrameSch(S);
-						}
-						else if(opt==1){
-							sprintf(cmd, "%sEDIT .s%d; ", cmd, S.number);
-							cmd += "ADD 'XDEVELOP*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
-							exit(cmd);
-						}
-					}
-					else {
-						cmd+=placeFrameSch(S);
-					}
-				}
-			}
-		}
+		cmd += addFrameSch(0);
 	}
 	else if(runOrder==3){ //execution #4
-		int opt = dlgMessageBox(lanGetText("dlg.setup.finished"), lanGetText("general.yes"), lanGetText("general.on"));
+		int opt = dlgMessageBox(lanGetText("dlg.setup.finished"), lanGetText("general.yes"), lanGetText("general.no"));
 		if (opt==0){
 			cmd+="RUN '"+filedir(argv[0])+"/ExportPro.ulp';";
 		}
@@ -666,7 +716,7 @@ void run(int runOrder){
 
 
 	if(runOrder<3){
-		sprintf(cmd, "%sRUN \'%s\' %d", cmd, argv[0], exec?(++runOrder):0);
+		sprintf(cmd, "%sRUN \'%s\' %d", cmd, argv[0], ++runOrder);
  	}
 
  	// debugVal(cmd+"\n\nRUN Nr. ",runOrder);

@@ -19,7 +19,7 @@ dlg.drcError = :Es wurden noch DRC-Fehler im Layout gefunden
 dlg.newVal.footnote = * könnte von dem Preis aus dem Internet überschrieben werden wenn dieser abgefragt wird
 dlg.username = Bitte geben Sie Ihren Namen und Ihr Kürzel an
 dlg.cantEdit = Editieren von "Letztes" nicht möglich
-dlg.DrillError = :Nicht alle Bohrungen haben zugehörige Bohrsymbole. <br>Bitte erzeugen Sie diese in Optionen>Einstellungen>Bohrsymbole!
+dlg.DrillError = Nicht alle Bohrungen haben zugehörige Bohrsymbole. <br>Bitte erzeugen Sie diese in Optionen>Einstellungen>Bohrsymbole!
 dlg.add2Menu = Möchten Sie die ULP zum Textmenu hinzufügen?
 dlg.ExportCompleted = ;Der Export ist abgeschlossen
 dlg.setup.expl = //todo: erkärung was das easy setup macht
@@ -30,6 +30,7 @@ dlg.setup.noBom = !Es wurden keine genauen einträge in der Stückliste gefunden
 dlg.setup.noFrameSch = !Es wurde in mindestens einem Blat des Schaltplans kein Rahmen gefunden. <br>Sollen passende Rahmen automatisch plaziert werden?
 dlg.setup.finished = ;EasySetup ist abgeschlossen. <br>Soll die ExportPro.ulp gestarted werden?
 dlg.setup.drillSymbolsCreated = ;Es sind bereits alle notwendigen Bohrsymbole zugeteilt.
+dlg.setup.noFrameNeeded = ;Es ist kein Rahmen notwendig
 
 general.copper = Kupfer
 general.side = Seite

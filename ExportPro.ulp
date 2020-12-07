@@ -1635,7 +1635,7 @@ void detectDrillsymbols(){
 		}
 
 		if(!cDrillSymbols){
-			int opt=dlgMessageBox(lanGetText("dlg.DrillError"),lanGetText("button.continue"),lanGetText("button.cancel"));
+			int opt=dlgMessageBox(":"+lanGetText("dlg.DrillError"),lanGetText("button.continue"),lanGetText("button.cancel"));
 			
 			if(opt){
 				exit("");
