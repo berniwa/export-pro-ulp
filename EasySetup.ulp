@@ -527,7 +527,7 @@ string placeFrameSh(UL_SHEET S){
 		}
 	}
 
-	if(u2mm(maxX - minX)<170) {		//adding an A4 frame for boars smaler then 155mm to fitt multiple mesurments
+	if(u2mm(maxX - minX)<170) {		//adding an A4 frame for boars smaler then 170mm to fitt multiple mesurments
 		cmd+="'XDEVELOP-A4@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
 
 		sprintf(cmd, "%s(%fmm %fmm)", cmd, (u2mm((maxX + minX)/2) - 90), (u2mm((maxY + minY)/2) - 164));
@@ -574,8 +574,10 @@ string checkLayerBrd(){
 	string cmd="";
 	project.board(B){
 		B.layers(L){
-			if (153<=L.number && L.number<=155 && !L.visible){
-				sprintf(cmd, "%sLAYER %d FabDoc%d;", cmd, L.number, (L.number - 152));
+			for(int i=0;lay_fabDoc[i];i++){
+				if (L.number==lay_fabDoc[i] && !L.visible){
+					sprintf(cmd, "%sLAYER %d FabDoc%d;", cmd, L.number, (L.number - 152));
+				}
 			}
 		}
 	}
@@ -586,8 +588,10 @@ string checkLayerSch(){
 	string cmd="";
 	project.schematic(SCH){
 		SCH.layers(L){
-			if (153<=L.number && L.number<=155 && !L.visible){
-				sprintf(cmd, "%sLAYER %d FabDoc%d;", cmd, L.number, (L.number - 152));
+			for(int i=0;lay_fabDoc[i];i++){
+				if (L.number==lay_fabDoc[i] && !L.visible){
+					sprintf(cmd, "%sLAYER %d FabDoc%d;", cmd, L.number, (L.number - 152));
+				}
 			}
 		}
 	}

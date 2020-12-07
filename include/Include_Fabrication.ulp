@@ -20,10 +20,11 @@
 #include "Include_FastExecute.ulp";
 #include "Include_String.ulp"
 #include "Include_Boardsize.ulp"
+#include "Include_Config.ulp"
 
 string LIBRARY_NAME 	= "fabrication.lbr";
 
-int  outputLayer 		= 154;
+int  outputLayer 		= lay_fabDoc[1];
 string outputLayerName	= "FabDoc2";
 
 real 	rowHeight 		= 2.5; 	//in mm

@@ -14,9 +14,14 @@
 #include "Include_FastExecute.ulp";
 #include "Include_Misc.ulp";
 #include "Include_String.ulp";
+#include "Include_Config.ulp";
 
 int ram = 2147483647;	//in byte
 int bytePerPixel = 4;	//R,G,B,Alpha
+string 
+_dimensionL = stringFromInt(lay_dimension),
+_BackgoundL = stringFromInt(lay_background),
+_emptyL = stringFromInt(lay_empty);
 
 string getFilename(string basename, string ends_with)
 {
@@ -79,18 +84,18 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 
 	if(EAGLE_VERSION>=9){
 		cmd += "SET PALETTE WHITE;\n";
-		cmd += "SET COLOR_LAYER 123 20;\n";
-		cmd += "SET COLOR_LAYER 124 22;\n";
-		cmd += "SET COLOR_LAYER 127 8;\n";
+		cmd += "SET COLOR_LAYER " + _dimensionL + " 20;\n";
+		cmd += "SET COLOR_LAYER " + _BackgoundL + " 22;\n";
+		cmd += "SET COLOR_LAYER " + _emptyL +" 8;\n";
 		cmd += "SET PALETTE 22 " + colorPcb + ";\n";
-		cmd += "SET Option.LayerSequence 124;\n";
-		versionLayer= "123 124 127";
+		cmd += "SET Option.LayerSequence " + _BackgoundL + ";\n";
+		versionLayer= _dimensionL + " " + _BackgoundL + " " +_emptyL;
 	}
 	else{
 		cmd += "SET PALETTE COLORED;\n";
 		cmd += "SET PALETTE 0 " + colorPcb + ";\n";
 		cmd += "SET Option.LayerSequence 20;\n";
-		versionLayer= "20 123";
+		versionLayer= "20 " + _dimensionL;
 	}
 
 	cmd += "SET COLOR_LAYER 1 16;\n";
@@ -115,7 +120,7 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 	cmd += "SET COLOR_LAYER 28 21;\n";
 	cmd += "SET COLOR_LAYER 52 21;\n";
 	cmd += "SET COLOR_LAYER 20 20;\n";
-	cmd += "SET COLOR_LAYER 153 20;\n";
+	cmd += "SET COLOR_LAYER " + stringFromInt(lay_fabDoc[0]) + " 20;\n";
 
 	//cmd += "SET COLOR_LAYER 125 18;\n";
 	//cmd += "SET COLOR_LAYER 126 18;\n";
@@ -151,7 +156,7 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 		if (pdfExport) {
 			if(frame){
 				cmd += updateFrameInformation("PCB - Top");
-				cmd += "DISPLAY NONE;DISPLAY 1 18 29 "+tsilcLayers+" "+versionLayer+" 153;\n";
+				cmd += "DISPLAY NONE;DISPLAY 1 18 29 "+tsilcLayers+" "+versionLayer+" " + stringFromInt(lay_fabDoc[0]) + ";\n";
 			}
 			sprintf(cmd,"%s PRINT SHEETS ALL HIERARCHY -BLACK -CAPTION PAPER %s FILE '%s';\n", cmd, (format?"A3 landscape":"A4 portrait"), topPdf);
 		}
@@ -171,7 +176,7 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 		if (pdfExport) {
 			if(frame){
 				cmd += updateFrameInformation("PCB - Bottom");
-				cmd += "DISPLAY NONE;DISPLAY 16 18 30 "+bsilcLayers+" "+versionLayer+" 153;\n";
+				cmd += "DISPLAY NONE;DISPLAY 16 18 30 "+bsilcLayers+" "+versionLayer+" " + stringFromInt(lay_fabDoc[0]) + ";\n";
 			}
 			sprintf(cmd,"%s PRINT SHEETS ALL HIERARCHY -BLACK -CAPTION PAPER %s FILE '%s';\n", cmd, (format?"A3 landscape":"A4 portrait"), botPdf);
 		}

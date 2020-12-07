@@ -10,6 +10,9 @@
 
 #usage ""
 
+#include "Include_Config.ulp";
+#include "Include_String.ulp";
+
 string working_directory = "", temporary_file = "", eagle_binary = "";
 string option = "-c-"; 
 
@@ -159,7 +162,7 @@ else if(type == 6) {
 }
 else if(type == 7) {
 	status("Processing fabrication layer");
-	string layers = "20 48 153 154";
+	string layers = "20 48 " + stringFromInt(lay_fabDoc[0]) + " " + stringFromInt(lay_fabDoc[1]);
 
 	string cmd = "";
 	sprintf(cmd, "%s -X -dGERBER_RS274X %s -o \"%s\" \"%s\" %s ", eagle_binary, option, outputfile, inputfile, layers);

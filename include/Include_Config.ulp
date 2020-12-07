@@ -20,6 +20,12 @@ cfg_defaultTolerance = "1%",
 cfg_defaultVoltage = "50V"
 ;
 
+int 
+lay_dimension = 123,
+lay_background = 124,
+lay_empty = 127,
+lay_fabDoc[] = {153, 154, 155}; //fabDoc1 - fabDoc3 
+
 //variables for bom export presets
 string 	cfg_bomPreNames[];
 real 	cfg_bomPreOffX[];
