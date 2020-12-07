@@ -46,7 +46,7 @@ void setCoordinates(int x, int y)
 
 void getBoardSize(){
 	
-	board(B) {
+	project.board(B) {
 	 	B.wires(W) {
 			if(W.layer == 20){
 				if(W.arc){
