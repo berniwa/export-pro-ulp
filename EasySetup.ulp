@@ -176,40 +176,48 @@ void checkPrintSettings(){
 	}
 }
 
-void detectDrillsymbols(UL_BOARD B){
+char detectDrillsymbols(){
 	char cDrillSymbols = 1;
-	B.holes(H) {
-		if(!H.drillsymbol){
-			cDrillSymbols=0;
-		}
-	}
-	B.signals(S){
-		S.vias(V){
-			if(!V.drillsymbol){
-				cDrillSymbols=0;
-			}
-		}
-	}
-	B.elements(E) {
-		E.package.contacts(C) {
-			if(C.pad && (!C.pad.drillsymbol)){
-				cDrillSymbols=0;
-			}
-		}
-		E.package.holes(H) {
+	project.board(B){
+		B.holes(H) {
 			if(!H.drillsymbol){
 				cDrillSymbols=0;
+			}
+		}
+		B.signals(S){
+			S.vias(V){
+				if(!V.drillsymbol){
+					cDrillSymbols=0;
+				}
+			}
+		}
+		B.elements(E) {
+			E.package.contacts(C) {
+				if(C.pad && (!C.pad.drillsymbol)){
+					cDrillSymbols=0;
+				}
+			}
+			E.package.holes(H) {
+				if(!H.drillsymbol){
+					cDrillSymbols=0;
+				}
 			}
 		}
 	}
 
 	if(!cDrillSymbols){
-		int opt=dlgMessageBox(lanGetText("dlg.DrillError"),lanGetText("button.continue"),lanGetText("button.cancel"));
-		
-		if(opt){
-			exit("");
-		}
+		dlgDialog("Dirll"){
+			dlgLabel(lanGetText("dlg.DrillError"));
+			dlgLabel("<img src=\"" + filedir(argv[0]) + "/bin/ExpDrillSymb.png\">");
+			dlgHBoxLayout{
+				dlgStretch(1);
+				dlgPushButton(lanGetText("button.ok")) {exit("");};
+				dlgPushButton(lanGetText("button.cancel")) {dlgReject();};
+			}
+		};
 	}
+
+	return cDrillSymbols;
 }
 
 string placeFrameBrd(){
@@ -224,7 +232,7 @@ string placeFrameBrd(){
 			offset = u2mm(max_y - min_y) - 80;
 		}
 
-		sprintf(cmd, "%s(%fmm %fmm)", cmd, u2mm((max_x + min_x)/2), (u2mm((max_y + min_y)/2) - offset));
+		sprintf(cmd, "%s(%fmm %fmm)", cmd, u2mm((max_x + min_x)/2), (u2mm((max_y + min_y)/2) + offset));
 	}
 	else{							//adding an A3 frame
 		cmd+="'FRAME-A3@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
@@ -500,6 +508,7 @@ string placeFrameSch(UL_SHEET S){
 }
 
 void run(int runOrder){
+	char exec=0;
 	string cmd="";
 	loadConfig();
 
@@ -513,8 +522,21 @@ void run(int runOrder){
 
 	if (runOrder==0){ //execution #1
 		//not file type specific settings 
-		dlgMessageBox(lanGetText("dlg.setup.expl"));
-
+		dlgDialog("Easy Setup"){
+			dlgLabel(lanGetText("dlg.setup.expl"));
+			
+			dlgGroup("necessary setup steps"){
+				dlgHBoxLayout{dlgLabel("Setup Layers"); dlgStretch(1); dlgPushButton("add");}
+				dlgHBoxLayout{dlgLabel("Frame in Layout"); dlgStretch(1); dlgPushButton("add");}
+				dlgHBoxLayout{dlgLabel("Frame in schematic"); dlgStretch(1); dlgPushButton("add");}
+				dlgHBoxLayout{dlgLabel("drill symbols"); dlgStretch(1); dlgPushButton("add"){if(detectDrillsymbols()) dlgMessageBox(lanGetText("dlg.setup.drillSymbolsCreated"));};}
+			}
+			dlgHBoxLayout{
+				dlgStretch(1); 
+				dlgPushButton("check setup") {exec=1; dlgAccept();};
+				dlgPushButton(lanGetText("button.cancel")){dlgReject(); exit("");};
+			}
+		};
 		//checking if pdftk is installed
 		checkPDFTK();
 
@@ -529,9 +551,9 @@ void run(int runOrder){
 	}
 	else if (runOrder == 1){ //execution #2
 		//Settings that only can be edited in the .brd file
-		project.board(B){
-			detectDrillsymbols(B);
+		detectDrillsymbols();
 
+		project.board(B){
 			//detecting if all Fabdoc layers are visible
 			B.layers(L){
 				if (153<=L.number && L.number<=155 && !L.visible){
@@ -579,7 +601,7 @@ void run(int runOrder){
 
 		cmd+="EDIT .sch;";
 	}
-	else if (runOrder==2){
+	else if (runOrder==2){ //execution #3
 		//Settings that only can be edited in the .sch file
 
 		//check if there are specific bom entrys
@@ -609,8 +631,11 @@ void run(int runOrder){
 			}
 		} 
 
-		//Checking for a frame in .sch
 		project.schematic(Sc){
+			// checking fame layout
+
+
+			//Checking for a frame in .sch
 			int opt=10; //10 ... not initislised 
 			Sc.sheets(S){
 				if(!checkFrameSch(S)&&(opt%10)==0){
@@ -632,7 +657,7 @@ void run(int runOrder){
 			}
 		}
 	}
-	else if(runOrder==3){
+	else if(runOrder==3){ //execution #4
 		int opt = dlgMessageBox(lanGetText("dlg.setup.finished"), lanGetText("general.yes"), lanGetText("general.on"));
 		if (opt==0){
 			cmd+="RUN '"+filedir(argv[0])+"/ExportPro.ulp';";
@@ -641,7 +666,7 @@ void run(int runOrder){
 
 
 	if(runOrder<3){
-		sprintf(cmd, "%sRUN \'%s\' %d", cmd, argv[0], (++runOrder));
+		sprintf(cmd, "%sRUN \'%s\' %d", cmd, argv[0], exec?(++runOrder):0);
  	}
 
  	// debugVal(cmd+"\n\nRUN Nr. ",runOrder);

@@ -10,6 +10,7 @@ button.apply = Apply && request Price
 button.add = Add
 button.edit = Edit
 button.delete = Delete
+button.setpopulate = Update
 
 dlg.imag.footnote = * This may take a few minutes, depending on the size of the board
 dlg.pfd.footnote = * To merge the pdf-files we use pdftk_server. <br>You can get this tool <a href=\"https://www.pdflabs.com/tools/pdftk-server/\">here</a>.
@@ -28,6 +29,7 @@ dlg.setup.stdDRU = !The default Eagle Design Rules are loaded.<br>Do you want to
 dlg.setup.noBom = !There were no specific BOM entrys found. <br>Should those be generated?
 dlg.setup.noFrameSch = !There was no frame in at least one sheet of the schematic detected. <br>Should the ulp place them automatically?
 dlg.setup.finished = ;EasySetup is finished. <br>Shoult the ExportPro.ulp be started?
+dlg.setup.drillSymbolsCreated = ;All necesary drill symbols are already assinged.
 
 general.copper = Copper
 general.side = Side
@@ -185,5 +187,4 @@ tab.minTemp = Min. Temp.
 tab.maxTemp = Max. Temp.
 tab.rohs = Rohs state
 
-button.setpopulate = Update
 

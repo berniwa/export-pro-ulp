@@ -10,6 +10,7 @@ button.apply = Anwenden && Preise abfragen
 button.add = Hinzufügen
 button.edit = Editieren
 button.delete = Löschen
+button.setpopulate = Aktualisieren
 
 dlg.imag.footnote = * Dies kann je nach Boardgröße einige Zeit <br>(bis zu mehreren Minuten) dauern.
 dlg.pfd.footnote = * Um die PDF-Dateien zusammen zu führen benutzen wir pdftk_server <br>Sie können sich dieses Tool <a href=\"https://www.pdflabs.com/tools/pdftk-server/\">hier</a> herunterladen.
@@ -28,6 +29,7 @@ dlg.setup.stdDRU = !Es sind die Standard Eagle Design geladen. <br>Willst du das
 dlg.setup.noBom = !Es wurden keine genauen einträge in der Stückliste gefunden. <br>Sollen diese generiert werden?
 dlg.setup.noFrameSch = !Es wurde in mindestens einem Blat des Schaltplans kein Rahmen gefunden. <br>Sollen passende Rahmen automatisch plaziert werden?
 dlg.setup.finished = ;EasySetup ist abgeschlossen. <br>Soll die ExportPro.ulp gestarted werden?
+dlg.setup.drillSymbolsCreated = ;Es sind bereits alle notwendigen Bohrsymbole zugeteilt.
 
 general.copper = Kupfer
 general.side = Seite
@@ -184,5 +186,3 @@ tab.note = Notizen
 tab.minTemp = Min. Temp.
 tab.maxTemp = Max. Temp.
 tab.rohs = Rohs Status
-
-button.setpopulate = Aktualisieren
