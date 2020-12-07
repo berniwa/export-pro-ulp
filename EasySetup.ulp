@@ -608,20 +608,20 @@ void run(int runOrder){
 
 	if (runOrder==0){ //execution #1
 		//not file type specific settings 
-		dlgDialog("Easy Setup"){
+		dlgDialog(filename(argv[0])){
 			dlgLabel(lanGetText("dlg.setup.expl"));
 			
-			dlgGroup("necessary setup steps"){
-				dlgHBoxLayout{dlgLabel("Setup Layers"); dlgStretch(1); dlgPushButton("add") {
+			dlgGroup(lanGetText("headline.setup.steps")){
+				dlgHBoxLayout{dlgLabel(lanGetText("settings.setup.layer")); dlgStretch(1); dlgPushButton(lanGetText("button.add")) {
 					executeButton("EDIT .brd;" + checkLayerBrd() +
 						"EDIT .sch;" + checkLayerSch());};}
-				dlgHBoxLayout{dlgLabel("Frame in Layout"); dlgStretch(1); dlgPushButton("add") {executeButton("EDIT .brd;"+addFrameBrd(1));};}
-				dlgHBoxLayout{dlgLabel("Frame in schematic"); dlgStretch(1); dlgPushButton("add") {executeButton("EDIT .sch;"+addFrameSch(1));};}
-				dlgHBoxLayout{dlgLabel("drill symbols"); dlgStretch(1); dlgPushButton("add"){if(detectDrillsymbols()) dlgMessageBox(lanGetText("dlg.setup.drillSymbolsCreated"));};}
+				dlgHBoxLayout{dlgLabel(lanGetText("settings.setup.FrameBrd")); dlgStretch(1); dlgPushButton(lanGetText("button.add")) {executeButton("EDIT .brd;"+addFrameBrd(1));};}
+				dlgHBoxLayout{dlgLabel(lanGetText("settings.setup.FrameSch")); dlgStretch(1); dlgPushButton(lanGetText("button.add")) {executeButton("EDIT .sch;"+addFrameSch(1));};}
+				dlgHBoxLayout{dlgLabel(lanGetText("settings.setup.drill")); dlgStretch(1); dlgPushButton(lanGetText("button.add")){if(detectDrillsymbols()) dlgMessageBox(lanGetText("dlg.setup.drillSymbolsCreated"));};}
 			}
 			dlgHBoxLayout{
 				dlgStretch(1); 
-				dlgPushButton("check setup") { dlgAccept();};
+				dlgPushButton(lanGetText("button.setup.run")) { dlgAccept();};
 				dlgPushButton(lanGetText("button.cancel")){dlgReject(); exit("");};
 			}
 		};

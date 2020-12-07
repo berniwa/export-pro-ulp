@@ -11,6 +11,7 @@ button.add = Add
 button.edit = Edit
 button.delete = Delete
 button.setpopulate = Update
+button.setup.run = Check setup
 
 dlg.imag.footnote = * This may take a few minutes, depending on the size of the board
 dlg.pfd.footnote = * To merge the pdf-files we use pdftk_server. <br>You can get this tool <a href=\"https://www.pdflabs.com/tools/pdftk-server/\">here</a>.
@@ -87,6 +88,7 @@ headline.pdf = Pdf settings
 headline.usedLayers = Used Layers
 headline.boardInfo = Board information
 headline.bom.pdf = Settings for pdf export
+headline.setup.steps = necessary setup steps
 
 settings.general = General settings
 settings.renumber = Renumber parts
@@ -162,6 +164,11 @@ settings.bom.width = Bom width
 settings.default.tolerance = Default resistor tolerance 
 settings.default.voltage = Default capacitor voltage
 settings.menu = Set ULP to text menu
+settings.setup.layer = Setup Layers
+settings.setup.FrameBrd = Frame in Layout
+settings.setup.FrameSch = Frame in schematic
+settings.setup.drill = drill symbols
+
 
 comb.res = 600dpi - normal resolution;1200dpi - high resolution;2400dpi - very high resolution
 comb.pcbColor = Green;Red;Black;White;Polyimid
