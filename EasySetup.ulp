@@ -290,9 +290,9 @@ string placeFrameSh(UL_SHEET S){
 
 	string cmd;
 
-	sprintf(cmd,"EDIT .s%d",S.number);
+	sprintf(cmd,"EDIT .s%d;",S.number);
 
-	cmd = "Add ";
+	cmd += "Add ";
 
 	//getting the outline of the sheet 
 	//the algorythem is not perfect but good enouth for now
@@ -526,6 +526,96 @@ string placeFrameSh(UL_SHEET S){
 			}
 		}
 	}
+	S.frames(F){
+		F.wires(W){
+			if(!init){
+				init=1;
+				if(W.x1<=W.x2){
+					minX = W.x1;
+					maxX = W.x2;
+				}
+				else{
+					minX = W.x2;
+					maxX = W.x1;						
+				}
+
+				if(W.y1<=W.y2){
+					minY = W.y1;
+					maxY = W.y2;
+				}
+				else{
+					minY = W.y2;
+					maxY = W.y1;						
+				}
+			}
+			else{
+				if(minX>W.x1)
+					minX=W.x1;
+				else if(maxX<W.x1)
+					maxX=W.x1;
+
+				if(minX>W.x2)
+					minX=W.x2;
+				else if(maxX<W.x2)
+					maxX=W.x2;
+
+				if(minY>W.y1)
+					minY=W.y1;
+				else if(maxY<W.y1)
+					maxY=W.y1;
+
+				if(minY>W.y2)
+					minY=W.y2;
+				else if(maxY<W.y2)
+					maxY=W.y2;
+			}
+		}
+	}
+	S.polygons(P){
+		P.wires(W){
+			if(!init){
+				init=1;
+				if(W.x1<=W.x2){
+					minX = W.x1;
+					maxX = W.x2;
+				}
+				else{
+					minX = W.x2;
+					maxX = W.x1;						
+				}
+
+				if(W.y1<=W.y2){
+					minY = W.y1;
+					maxY = W.y2;
+				}
+				else{
+					minY = W.y2;
+					maxY = W.y1;						
+				}
+			}
+			else{
+				if(minX>W.x1)
+					minX=W.x1;
+				else if(maxX<W.x1)
+					maxX=W.x1;
+
+				if(minX>W.x2)
+					minX=W.x2;
+				else if(maxX<W.x2)
+					maxX=W.x2;
+
+				if(minY>W.y1)
+					minY=W.y1;
+				else if(maxY<W.y1)
+					maxY=W.y1;
+
+				if(minY>W.y2)
+					minY=W.y2;
+				else if(maxY<W.y2)
+					maxY=W.y2;
+			}
+		}
+	}
 
 	if(u2mm(maxX - minX)<170) {		//adding an A4 frame for boars smaler then 170mm to fitt multiple mesurments
 		cmd+="'XDEVELOP-A4@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
@@ -534,8 +624,8 @@ string placeFrameSh(UL_SHEET S){
 	}
 	else{							//adding an A3 frame
 		cmd+="'XDEVELOP-A3@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
-		sprintf(cmd, "%s(%fmm %fmm)", cmd, (u2mm((maxX + minX)/2) - 195), (u2mm((maxY + minY)/2) - 147));
-		}
+		sprintf(cmd, "%s(%fmm %fmm)", cmd, (u2mm((maxX + minX)/2) - 190), (u2mm((maxY + minY)/2) - 130));
+	}
 
 	return cmd+"; ";
 }
