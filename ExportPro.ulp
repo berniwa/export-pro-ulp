@@ -73,7 +73,9 @@ bomPreset=0;
 
 real board_thickness = 0.0, board_copper_thickness = 0.0,
 bom_quantity, pnp_offset_x = 0.0, pnp_offset_y = 0.0,
-bom_offsetX = 0.15, bom_offsetY = 0.15, bom_width = 179.6;
+bom_offsetX = 0.15, bom_offsetY = 0.15, bom_width = 179.6,
+temp_min, temp_max
+;
 
 
 
@@ -248,7 +250,6 @@ void loadDRCSettings(){
 string parseUserSetting(string data){
 	return stringTrim(strsub(data,(strchr(data,'=')+1)));
 }
-
 
 void loadUsersettings(){
 	string data[];
@@ -1079,6 +1080,35 @@ string exportLayer(int export_layer, int export_png, int export_pdf, string fold
 	return cmd;
 }
 
+void getMinMaxTemp(){
+	char initmaxi = 0, initmini = 0;
+
+	project.board(B){
+		B.elements(E){
+			E.attributes(A){
+				if(A.name == "MAX_TEMP"){
+					if(!initmaxi){
+						temp_max=strtod(A.value);
+						initmaxi=1;
+					}
+					else if(temp_max<strtod(A.value)){
+						temp_max=strtod(A.value);
+					}
+				}
+				else if(A.name == "MIN_TEMP"){
+					if(!initmini){
+						temp_min=strtod(A.value);
+						initmini=1;
+					}
+					else if(temp_min>strtod(A.value)){
+						temp_min=strtod(A.value);
+					}
+				}
+			}
+		}
+	}
+}
+
 void export(){
 
 	if(EAGLE_VERSION>=9){
@@ -1326,13 +1356,15 @@ void export(){
 	cmd += "WRITE;";
 	
 	if(drilltable || fabrication || stackup) {
+		getMinMaxTemp();
 		//The drilltable ulp has been repalced with the new fabrication ULP
-		sprintf(cmd, "%s RUN '%sFabrication.ulp' %d %d %d \'%s\' \'%s\' \'%s\' \'%s\' \'%s\' \'%s\';", cmd, include_path, 
+		sprintf(cmd, "%s RUN '%sFabrication.ulp' %d %d %d \'%s\' \'%s\' \'%s\' \'%s\' \'%s\' \'%s\' \'%.2f\' \'%.2f\';", cmd, include_path, 
 			fabrication, drilltable, stackup, 
 			PcbType[board_type], pcbSpecColor[pcbimage_color], 
 			pcbSpecSilkscreenColor[pcbimage_silkscreen_color], 
 			pcbSpecPlating[pcbimage_plating],
-			bname, (strtod(drcGetRule("mdCopperDimension"))==0.0)?"yes":"no"
+			bname, (strtod(drcGetRule("mdCopperDimension"))==0.0)?"yes":"no",
+			temp_min, temp_max
 		);
 	}
 	cmd += "WRITE;";
