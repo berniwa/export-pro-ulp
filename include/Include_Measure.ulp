@@ -440,6 +440,51 @@ board(B) {
 		}
 	}
 	B.elements(E) {
+		E.package.wires(W) {
+			if(W.layer == 20) {
+				if(W.arc) {
+					setCoordinates(W.arc.x1, W.arc.y1);
+					setCoordinates(W.arc.x2, W.arc.y2);
+					
+					int angle = W.arc.angle2 - W.arc.angle1;
+					
+					int set_elements = round(angle/90);
+					int start_element = round(W.arc.angle1/90);
+					start_element = start_element % 4;
+
+					/*string tmp = "";
+					sprintf(tmp, "%f %f %d %d", W.arc.angle1, W.arc.angle2, start_element, set_elements);
+					dlgMessageBox(tmp);*/
+					
+					for(int i = start_element; i < (start_element + set_elements); i++) {
+						if(i == 0) {
+							setCoordinates(W.arc.xc - W.arc.radius, W.arc.y1);
+						}
+						else if(i == 1) {
+							setCoordinates(W.arc.x2, W.arc.yc + W.arc.radius);
+						}
+						else if(i == 2) {
+							setCoordinates(W.arc.xc + W.arc.radius, W.arc.y1);
+						}
+						else if(i == 3) {
+							setCoordinates(W.arc.x2, W.arc.yc - W.arc.radius);
+						}
+					}
+				}
+				else {
+					setCoordinates(W.x1, W.y1);
+					setCoordinates(W.x2, W.y2);
+				}
+			}
+		}
+		E.package.circles(C) {
+			if(C.layer == 20) {
+				setCoordinates(C.x + C.radius, C.y + C.radius);
+				setCoordinates(C.x - C.radius, C.y - C.radius);
+			}
+		}
+
+
 		if(E.name == "MEASURE") {	
 			update = 1;
 		}
