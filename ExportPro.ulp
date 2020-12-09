@@ -853,7 +853,7 @@ string updateFrameInformationSch(){
 
 		sprintf(cmd,"%sEDIT .s%d;\n",cmd,she[j]);
 
-		cmd += "CHANGE DISPLAY OFF;\n";
+		//cmd += "CHANGE DISPLAY OFF;\n";
 	 	
 		if(strstr(attribute,"TITLE")==-1) {
 			cmd += "ATTRIBUTE " + name[j] + " TITLE DELETE;\n";
@@ -929,7 +929,7 @@ string updateFrameInformationBrd(string drawing){
 	string cmd = "";
 	if(name != "") {
 
-		cmd += "CHANGE DISPLAY OFF;";
+		//cmd += "CHANGE DISPLAY OFF;";
 	 	
 		if(strstr(attribute,"TITLE")==-1) {
 			cmd += "ATTRIBUTE " + name + " TITLE DELETE;";
