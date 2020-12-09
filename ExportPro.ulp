@@ -828,7 +828,7 @@ string updateFrameInformationSch(){
 	char numNames = 0;
 
 	project.schematic(S) {
-		schname=S.name;
+		schname=filename(S.name);
 		S.sheets(ST){
 			ST.parts(P) {
 				if(strstr(P.device.library, "frame") != -1){
