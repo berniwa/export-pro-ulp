@@ -416,7 +416,6 @@ void main(){
 
 			if(drawR<0){
 				sprintf(cmd,"%s @%f ",cmd,drawR);
-				dbgMsg(cmd,0.0);
 			}
 			else{
 				sprintf(cmd,"%s @+%f",cmd,drawR);
