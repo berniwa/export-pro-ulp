@@ -78,6 +78,7 @@ string isNotMenu(){
 	fileread(scrI,pathSCR);
 
 	if(strstr(scrI,"/ExportPro.ulp")==-1){
+		dlgMessageBox(scrI);
 		pathO=pathSCR;
 	}
 
@@ -86,6 +87,11 @@ string isNotMenu(){
 
 void setToMenu(){
 	string pathULP = filedir(argv[0]);
+
+	if(strstr(pathULP,"/include")!=-1) {
+		pathULP += "/../";
+	}
+
 	string pathSCR = isNotMenu();
 	if(pathSCR){
 		string scr;
@@ -115,17 +121,17 @@ void removeFromMenu(){
 	fileread(scr,pathSCR);
 	
 	start = strstr(scr,"'Export Pro",strstr(scr,"MENU",strstr(scr,"BRD:")));
-	end = strstr(scr, ";'",strstr(scr, "'Select Part", start))+2;
+	end = strstr(scr, ";'",strstr(scr, "'Select Part", start))+5;
 	scr = stringCutout(scr, start, end);
 
 	start = strstr(scr,"'Export Pro",strstr(scr,"MENU",strstr(scr,"SCH:")));
-	end = strstr(scr, ";'",strstr(scr, "'Select Part", start))+2;
+	end = strstr(scr, ";'",strstr(scr, "'Select Part", start))+5;
 	scr = stringCutout(scr, start, end);
 
 	start = strstr(scr,"'SelectPart",strstr(scr,"SET CONTEXT",strstr(scr,"BRD:")));
 	tmp = strsub(scr, 0, start);				//to just remove the one entery
 	start = strrstr(tmp,"SET CONTEXT");
-	end = strstr(scr, ";", start)+1;
+	end = strstr(scr, ";", start)+2;
 	scr = stringCutout(scr, start, end);
 
 	//dlgMessageBox(scr);
