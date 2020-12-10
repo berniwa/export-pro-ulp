@@ -154,8 +154,7 @@ real BackConvertDimensions(real mmDim) {
      int unitsInt;
 
      //get board dimensions
-     board(B)
-     {
+     board(B) {
           unitsInt = B.grid.unit;
      }
 
@@ -257,16 +256,14 @@ real GetTolerance() {
 }  //end func
 
 string GetBoardFilename() {
-     board(BRD)
-     {
+     board(BRD) {
           return filename(BRD.name);
      }  //end board
 }
 
 string GetBoardDir() {
 
-     board(BRD)
-     {
+     board(BRD) {
           return filedir(BRD.name);
      }  //end board
 }
@@ -517,8 +514,7 @@ real GetDistBetweenPts(real x1, real y1, real x2, real y2) {
 
 void WriteToFile(string filePath, string fileContents) {
 
-     output(filePath, "wt")
-     {
+     output(filePath, "wt") {
           printf(fileContents);
      }
 }   //end sub
@@ -533,8 +529,7 @@ string GetElementHeightAttr( UL_ELEMENT E ){
      string height = NULL_HEIGHT;
 
      //check for element height
-     E.attributes(A)
-     {
+     E.attributes(A) {
           if (strupr(A.name) == "HEIGHT") {
                if ( strtod(A.value) <= 0.0) {
                     height = NULL_HEIGHT;
@@ -595,16 +590,13 @@ string GetComponentOutline(
           real maxX = 0, maxY = 0, minX = 0, minY = 0;
 
           //loop thru all Libraries to find packagename
-          board(B)
-          {
+          board(B) {
 
                //go into library
-               B.libraries(LBR)
-               {
+               B.libraries(LBR) {
 
                     //loop thru packages in library
-                    LBR.packages(P)
-                    {
+                    LBR.packages(P) {
                          //if package name matches the one we are looking for then process it
                          if (P.name == packageName) {
                               //check min/ax for each of
@@ -623,8 +615,7 @@ string GetComponentOutline(
 
                               //loop thru wires and Get max/min x/y
                               //do wires first to take care of loopCounter == 0 case
-                              P.wires(W)
-                              {
+                              P.wires(W) {
                                    //get first data point
                                    if (loopCounter == 0) {
                                         w2 = W.width / 2;
@@ -679,8 +670,7 @@ string GetComponentOutline(
 
                               //UpdateBBoxBox(C.x - C.radius - w2, C.y - C.radius - w2, C.x + C.radius + w2, C.y + C.radius + w2);
                               // xmin, ymin, xmax, ymax
-                              P.circles(C)
-                              {
+                              P.circles(C) {
                                    w2 = C.width / 2;
                                    minX = min(minX,
                                              GetDimInBoardUnits(C.x - C.radius - w2));
@@ -696,10 +686,8 @@ string GetComponentOutline(
 
                               //P.holes(){} - Not required. These are solder masks
 
-                              P.polygons(POLY)
-                              {
-                                   POLY.wires(PW)
-                                   {
+                              P.polygons(POLY) {
+                                   POLY.wires(PW) {
                                         minX = min(minX, GetDimInBoardUnits(PW.x1));
                                         minY = min(minY, GetDimInBoardUnits(PW.y1));
                                         maxX = max(maxX, GetDimInBoardUnits(PW.x1));
@@ -708,8 +696,7 @@ string GetComponentOutline(
                                    }  //end wires in polygon
                               }   //end polgons
 
-                              P.rectangles(R)
-                              {
+                              P.rectangles(R) {
                                    minX = min(minX,
                                              min(GetDimInBoardUnits(R.x1),
                                                        GetDimInBoardUnits(R.x2)));
@@ -864,13 +851,11 @@ string GetEmpElectrical() {
      string component;
 
      //loop thru elements on board
-     board(BRD)
-     {
+     board(BRD) {
 
           int i = 0;
 
-          BRD.elements(E)
-          {
+          BRD.elements(E) {
 
                height = NULL_HEIGHT;
 
@@ -904,8 +889,7 @@ string GetEmpElectrical() {
 
                //check for element height
                /*
-               E.attributes(A)
-               {
+               E.attributes(A) {
                     if (strupr(A.name) == "HEIGHT") {
 
                          if (strtod(A.value) < 0) {
@@ -1005,8 +989,7 @@ string GetEmnHeader() {
      string boardName;
 
      //get board name
-     board(BRD)
-     {
+     board(BRD) {
           boardName = filename(BRD.name);
      }
 
@@ -1103,10 +1086,8 @@ int LayerNumInUse(int layerNum) {
      //returns true=1 if layer Is being used. returns 0 if layer Is not used.
      int layerUsed = 0;
 
-     board(B)
-     {
-          B.layers(L)
-          {
+     board(B) {
+          B.layers(L) {
                if (L.number == layerNum) {
                     layerUsed = 1;
                }  //end if
@@ -1117,10 +1098,8 @@ int LayerNumInUse(int layerNum) {
 }
 
 int LayerIsIDFDebug(int layerNum) {
-     board(B)
-     {
-          B.layers(L)
-          {
+     board(B) {
+          B.layers(L) {
                if (L.number == layerNum && L.name == "IDFDebug") {
                     return 1;
                }  //end if
@@ -1164,10 +1143,8 @@ string GetIDFDebugLayerNum() {
      //loop thru layers and check for name IDFDebug
      int IDFDebugLayerNum = -1;
 
-     board(B)
-     {
-          B.layers(L)
-          {
+     board(B) {
+          B.layers(L) {
                if (L.name == "IDFDebug") {
                     IDFDebugLayerNum = L.number;
                }  //end if
@@ -1202,10 +1179,8 @@ string RemoveIDFDebugLayerCommands() {
 
           //delete circles
           //DELETE (x y) where x y are points on circle outline
-          board(B)
-          {
-               B.circles(C)
-               {
+          board(B) {
+               B.circles(C) {
                     if (C.layer == strtol(debugLayerNum)) {
 
                          commands += "DELETE ( " + rtos(GetDimInBoardUnits(C.x))
@@ -1214,8 +1189,7 @@ string RemoveIDFDebugLayerCommands() {
                     }  //end if
                }  //end wire loop
 
-               B.wires(W)
-               {
+               B.wires(W) {
                     if (W.layer == strtol(debugLayerNum)) {
 
                          commands += "DELETE ( " + rtos(GetDimInBoardUnits(W.x1))
@@ -1236,8 +1210,7 @@ string RemoveIDFDebugLayerCommands() {
 int CountWireHoles() {
      int holeCount = 0;
 
-     board(BRD)
-     {
+     board(BRD) {
           /*
            BRD.holes(H){
 
@@ -1245,8 +1218,7 @@ int CountWireHoles() {
            }  //end holes
            */
 
-          BRD.circles(C)
-          {
+          BRD.circles(C) {
                if (C.layer == strtol(WireLayer)) {
                     holeCount++;
                }
@@ -1320,11 +1292,9 @@ string GetEmnBoardOutline() {
 
      /*   Step 1 & 2   */
      //loop thru layer 20 and wires on layer
-     board(BRD)
-     {
+     board(BRD) {
           //loop thru wires
-          BRD.wires(W)
-          {
+          BRD.wires(W) {
 
                //only pull layer 20 wires
                if (W.layer == strtol(WireLayer)) {
@@ -1377,7 +1347,63 @@ string GetEmnBoardOutline() {
 
                     }  //end if for arc
                }  //end if check for layer=20
-          }  //end loop thru wires
+          }  
+          BRD.elements(E) {
+              E.package.wires(W) {
+                   //only pull layer 20 wires
+                   if (W.layer == strtol(WireLayer)) {
+                        //get wire start and end points
+
+                        //get x/y for start and end.
+                        bx1 = GetDimInBoardUnits(W.x1);
+                        by1 = GetDimInBoardUnits(W.y1);
+                        bx2 = GetDimInBoardUnits(W.x2);
+                        by2 = GetDimInBoardUnits(W.y2);
+
+                        //handle arcs and lines differently
+                        if (W.arc) {
+                                                                   
+                             real angle1 = W.arc.angle1;
+                             real angle2 = W.arc.angle2;
+                             real centerx = GetDimInBoardUnits(W.arc.xc);
+                             real centery = GetDimInBoardUnits(W.arc.yc);
+
+                             // todo not useable? why? cant distinguish between counterClock vs clockwise
+                             real arcAngle  = angle2 - angle1;
+                             if (arcAngle < 0){
+                                  arcAngle += 360;
+                             } 
+                             
+                             // determine which direction to draw arc by Getting x/y points based on angle2
+                             incx = (cos(deg2rad * (angle1)) * GetDimInBoardUnits( W.arc.radius)) + centerx;
+                             incy = (sin(deg2rad * (angle1)) * GetDimInBoardUnits(  W.arc.radius))  + centery;
+
+                           // string foo;
+                           //  sprintf(foo, "%1.6f   %1.6f   \n%1.6f   %1.6f", incx, incy, bx1, by1);
+                           //  dlgMessageBox(foo);
+
+                             if (!(CompareReals(incx, bx1) && CompareReals(incy, by1))){
+                                  arcAngle = arcAngle * -1;
+                             }
+
+                             sprintf(temp, "%1.6f\t%1.6f\t%1.6f\t%1.6f\t%1.6f\tn\n", bx1, by1, bx2, by2, arcAngle);
+
+                             outlinePoints[wireCount] = temp;
+                             wireCount++;
+                    
+                        } else {
+                             //process lines
+                             sprintf(temp, "%1.6f\t%1.6f\t%1.6f\t%1.6f\t%d\tn\n", bx1, by1, bx2, by2, 0);
+
+                             outlinePoints[wireCount] = temp;
+
+                             wireCount++;
+
+                        }  //end if for arc
+                   }  //end if check for layer=20
+              }  //end loop thru wires
+          }
+          //end loop thru wires
      }  //end loop thru board
 
      //if there are wireholes then consider those as part of the outline
@@ -1883,11 +1909,9 @@ string GetEmnDrilledHoles() {
 
      int holeCount = 0;
 
-     board(BRD)
-     {
+     board(BRD) {
           //loop thru holes
-          BRD.holes(H)
-          {
+          BRD.holes(H) {
                sprintf(temp, "%10.4f%10.4f%10.4f  NPTH  BOARD OTHER UNOWNED\n",
                          (GetDimInBoardUnits(H.drill)), (GetDimInBoardUnits(H.x)),
                          (GetDimInBoardUnits(H.y)));
@@ -1898,10 +1922,8 @@ string GetEmnDrilledHoles() {
           }  //end holes
 
           //get any holes from packages on elements
-          BRD.elements(E)
-          {
-               E.package.holes(C)
-               {
+          BRD.elements(E) {
+               E.package.holes(C) {
                     sprintf(temp, "%10.4f%10.4f%10.4f  NPTH  %-4s PIN UNOWNED\n",
                               (GetDimInBoardUnits(C.drill)),
                               (GetDimInBoardUnits(C.x)), (GetDimInBoardUnits(C.y)),
@@ -1912,8 +1934,7 @@ string GetEmnDrilledHoles() {
                     holeCount++;
                }  //end package.holes
 
-               E.package.contacts(P)
-               {
+               E.package.contacts(P) {
                     if (P.pad) {
                          sprintf(temp, "%.2f %.2f %.2f PTH BOARD VIA UNOWNED\n",
                                    GetDimInBoardUnits(P.pad.drill),
@@ -1928,10 +1949,8 @@ string GetEmnDrilledHoles() {
           }  //end elements
 
           //get any holes on vias
-          BRD.signals(S)
-          {
-               S.vias(V)
-               {
+          BRD.signals(S) {
+               S.vias(V) {
                     sprintf(temp, "%10.4f%10.4f%10.4f  NPTH  BOARD OTHER UNOWNED\n",
                               (GetDimInBoardUnits(V.drill)),
                               (GetDimInBoardUnits(V.x)), (GetDimInBoardUnits(V.y)));
@@ -1986,13 +2005,11 @@ string GetEmnPlacements() {
      placementSection = ".PLACEMENT\n";
 
      //loop thru elements on board
-     board(BRD)
-     {
+     board(BRD) {
 
           int i = 0;
 
-          BRD.elements(E)
-          {
+          BRD.elements(E) {
 
                LibraryLookup = lookup(Libraries, strupr(E.package.library), 0);
 
@@ -2081,8 +2098,7 @@ void GenerateEmnEmpFiles(string dirName) {
      string boardName;
      string boardDir;
 
-     board(BRD)
-     {
+     board(BRD) {
           boardName = filename(BRD.name);
 
           boardDir = filedir(BRD.name);
@@ -2092,13 +2108,11 @@ void GenerateEmnEmpFiles(string dirName) {
      string emnData = GenerateEmn();
      string empData = GenerateEmp();
 
-     output(dirName + GetFileSeperator() + filesetext(boardName, ".emn"), "wt")
-     {
+     output(dirName + GetFileSeperator() + filesetext(boardName, ".emn"), "wt") {
           printf(emnData);
      }
 
-     output(dirName + GetFileSeperator() + filesetext(boardName, ".emp"), "wt")
-     {
+     output(dirName + GetFileSeperator() + filesetext(boardName, ".emp"), "wt") {
           printf(empData);
      }
 
