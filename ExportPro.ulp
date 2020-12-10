@@ -1070,10 +1070,10 @@ string pdfExport(string folder, string index){
 
 	cmd +=	"PRINT SHEETS ALL -CAPTION HIERARCHY PAPER ";
 	cmd +=	(board_format?"A3 landscape":"A4 portrait");
-	cmd +=	(fields[6]=="1")?" MIRROR":" -MIRROR";
+	cmd +=	((fields[6]=="1") && mirror_bot)?" MIRROR":" -MIRROR";
 	cmd +=	" BLACK FILE '" + folder + stringTrim(fields[1]) + ".pdf';";
 
-	if (fields[6]=="1")	{
+	if ((fields[6]=="1") && mirror_bot && pdf_keep_frame) {
 		cmd  = "RUN " + include_path + "MirrorPDF.ulp;" + cmd;
 		cmd += "RUN " + include_path + "MirrorPDF.ulp;";
 	}
@@ -1726,7 +1726,6 @@ void dialogImageSettings(){
 					string tmp[];
 					strsplit(tmp, lanGetText("comb.res"), ';');
 					dlgComboBox(tmp, image_resolution);
-					dlgCheckBox(lanGetText("settings.imag.mirror"), mirror_bot);
 					dlgCheckBox(lanGetText("settings.imag.crop"), crop_all);
 					dlgLabel(lanGetText("dlg.imag.footnote"));
 					dlgStretch(1);
@@ -1749,7 +1748,8 @@ void dialogImageSettings(){
 				}
 			};
 		}
-		dlgGroup(lanGetText("headline.advancedSettings")){			
+		dlgGroup(lanGetText("headline.advancedSettings")) {
+			dlgCheckBox(lanGetText("settings.imag.mirror"), mirror_bot);
 			dlgCheckBox(lanGetText("settings.imag.noMeasures"), no_measures);	
 			dlgCheckBox(lanGetText("settings.imag.alwaysExpT"), parts_top_docu);
 			dlgCheckBox(lanGetText("settings.imag.alwaysExpB"), parts_bot_docu);
