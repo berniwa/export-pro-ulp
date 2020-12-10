@@ -78,7 +78,6 @@ string isNotMenu(){
 	fileread(scrI,pathSCR);
 
 	if(strstr(scrI,"/ExportPro.ulp")==-1){
-		dlgMessageBox(scrI);
 		pathO=pathSCR;
 	}
 
