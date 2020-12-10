@@ -12,8 +12,7 @@ string  lanContent = "";
 int 	lanLines = 0;
 string  lan="";
 
-void lanLoadText(string languageFile)
-{
+void lanLoadText(string languageFile) {
 	languageFile = "../Languages/" + languageFile;
 	lan=getUlpDir(languageFile);
 
@@ -26,8 +25,7 @@ void lanLoadText(string languageFile)
 }
 
 /* Parameters look like: grid 5 mm, outline 5 x 5 mm */
-string lanWord(string parameter, string haystack)
-{
+string lanWord(string parameter, string haystack) {
 	string data = "";
 
 	parameter = parameter + " =";
@@ -36,8 +34,7 @@ string lanWord(string parameter, string haystack)
 	int len = strlen(parameter) + 1;
 	int end = 0;
 
-	if(start != -1)
-	{
+	if(start != -1) {
 		end = strstr(haystack, "\n", start);
 		end = end==-1?strlen(haystack):end;
 
@@ -47,14 +44,11 @@ string lanWord(string parameter, string haystack)
 	return stringTrim(data);
 }
 
-string lanGetText(string name)
-{
+string lanGetText(string name) {
 	string result = "";
-	for(int i = 0; i < lanLines; i++)
-	{
+	for(int i = 0; i < lanLines; i++) {
 		result = lanWord(name, lanContent);
-		if(result != "")
-		{
+		if(result != "") {
 			return result;
 		}
 	}
