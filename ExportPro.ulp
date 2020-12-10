@@ -1063,11 +1063,22 @@ string pdfExport(string folder, string index){
 
 	string fields[];
 	int count = strsplit(fields, ExportSetup[i], ';');
+	string cmd = "" ;
+	cmd += 	"DISPLAY NONE; ";
+	cmd +=	"DISPLAY " + fields[2] + "; ";
+	cmd +=	"DISPLAY " + fields[4] + "; ";
 
-	return 	"DISPLAY NONE; "+
-			"DISPLAY " + fields[2] + "; " + 
-			"DISPLAY " + fields[4] + "; " + 
-			"PRINT SHEETS ALL -CAPTION HIERARCHY PAPER "+(board_format?"A3 landscape":"A4 portrait")+" BLACK FILE '" + folder + stringTrim(fields[1]) + ".pdf';";
+	cmd +=	"PRINT SHEETS ALL -CAPTION HIERARCHY PAPER ";
+	cmd +=	(board_format?"A3 landscape":"A4 portrait");
+	cmd +=	(fields[6]=="1")?" MIRROR":" -MIRROR";
+	cmd +=	" BLACK FILE '" + folder + stringTrim(fields[1]) + ".pdf';";
+
+	if (fields[6]=="1")	{
+		cmd  = "RUN " + include_path + "MirrorPDF.ulp;" + cmd;
+		cmd += "RUN " + include_path + "MirrorPDF.ulp;";
+	}
+
+	return cmd;
 } //HERE
 
 string exportLayer(int export_layer, int export_png, int export_pdf, string folder_png, string folder_pdf, string index) {
@@ -1413,7 +1424,7 @@ void export(){
 			layer_pdf += stringFromInt(lay_fabDoc[0]) + " ";
 		}
 		//Quick fix, to get correct dimensions, for non mirrored views
-		layer_pdf += "-" + mb + " " + mt;
+		//layer_pdf += "-" + mb + " " + mt;
 
 		int row = 0;
 		//Index, Filenames, Default Layers, Layers PNG, Layers PDF, Drawing, png mirror

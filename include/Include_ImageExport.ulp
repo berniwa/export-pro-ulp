@@ -23,8 +23,7 @@ _dimensionL = stringFromInt(lay_dimension),
 _BackgoundL = stringFromInt(lay_background),
 _emptyL = stringFromInt(lay_empty);
 
-string getFilename(string basename, string ends_with)
-{
+string getFilename(string basename, string ends_with) {
 	return filesetext(basename,ends_with);
 }
 
@@ -72,13 +71,11 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 
 	string bname = "";
 	real height, width;
-	board(B)
-	{
+	board(B) {
 		bname = B.name;
 
 		height = u2inch(B.area.y2-B.area.y1);
 		width = u2inch(B.area.x2-B.area.x1);
-
 	}
 	string versionLayer="";
 
@@ -145,8 +142,7 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 		dlgMessageBox(tmp);
 	}
 
-	if(exportTop)
-	{
+	if(exportTop) {
 		cmd += "DISPLAY NONE;DISPLAY 1 18 29 "+tsilcLayers+" "+versionLayer+";\n";
 		if (imgExport) {
 			cmd += "RUN " + getUlpDir("Include_") + "ZoomVisible.ulp;";
@@ -162,8 +158,7 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 		}
 		
 	}
-	if(exportBot)
-	{
+	if(exportBot) {
 		cmd += "DISPLAY NONE;DISPLAY 16 18 30 "+bsilcLayers+" "+versionLayer+";\n";
 
 		if (imgExport) {
@@ -176,16 +171,21 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 		if (pdfExport) {
 			if(frame){
 				cmd += updateFrameInformation("PCB - Bottom");
+				cmd += mirror?"RUN " + filedir(argv[0]) + "Include_MirrorPDF.ulp;":"";
 				cmd += "DISPLAY NONE;DISPLAY 16 18 30 "+bsilcLayers+" "+versionLayer+" " + stringFromInt(lay_fabDoc[0]) + ";\n";
 			}
-			sprintf(cmd,"%s PRINT SHEETS ALL HIERARCHY -BLACK -CAPTION PAPER %s FILE '%s';\n", cmd, (format?"A3 landscape":"A4 portrait"), botPdf);
+
+			sprintf(cmd,"%s PRINT SHEETS ALL HIERARCHY -BLACK -CAPTION PAPER %s %s FILE '%s';\n", cmd, 
+				(format?"A3 landscape":"A4 portrait"), 
+				(mirror?"MIRROR":"-MIRROR"),
+				botPdf);
+
+			cmd += ((mirror && frame)?("RUN " + filedir(argv[0]) + "Include_MirrorPDF.ulp;"):"");
 		}
-		
 	}
 
 
-	if(EAGLE_VERSION > 5 || (EAGLE_VERSION == 5 && EAGLE_RELEASE >= 11) ) //Support for SET CONFIRM form Eagle 5.11 on
-	{
+	if(EAGLE_VERSION > 5 || (EAGLE_VERSION == 5 && EAGLE_RELEASE >= 11) ) { 	//Support for SET CONFIRM form Eagle 5.11 on 
 		cmd += "SET CONFIRM NO;\n";
 	}
 
@@ -209,13 +209,10 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 
 	string layers = "";
 
-	board(B)
-	{
+	board(B) {
 		
-		B.layers(L)
-		{
-			if(L.visible)
-			{
+		B.layers(L) {
+			if(L.visible) {
 				sprintf(layers, layers + " %d", L.number);
 			}
 		}
@@ -223,28 +220,23 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 
 	cmd += "DISPLAY NONE; DISPLAY " + layers + ";\n";
 
-	if(palette(-1) == PALETTE_BLACK)
-	{
+	if(palette(-1) == PALETTE_BLACK) {
 		cmd += "SET PALETTE BLACK;\n";
 	}
-	else if(palette(-1) == PALETTE_WHITE)
-	{
+	else if(palette(-1) == PALETTE_WHITE) {
 		cmd += "SET PALETTE WHITE;\n";
 	}
-	else
-	{
+	else {
 		cmd += "SET PALETTE COLORED;\n";
 	}
 
 	cmd += "SET FILL_LAYER 29 LtSlash;\n";
 	cmd += "SET FILL_LAYER 30 BkSlash;\n";
 	
-	if(exportBot && crop && imgExport)
-	{
+	if(exportBot && crop && imgExport) {
 		sprintf(cmd, "%s RUN '%sCropColor.ulp' '%s' %d '%s';\n", cmd, getUlpDir("Include_"), botImage, resolution,filesetext(bname,".bat"));
 	}
-	if(exportTop && crop && imgExport)
-	{
+	if(exportTop && crop && imgExport) {
 		sprintf(cmd, "%s RUN '%sCropColor.ulp' '%s' %d '%s';\n", cmd, getUlpDir("Include_"), topImage, resolution,filesetext(bname,".bat"));
 	}
 	executeAndExit(cmd);
