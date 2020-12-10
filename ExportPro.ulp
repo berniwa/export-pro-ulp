@@ -1042,18 +1042,6 @@ string pngCrop(string folder, string index){
 	return "RUN '"  + include_path + "Crop.ulp' '" + folder + stringTrim(fields[1]) + ".png' '"+getSystemFilename(".bat")+"';";
 }
 
-string pngMirror(string folder, string index){	
-	int i = exportSetupLookup(index);
-	if(i == -1){
-		dlgMessageBox(":Unable to find index " + index);
-		return "";
-	}
-	
-	string fields[];
-	int count = strsplit(fields, ExportSetup[i], ';');
-	return "RUN '"  + include_path + "Mirror.ulp' '" + folder + stringTrim(fields[1]) + ".png' '"+getSystemFilename(".bat")+"';";
-}
-
 string pdfExport(string folder, string index){
 	int i = exportSetupLookup(index);
 	if(i == -1){
