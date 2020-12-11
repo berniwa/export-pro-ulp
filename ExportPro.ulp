@@ -100,6 +100,9 @@ output_file_eagle_spec, ecpanel_path
 ;
 
 
+string waitingList[];
+int waitingcount = 0;
+
 
 string layer_fill[];
 
@@ -242,6 +245,11 @@ void loadDRCSettings(){
 	}
 
 	board_copper_thickness=strtod(copper[0])*1000;//to get µm
+}
+
+void addToWaitinglist(string file){
+	file = filesetext(file,".tmp");
+	waitingList[waitingcount++] = file;
 }
 
 string parseUserSetting(string data){
@@ -1036,6 +1044,7 @@ string pngCrop(string folder, string index){
 	
 	string fields[];
 	int count = strsplit(fields, ExportSetup[i], ';');
+	addToWaitinglist(folder + stringTrim(fields[1]));
 	return "RUN '"  + include_path + "Crop.ulp' '" + folder + stringTrim(fields[1]) + ".png' '"+getSystemFilename(".bat")+"';";
 }
 
@@ -1513,6 +1522,12 @@ void export(){
 				tsilcsreenLayer, bsilcsreenLayer,
 				board_format, pdf_keep_frame
 			);
+
+			if (pcbimage_top && enable_export_png && crop_all) 
+				addToWaitinglist(output_file_img_pcbt);
+
+			if (pcbimage_bottom && enable_export_png && crop_all) 
+				addToWaitinglist(output_file_img_pcbb);
 		}		
 	}
 
@@ -1609,7 +1624,11 @@ void export(){
 	
 	cmd += "EDIT \'" + filepath + boardname + ".brd\'" + ";";
 
-	cmd += "RUN '" + include_path + "RunBatch.ulp' '"+getSystemFilename(".bat")+"' '"+preCMD+"';";
+	cmd += "RUN '" + include_path + "RunBatch.ulp' '"+getSystemFilename(".bat")+"' '"+preCMD+"'";
+	for(int i = 0; i<waitingcount; i++){
+		cmd += " '" + waitingList[i] + "'";
+	}
+	cmd += ";";
 
 	if(EAGLE_VERSION>=9){
 		cmd+="SET Option.SignalNamesOnTraces "+cfgget("EAGLE:Option.SignalNamesOnTraces")+";";

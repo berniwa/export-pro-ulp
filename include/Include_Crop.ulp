@@ -18,7 +18,7 @@ if(OS_SIGNATURE == "Windows_7" || OS_SIGNATURE == "Windows_8" || OS_SIGNATURE ==
 	
   	//dlgMessageBox(argv[2]);
   	output(argv[2],"at"){
-   	 	printf("START /B " + CallOfWinProg+"\n");
+   	 	printf("START /B " + CallOfWinProg + " > " + filesetext(argv[1],".tmp") + "\n");
   	}
 }
 else if(OS_SIGNATURE == "Linux")
