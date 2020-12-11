@@ -982,7 +982,7 @@ string updateFrameInformationBrd(string drawing){
 	 	sprintf(cmd, "%sATTRIBUTE %s SUBTITLE \'%s\'; ", cmd, name, board_subtitle);
 
 	 	if(EAGLE_VERSION>=9){
-	 		cmd += "REPOSITION " + name + "; ";
+	 		//cmd += "REPOSITION " + name + "; ";
 	 	}
 	 }
 
@@ -1114,6 +1114,38 @@ void getMinMaxTemp(){
 	}
 }
 
+string resetVew(){
+	string cmd = "";
+
+	//reseting visible layers
+	cmd += "DISPLAY";
+	project.board(B){
+		B.layers(L){
+			cmd += " " + (L.visible)?"":"-" + stringFromInt(L.number);
+		}
+	}
+	cmd += ";";
+
+
+	//reseting palette colors (3 palette X 128 entrys)
+	for(int i=0; i<3; i++){
+		cmd += "SET PALETTE ";
+		if(i == PALETTE_BLACK)		{ cmd += "BLACK"; 	}
+		else if(i == PALETTE_WHITE)	{ cmd += "WHITE"; 	}
+		else						{ cmd += "COLORED"; }
+		cmd += ";";
+
+		for(int l=0; l<128; l++){
+			sprintf(cmd,"%sSET PALETTE %d %s;", cmd, l, cfgget("EAGLE:Palette."+stringFromInt(i)+"."+stringFromInt(l)));
+		}
+	}
+
+	//reseting visibel palette
+	cmd += "SET PALETTE " + palette_name + ";";
+
+	return cmd;
+}
+
 void export(){
 
 	if(EAGLE_VERSION>=9){
@@ -1128,6 +1160,11 @@ void export(){
 	cmd+="SET Option.ViaLength 0;";
 	cmd+="SET Option.DisplayMode 1;";
 	cmd+="SET Option.PolygonRatsnest 1;\n";
+
+	//Save old palette settings
+	if(palette(-1) == PALETTE_BLACK)		{ palette_name = "BLACK"; 	}
+	else if(palette(-1) == PALETTE_WHITE)	{ palette_name = "WHITE"; 	}
+	else									{ palette_name = "COLORED"; }
 
 	output(getSystemFilename(".bat"), "wt"){
 		printf("echo off\n");
@@ -1349,12 +1386,6 @@ void export(){
 	
 	cmd += "WRITE;";
 	
-	//Save old palette settings
-	if(palette(-1) == PALETTE_BLACK)		{ palette_name = "BLACK"; 	}
-	else if(palette(-1) == PALETTE_WHITE)	{ palette_name = "WHITE"; 	}
-	else									{ palette_name = "COLORED"; }
-
-
 	if(measure) {
 		cmd += "RUN '"  + include_path + "Measure.ulp';";
 	}
