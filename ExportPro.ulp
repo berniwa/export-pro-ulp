@@ -982,7 +982,7 @@ string updateFrameInformationBrd(string drawing){
 	 	sprintf(cmd, "%sATTRIBUTE %s SUBTITLE \'%s\'; ", cmd, name, board_subtitle);
 
 	 	if(EAGLE_VERSION>=9){
-	 		//cmd += "REPOSITION " + name + "; ";
+	 		cmd += "REPOSITION " + name + "; ";
 	 	}
 	 }
 
@@ -1117,14 +1117,16 @@ void getMinMaxTemp(){
 string resetVew(){
 	string cmd = "";
 
-	//reseting visible layers
+	//reseting visible layers & reset their colors
 	cmd += "DISPLAY";
+	string cm2 = "";
 	project.board(B){
 		B.layers(L){
 			cmd += " " + (L.visible)?"":"-" + stringFromInt(L.number);
+			cm2 += "SET COLOR_LAYER " + stringFromInt(L.number) + " " + stringFromInt(L.color) + ";";
 		}
 	}
-	cmd += ";";
+	cmd += ";" + cm2;
 
 
 	//reseting palette colors (3 palette X 128 entrys)
@@ -1136,6 +1138,10 @@ string resetVew(){
 		cmd += ";";
 
 		for(int l=0; l<128; l++){
+			if(i==PALETTE_WHITE && l==0){	//palett white 0 cant be changed
+				continue;
+			}
+
 			sprintf(cmd,"%sSET PALETTE %d %s;", cmd, l, cfgget("EAGLE:Palette."+stringFromInt(i)+"."+stringFromInt(l)));
 		}
 	}
@@ -1678,6 +1684,8 @@ void export(){
 		cmd+="USE \'"+filepath+"fabrication.lbr\';";	//to prevent error messages the fabrication.lbr is loaded befor unloading
 		cmd+="USE \'-"+filepath+"fabrication.lbr\';";
 	}
+
+	cmd += resetVew();
 
 	cmd += "RUN '" + include_path + "EndMessage.ulp' '" + lanGetText("dlg.ExportCompleted") +"';\n";
 
