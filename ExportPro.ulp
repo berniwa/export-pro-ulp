@@ -874,11 +874,9 @@ string updateFrameInformationSch(){
 	 	if(strstr(attribute,"DRAWING")!=-1) {
 			cmd += "ATTRIBUTE " + name[j] + " DRAWING DELETE;\n";
 		}
-		/*
 		if(strstr(attribute,"EDIT_DATE")!=-1) {
 			cmd += "ATTRIBUTE " + name[j] + " EDIT_DATE DELETE;";
 		}
-		*/
 		if(strstr(attribute,"FILENAME")!=-1) {
 			cmd += "ATTRIBUTE " + name[j] + " FILENAME DELETE;\n";
 		}
@@ -895,13 +893,13 @@ string updateFrameInformationSch(){
 		}
 
 
-		/*
+		
 	 	int t = time();
 	 	if(UI_LESS){
 	 		t=0;
 	 	}
-	 	sprintf(cmd, "%sATTRIBUTE %s EDIT_DATE \'%s\'; ", cmd, name, t2string(t, "dd.MM.yy"));
-	 	*/
+
+	 	sprintf(cmd, "%sATTRIBUTE %s EDIT_DATE \'%s\'; ", cmd, name[j], t2string(t, "dd.MM.yy"));
 	 	sprintf(cmd, "%sATTRIBUTE %s DRAWING \'Schematic\';\n", cmd, name[j]);
 	 	sprintf(cmd, "%sATTRIBUTE %s FILENAME \'%s\';\n", cmd, name[j], schname);
 	 	sprintf(cmd, "%sATTRIBUTE %s USERNAME \'%s\';\n", cmd, name[j], cfg_userName);
