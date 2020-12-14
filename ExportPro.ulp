@@ -74,7 +74,7 @@ bomPreset=0;
 real board_thickness = 0.0, board_copper_thickness = 0.0,
 bom_quantity, pnp_offset_x = 0.0, pnp_offset_y = 0.0,
 bom_offsetX = 0.15, bom_offsetY = 0.15, bom_width = 179.6,
-temp_min, temp_max
+temp_min, temp_max, minMeasureDiameter = 2.0
 ;
 
 
@@ -535,6 +535,9 @@ void loadUsersettings(){
 			else if (con=="board_subtitle") {
 				board_subtitle = parseUserSetting(data[i]);				
 			}
+			else if (con=="minMeasureDiameter") {
+				minMeasureDiameter = strtod(parseUserSetting(data[i]));				
+			}
 			else {
 				for(int l=0; l<16;l++){
 					string s;
@@ -792,6 +795,7 @@ void saveUsersettings(){
 		printf("board_info = %d\n", board_info);
 		printf("board_title  = %s\n", board_title);
 		printf("board_subtitle  = %s\n", board_subtitle);
+		printf("minMeasureDiameter = %f\n", minMeasureDiameter);
 	}
 }
 
@@ -1393,7 +1397,7 @@ void export(){
 	cmd += "WRITE;";
 	
 	if(measure) {
-		cmd += "RUN '"  + include_path + "Measure.ulp';";
+		sprintf(cmd,"%sRUN '%sMeasure.ulp' '%f';", cmd, include_path, minMeasureDiameter);
 	}
 	cmd += "WRITE;";
 	
@@ -2029,6 +2033,7 @@ void dialogFabricationSettings() {
 		dlgVBoxLayout {
 			dlgGroup(lanGetText("headline.boardInfo")) {
 				dlgCheckBox(lanGetText("settings.measure"),measure);
+				dlgHBoxLayout{dlgLabel(lanGetText("")); dlgStretch(1); dlgRealEdit(minMeasureDiameter, 0.0, 100000.0); dlgLabel("mm");}
 				dlgCheckBox(lanGetText("settings.drilltable"),drilltable); 
 				dlgCheckBox(lanGetText("settings.fabrication"),fabrication);
 				dlgCheckBox(lanGetText("settings.stackup"),stackup);

@@ -93,6 +93,7 @@ headline.setup.steps = Notwendige einstellungen
 settings.general = Allgemeine Einstellungen
 settings.renumber = Bauteile neu nummerieren
 settings.measure = Bemaßung erstellen
+settings.minViaSize = Minimale größe für bemaßte Via
 settings.drilltable = Bohrtabelle hinzufügen
 settings.fabrication = Fabrication hinzufügen
 settings.stackup = Stackup-Info hinzufügen

@@ -19,6 +19,7 @@ real width_origin = 200; //Breite des
 real width_arrow = 40; //Breite des Pfeils
 real length_arrow = 125; //Länge des Pfeils
 real length_line = 20; //Schwanzl vom Pfeil
+real minMeasureDiameter = strtod(argv[1]); //minimal durchmesser von bemaßten via
 
 
 real length_arrow45 = length_arrow / sqrt(2);
@@ -163,6 +164,7 @@ string generateArrow(real x, real y, int degree) {
 	//dlgMessageBox(data);
 	return data;
 }
+
 string generateMeasureY(int y, int paint_line, int mirror) {
 	int add_y = 1; 	
 
@@ -232,8 +234,6 @@ string generateMeasureY(int y, int paint_line, int mirror) {
 	return data;
 }
 
-
-
 string generateMeasureX(int x, int paint_line, int mirror) {
 	int add_x = 1; 	
 
@@ -292,8 +292,7 @@ string generateMeasureX(int x, int paint_line, int mirror) {
 	return data;
 }
 
-string generateDiameter(int x, int y, int radius)
-{
+string generateDiameter(int x, int y, int radius){
 	string data = "";
 	if(radius) {
 		real str_len45 = realLength(u2mm(radius) * 2) / sqrt(2);
@@ -496,7 +495,7 @@ board(B) {
 	}
 	B.signals(S) {
 		S.vias(D) {
-			if(u2mm(D.drill) > 2) {//Use Vias > 2.0mm as mounting holes
+			if(u2mm(D.drill) > minMeasureDiameter) {//Use Vias > 2.0mm as mounting holes
 				drills_x[drill_count] = D.x;
 				drills_y[drill_count] = D.y;
 				drills_radius[drill_count++] = D.drill / 2;

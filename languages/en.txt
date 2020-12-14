@@ -93,6 +93,7 @@ headline.setup.steps = necessary setup steps
 settings.general = General settings
 settings.renumber = Renumber parts
 settings.measure = Create dimensions
+settings.minViaSize = Min measured via size
 settings.drilltable = Add drill-table
 settings.fabrication = Add fabrication data
 settings.stackup = Add stackup-information
