@@ -2033,7 +2033,7 @@ void dialogFabricationSettings() {
 		dlgVBoxLayout {
 			dlgGroup(lanGetText("headline.boardInfo")) {
 				dlgCheckBox(lanGetText("settings.measure"),measure);
-				dlgHBoxLayout{dlgLabel(lanGetText("")); dlgStretch(1); dlgRealEdit(minMeasureDiameter, 0.0, 100000.0); dlgLabel("mm");}
+				dlgHBoxLayout{dlgLabel(lanGetText("settings.minViaSize")); dlgStretch(1); dlgRealEdit(minMeasureDiameter, 0.0, 100000.0); dlgLabel("mm");}
 				dlgCheckBox(lanGetText("settings.drilltable"),drilltable); 
 				dlgCheckBox(lanGetText("settings.fabrication"),fabrication);
 				dlgCheckBox(lanGetText("settings.stackup"),stackup);
