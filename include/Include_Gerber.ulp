@@ -24,21 +24,16 @@ string option = "-c-";
 
 //Get the current directory
 if(board)
-{
 	project.board(B)
-	{
 		working_directory = filedir(B.name);
 	}
 }
 else if(schematic)
-{
 	project.schematic(S)
-	{
 		working_directory = filedir(S.name);
 	}
 }
 else
-{
 	dlgMessageBox(":Please start in schematic or board editor only!");
 }
 
@@ -64,6 +59,8 @@ if(EAGLE_VERSION > 7){
 	eagle_binary = EAGLE_DIR + "/bin/eagle";
 }
 
+string cmd = "";
+
 if(type == 0) {
 	int layer = strtol(argv[4]);
 
@@ -72,9 +69,7 @@ if(type == 0) {
 	status(tmp);
 
 	//Export a single copper layer
-	string cmd = "";
 	sprintf(cmd, "%s -X -dGERBER_RS274X %s -o \"%s\" \"%s\" %d 17 18", eagle_binary, option, outputfile, inputfile, layer);
-	system(cmd);
 }
 else if(type == 1) {
 	int top_bottom = strtol(argv[4]);
@@ -85,9 +80,7 @@ else if(type == 1) {
 	sprintf(tmp, "Processing stop mask layer %d", top_bottom);
 	status(tmp);
 
-	string cmd = "";
-	sprintf(cmd, "%s -X -dGERBER_RS274X %s -o \"%s\" \"%s\" %d ", eagle_binary, option, outputfile, inputfile, layer);
-	system(cmd);	
+	sprintf(cmd, "%s -X -dGERBER_RS274X %s -o \"%s\" \"%s\" %d ", eagle_binary, option, outputfile, inputfile, layer);	
 }
 else if(type == 2) {
 	int top_bottom = strtol(argv[4]);
@@ -98,9 +91,7 @@ else if(type == 2) {
 	sprintf(tmp, "Processing cream layer %d", top_bottom);
 	status(tmp);
 
-	string cmd = "";
-	sprintf(cmd, "%s -X -dGERBER_RS274X %s -o \"%s\" \"%s\" %d ", eagle_binary, option, outputfile, inputfile, layer);
-	system(cmd);		
+	sprintf(cmd, "%s -X -dGERBER_RS274X %s -o \"%s\" \"%s\" %d ", eagle_binary, option, outputfile, inputfile, layer);		
 }
 else if(type == 3) {
 	int top_bottom	= strtol(argv[4]);
@@ -113,11 +104,9 @@ else if(type == 3) {
 	sprintf(tmp, "Processing silkscreen layer %d", top_bottom);
 	status(tmp);
 
-	string cmd = "";
 	sprintf(cmd, "%s -X -dGERBER_RS274X %s -o \"%s\" \"%s\" 20", eagle_binary, option, outputfile, inputfile);
 
 	if(top_bottom)
-	{
 		//If top layer is selected
 		if(use_place){	cmd += " 21";}
 		if(use_names){	cmd += " 25";}
@@ -125,46 +114,41 @@ else if(type == 3) {
 		if(use_docu){	cmd += " 51";}
 	}
 	else
-	{
 		//If top layer is selected
 		if(use_place){	cmd += " 22";}
 		if(use_names){	cmd += " 26";}
 		if(use_values){	cmd += " 28";}
 		if(use_docu){	cmd += " 52";}		
 	}	
-
-	system(cmd);		
+		
 }
 else if(type == 4) {
 	string tmp = "";
 	sprintf(tmp, "Processing drills");
 	status(tmp);	
 
-	string cmd = "";
 	sprintf(cmd, "%s -X -dEXCELLON %s -o \"%s\" \"%s\" 44 45", eagle_binary, option, outputfile, inputfile);	
-	system(cmd);
 }
 else if(type == 5) {
 	status("Processing outline layer");
 	int layer = 20;
 
-	string cmd = "";
-	sprintf(cmd, "%s -X -dGERBER_RS274X %s -o \"%s\" \"%s\" %d ", eagle_binary, option, outputfile, inputfile, layer);
-	system(cmd);		
+	sprintf(cmd, "%s -X -dGERBER_RS274X %s -o \"%s\" \"%s\" %d ", eagle_binary, option, outputfile, inputfile, layer);		
 }
 else if(type == 6) {
 	status("Processing reference layer");
 	int layer = 49;
 
-	string cmd = "";
-	sprintf(cmd, "%s -X -dGERBER_RS274X %s -o \"%s\" \"%s\" %d ", eagle_binary, option, outputfile, inputfile, layer);
-	system(cmd);		
+	sprintf(cmd, "%s -X -dGERBER_RS274X %s -o \"%s\" \"%s\" %d ", eagle_binary, option, outputfile, inputfile, layer);		
 }
 else if(type == 7) {
 	status("Processing fabrication layer");
 	string layers = "20 48 " + stringFromInt(lay_fabDoc[0]) + " " + stringFromInt(lay_fabDoc[1]);
 
-	string cmd = "";
-	sprintf(cmd, "%s -X -dGERBER_RS274X %s -o \"%s\" \"%s\" %s ", eagle_binary, option, outputfile, inputfile, layers);
-	system(cmd);		
+	sprintf(cmd, "%s -X -dGERBER_RS274X %s -o \"%s\" \"%s\" %s ", eagle_binary, option, outputfile, inputfile, layers);		
+}
+
+
+if((0 <= type) && (type < 8)){
+	system(cmd);
 }
