@@ -14,19 +14,28 @@ tmp[0]=batPath[0];
 
 output(batPath, "at"){
 	if(argv[3]){
+		//waiting for all async operations to finish
 		printf("ECHO Finishing export...\n");
 		printf(":loop\n");
 		for (int i = 3; argv[i]; i++) {
 			printf("2>NUL ( >>\"%s\" ECHO OFF) || (GOTO :loop)\n",argv[i]);
 		}
 
-		string str[], path;
-		int e = strsplit(str, argv[3], '/');
-		str[e-1]="";
-		path = strjoin(str, '\\');
-
 		for (int l = 3; argv[l]; l++) {
-			printf("DEL \"%s\\%s\"\n", path, filename(argv[l]));
+			//changing '/' into '\' for windows
+			string str[], path = argv[l];
+			int e = strsplit(str, path, '/');
+			path = strjoin(str, '\\');
+
+			//deleeting .tmp files
+			printf("DEL \"%s\\%s\"\n", filedir(path), filename(path));
+
+			//handeling gerber
+			if(strstr(path,"gerber")!=-1){
+				printf("COPY /Y \"%s\\*\" \"%s\"", (filedir(path) + fileext(filesetext(path,""))), filedir(path));
+				printf(" && RD /S /Q \"%s\"\n", (filedir(path) + fileext(filesetext(path,""))));
+				//printf(" || pause\n");
+			}
 		}
 	}
 
