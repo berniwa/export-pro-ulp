@@ -1,30 +1,26 @@
 #include "include/Include_Misc.ulp";
 #include "include/Include_Language.ulp";
-#include "include/Include_Config.ulp";
-#include "include/Include_Boardsize.ulp";
 #include "include/Include_BomCommon.ulp";
 #include "include/Include_BomCategory.ulp";
 #include "include/Include_BomConfig.ulp";
 #include "include/Include_BomPricing.ulp";
-#include "include/Include_Si.ulp";
+#include "include/Include_Config.ulp";
+#include "include/Include_CheckExport.ulp";
+
 
 void debugMsg(string msg){
 	//to prevent debug messages to apear in releace
 	dlgMessageBox(msg);
 }
 
-void debugVal(string msg, int val){
+int debugVal(string msg, int val){
 	sprintf(msg,"%s%d",msg,val);
 	debugMsg(msg);
+	return val;
 }
 
 char prefix[] = {'R', 'k', 'M', 'G', 'T'};
 string stdDistributor = "xdevelop";
-
-void executeButton(string cmd){
-	cmd += "RUN "+argv[0]+";";
-	exit(cmd);
-}
 
 string getTolerance(int select){
 	string tol="";
@@ -150,79 +146,9 @@ string addBomValues(){
 	return bomUpdateChanges();
 }
 
-void checkPDFTK(){
-	if(system("CMD.EXE /C " + filedir(argv[0]) + "bin/CheckPDFTK.bat")==-1){
-		//todo put text in language file
-		int opt = dlgMessageBox(":To merge the pdf-files we use pdftk_server.<br>"+
-						"You can get this tool <a href=\"https://www.pdflabs.com/tools/pdftk-server/\">here</a>.",
-						lanGetText("button.continue"),lanGetText("button.cancel"));
-		if (opt){
-			exit("");
-		}
-	}
-}
-
-void checkPrintSettings(){
-	if (cfgget("EAGLE:Printer.Border.Top")!="50000" ||
-		cfgget("EAGLE:Printer.Border.Bottom")!="50000" ||
-		cfgget("EAGLE:Printer.Border.Right")!="50000" ||
-		cfgget("EAGLE:Printer.Border.Left")!="200000"||
-		cfgget("EAGLE:Printer.Caption")!="0"){
-
-		int opt = dlgMessageBox(lanGetText("dlg.setup.editPrintSettings"), lanGetText("general.yes"), lanGetText("general.no"));
-
-		if(opt == 0){
-			cfgset("EAGLE:Printer.Border.Top","50000");
-			cfgset("EAGLE:Printer.Border.Bottom","50000");
-			cfgset("EAGLE:Printer.Border.Right","50000");
-			cfgset("EAGLE:Printer.Border.Left","200000");
-			cfgset("EAGLE:Printer.Caption","0");
-		}
-	}
-}
-
-char detectDrillsymbols(){
-	char cDrillSymbols = 1;
-	project.board(B){
-		B.holes(H) {
-			if(!H.drillsymbol){
-				cDrillSymbols=0;
-			}
-		}
-		B.signals(S){
-			S.vias(V){
-				if(!V.drillsymbol){
-					cDrillSymbols=0;
-				}
-			}
-		}
-		B.elements(E) {
-			E.package.contacts(C) {
-				if(C.pad && (!C.pad.drillsymbol)){
-					cDrillSymbols=0;
-				}
-			}
-			E.package.holes(H) {
-				if(!H.drillsymbol){
-					cDrillSymbols=0;
-				}
-			}
-		}
-	}
-
-	if(!cDrillSymbols){
-		dlgDialog("Dirll"){
-			dlgLabel(lanGetText("dlg.DrillError"));
-			dlgLabel("<img src=\"" + filedir(argv[0]) + "/bin/ExpDrillSymb.png\">");
-			dlgHBoxLayout{
-				dlgStretch(1);
-				dlgPushButton(lanGetText("button.ok")) {exit("EDIT .brd;");};
-				dlgPushButton(lanGetText("button.continue")) {dlgReject();};
-			}
-		};
-	}
-
-	return cDrillSymbols;
+void executeButton(string cmd){
+	cmd += "RUN "+argv[0]+" 1;";
+	exit(cmd);
 }
 
 string placeFrameBrd(){
@@ -250,15 +176,7 @@ string placeFrameBrd(){
 string addFrameBrd(char menu){
 	string cmd="";
 	project.board(B){
-		//checking if frame is placed
-		char isFrameAdded = 0;
-		B.elements(E){
-			if(strstr(strupr(E.package.name),"FRAME")!=-1){
-			    isFrameAdded = 1;
-			}
-		}
-
-		if (!isFrameAdded){
+		if (checkFrameBrd()){
 			int opt = dlgMessageBox(lanGetText("dlg.setup.noFrame"),lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("button.continue"));
 			if(opt == 0) {
 				cmd += placeFrameBrd();
@@ -273,16 +191,6 @@ string addFrameBrd(char menu){
 		}
 	}
 	return cmd;
-}
-
-char checkFrameSh(UL_SHEET S){
-	S.parts(P){
-		if((strstr(P.device.name,"XDEVELOP-")!=-1)||(strstr(P.device.library,"frame")!=-1)){
-			return 1;
-		}
-	}
-
-	return 0;
 }
 
 string placeFrameSh(UL_SHEET S){
@@ -636,7 +544,7 @@ string addFrameSch(char menu){
 		//Checking for a frame in .sch
 		int opt=10; //10 ... no need to place frame jet 
 		Sc.sheets(S){
-			if(!checkFrameSh(S)&&(opt%10)==0){
+			if(checkFrameSh(S)&&(opt%10)==0){
 				if(opt==10){
 					opt=dlgMessageBox(lanGetText("dlg.setup.noFrameSch"),lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("button.continue"));
 					if (opt == 0){
@@ -660,32 +568,51 @@ string addFrameSch(char menu){
 	return cmd;
 }
 
-string checkLayerBrd(){
+void setPrintSettings(){
+	cfgset("EAGLE:Printer.Border.Top","50000");
+	cfgset("EAGLE:Printer.Border.Bottom","50000");
+	cfgset("EAGLE:Printer.Border.Right","50000");
+	cfgset("EAGLE:Printer.Border.Left","200000");
+	cfgset("EAGLE:Printer.Caption","0");
+}
+
+string setLayer(){
 	string cmd="";
-	project.board(B){
-		B.layers(L){
-			for(int i=0;lay_fabDoc[i];i++){
-				if (L.number==lay_fabDoc[i] && !L.visible){
-					sprintf(cmd, "%sLAYER %d FabDoc%d;", cmd, L.number, (L.number - 152));
-				}
-			}
-		}
-	}
+	cmd += "LAYER 153 FabDoc1;";
+	cmd += "LAYER 154 FabDoc2;";
+	cmd += "LAYER 155 FabDoc3;";
 	return cmd;
 }
 
-string checkLayerSch(){
-	string cmd="";
-	project.schematic(SCH){
-		SCH.layers(L){
-			for(int i=0;lay_fabDoc[i];i++){
-				if (L.number==lay_fabDoc[i] && !L.visible){
-					sprintf(cmd, "%sLAYER %d FabDoc%d;", cmd, L.number, (L.number - 152));
-				}
-			}
-		}
+void dialogPDFtk(){
+		//todo put text in language file
+	int opt = dlgMessageBox(":To merge the pdf-files we use pdftk_server.<br>"+
+					"You can get this tool <a href=\"https://www.pdflabs.com/tools/pdftk-server/\">here</a>.",
+					lanGetText("button.continue"),lanGetText("button.cancel"));
+	if (opt){
+		exit("");
 	}
-	return cmd;
+}
+
+string dialogBOM(){
+	int opt = dlgMessageBox(lanGetText("dlg.setup.noBom"), lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("general.no"));
+
+	if(opt==0){
+		return addBomValues();
+	}
+	else if (opt==1){
+		exit("RUN '"+filedir(argv[0])+"/SelectPart.ulp';");
+	}
+
+	return "";
+}
+
+void dialogDRU(){
+	int opt = dlgMessageBox(lanGetText("dlg.setup.stdDRU"), lanGetText("general.yes"), lanGetText("button.continue"));
+
+	if (opt==0){
+		exit("DRC *;");
+	}
 }
 
 void run(int runOrder){
@@ -700,18 +627,30 @@ void run(int runOrder){
 		druname=filesetext(B.name,"-exportpro.dru");
 	}
 
-	if (runOrder==0){ //execution #1
+	if (runOrder == 0){ 		//execution #0
+		if(schematic){
+			cmd += "EDIT .brd; ";
+		}
+
+		cmd += "DRC SAVE \'" + druname + "\'; ";
+	}
+	else if (runOrder == 1){ 	//execution #1
 		//not file type specific settings 
 		dlgDialog(filename(argv[0])){
 			dlgLabel(lanGetText("dlg.setup.expl"));
 			
 			dlgGroup(lanGetText("headline.setup.steps")){
 				dlgHBoxLayout{dlgLabel(lanGetText("settings.setup.layer")); dlgStretch(1); dlgPushButton(lanGetText("button.add")) {
-					executeButton("EDIT .brd;" + checkLayerBrd() +
-						"EDIT .sch;" + checkLayerSch());};}
+					executeButton("EDIT .brd;" + setLayer() +
+						"EDIT .sch;" + setLayer());};}
 				dlgHBoxLayout{dlgLabel(lanGetText("settings.setup.FrameBrd")); dlgStretch(1); dlgPushButton(lanGetText("button.add")) {executeButton("EDIT .brd;"+addFrameBrd(1));};}
 				dlgHBoxLayout{dlgLabel(lanGetText("settings.setup.FrameSch")); dlgStretch(1); dlgPushButton(lanGetText("button.add")) {executeButton("EDIT .sch;"+addFrameSch(1));};}
 				dlgHBoxLayout{dlgLabel(lanGetText("settings.setup.drill")); dlgStretch(1); dlgPushButton(lanGetText("button.add")){if(detectDrillsymbols()) dlgMessageBox(lanGetText("dlg.setup.drillSymbolsCreated"));};}
+				dlgHBoxLayout{dlgLabel(("Print")); dlgStretch(1); dlgPushButton(lanGetText("button.add")){if(checkPrintSettings()) setPrintSettings(); executeButton(""); };}
+				dlgHBoxLayout{dlgLabel(("pdf")); dlgStretch(1); dlgPushButton(lanGetText("button.add")){if(checkPDFTK()) dialogPDFtk();};}
+				dlgHBoxLayout{dlgLabel(("bom")); dlgStretch(1); dlgPushButton(lanGetText("button.add")){if(checkBOM()) executeButton(dialogBOM());};}
+				dlgHBoxLayout{dlgLabel(("DRC")); dlgStretch(1); dlgPushButton(lanGetText("button.add")){if(checkBOM()) executeButton(dialogBOM());};}
+
 			}
 			dlgHBoxLayout{
 				dlgStretch(1); 
@@ -719,84 +658,58 @@ void run(int runOrder){
 				dlgPushButton(lanGetText("button.cancel")){dlgReject(); exit("");};
 			}
 		};
-
-		//checking if pdftk is installed
-		checkPDFTK();
+		if(checkPDFTK())
+			dialogPDFtk();
 
 		//Check if printer options are correct
-		checkPrintSettings();
+		if(checkPrintSettings()){
+			int opt = dlgMessageBox(lanGetText("dlg.setup.editPrintSettings"), lanGetText("general.yes"), lanGetText("general.no"));
+			if(opt == 0){
+				setPrintSettings();
+			}
+		}
 
 		if(schematic){
 			cmd += "EDIT .brd; ";
 		}
-
-		cmd += "DRC SAVE \'" + druname + "\'; ";
 	}
-	else if (runOrder == 1){ //execution #2
+	else if (runOrder == 2){ 	//execution #2
 		//Settings that only can be edited in the .brd file
 		detectDrillsymbols();
 
-		cmd += checkLayerBrd();
+		if(checkLayerBrd()){
+			cmd += setLayer();
+		}
 
 		cmd += addFrameBrd(0);
 
+		/*
 		project.board(B){			
 			//todo: check ob die fabdoc layer schon benuzt werden
 		}
+		*/
 
 		//checking if the default dru file is loaded
-		if(filesize(druname)) {
-			string data;
-			fileread(data, druname);
-
-			if ((strstr(data, "Eurocircuits-EAGLE design rules")!=-1)||
-				(strstr(data, "Standard-Design-Regeln")!=-1)){
-				int opt = dlgMessageBox(lanGetText("dlg.setup.stdDRU"), lanGetText("general.yes"), lanGetText("button.continue"));
-
-				if (opt==0){
-					cmd += "DRC *;";
-					exit(cmd);
-				}
-			}
+		if(checkDRU(druname)) {
+			dialogDRU();
 		}
 
 		cmd+="EDIT .sch;";
 	}
-	else if (runOrder==2){ //execution #3
+	else if (runOrder == 3){ 	//execution #3
 		//Settings that only can be edited in the .sch file
-
-		//check if there are specific bom entrys
-		bomLoadData();
-		string hasBom="";
-		for(int l=0; l<partcount; l++){
-			if(distributor[l])
-				hasBom+=distributor[l]+"\n";
-			
-			if(manufacturer[l])
-				hasBom+=manufacturer[l]+"\n";
-			
-			if(populate[l])
-				hasBom+=populate[l]+"\n";
-		}
-
 		//generating bom entrys
-		if(hasBom==""){
-			int opt = dlgMessageBox(lanGetText("dlg.setup.noBom"), lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("general.no"));
-
-			if(opt==0){
-				cmd+=addBomValues();
-			}
-			else if (opt==1){
-				cmd+="RUN '"+filedir(argv[0])+"/SelectPart.ulp';";
-				exit(cmd);
-			}
+		if(checkBOM()){
+			cmd += dialogBOM();
 		} 
 
-		cmd += checkLayerSch();
+		if(checkLayerSch()){
+			cmd += setLayer();
+		}
 
 		cmd += addFrameSch(0);
 	}
-	else if(runOrder==3){ //execution #4
+	else if (runOrder == 4){ 	//execution #4
 		int opt = dlgMessageBox(lanGetText("dlg.setup.finished"), lanGetText("general.yes"), lanGetText("general.no"));
 		if (opt==0){
 			cmd+="RUN '"+filedir(argv[0])+"/ExportPro.ulp';";
@@ -804,7 +717,7 @@ void run(int runOrder){
 	}
 
 
-	if(runOrder<3){
+	if(runOrder<4){
 		sprintf(cmd, "%sRUN \'%s\' %d", cmd, argv[0], ++runOrder);
  	}
 
