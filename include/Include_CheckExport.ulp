@@ -44,45 +44,33 @@ char checkPrintSettings(){
 	return 0;
 }
 
-char detectDrillsymbols(){
-	char cDrillSymbols = 1;
+char checkDrillsymbols(){
+	char cDrillSymbols = 0;
 	project.board(B){
 		B.holes(H) {
 			if(!H.drillsymbol){
-				cDrillSymbols=0;
+				cDrillSymbols=1;
 			}
 		}
 		B.signals(S){
 			S.vias(V){
 				if(!V.drillsymbol){
-					cDrillSymbols=0;
+					cDrillSymbols=1;
 				}
 			}
 		}
 		B.elements(E) {
 			E.package.contacts(C) {
 				if(C.pad && (!C.pad.drillsymbol)){
-					cDrillSymbols=0;
+					cDrillSymbols=1;
 				}
 			}
 			E.package.holes(H) {
 				if(!H.drillsymbol){
-					cDrillSymbols=0;
+					cDrillSymbols=1;
 				}
 			}
 		}
-	}
-
-	if(!cDrillSymbols){
-		dlgDialog("Dirll"){
-			dlgLabel(lanGetText("dlg.DrillError"));
-			dlgLabel("<img src=\"" + filedir(argv[0]) + "/bin/ExpDrillSymb.png\">");
-			dlgHBoxLayout{
-				dlgStretch(1);
-				dlgPushButton(lanGetText("button.ok")) {exit("EDIT .brd;");};
-				dlgPushButton(lanGetText("button.continue")) {dlgReject();};
-			}
-		};
 	}
 
 	return cDrillSymbols;
