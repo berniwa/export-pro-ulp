@@ -18,6 +18,7 @@
 #include "include/Include_Dru.ulp";
 #include "include/Include_Language.ulp";
 #include "include/Include_Config.ulp";
+#include "include/Include_CheckExport.ulp";
 
 void debugMsg(string msg){
 	//to prevent debug messages to apear in releace
@@ -864,7 +865,7 @@ string updateFrameInformationSch(){
 		sprintf(cmd,"%sEDIT .s%d;\n",cmd,she[j]);
 
 		//cmd += "CHANGE DISPLAY OFF;\n";
-		
+
 	 	/*
 		if(strstr(attribute,"TITLE")==-1) {
 			cmd += "ATTRIBUTE " + name[j] + " TITLE DELETE;\n";
@@ -1177,7 +1178,8 @@ void export(){
 	else									{ palette_name = "COLORED"; }
 
 	output(getSystemFilename(".bat"), "wt"){
-		printf("echo off\n");
+		printf("ECHO OFF\n");
+		printf("ECHO Finishing export...\n");
 	}
 
 	string tsilcsreenLayer =" ";
@@ -2222,6 +2224,14 @@ void mainManu(){
 		}
 		dlgHBoxLayout {
 			dlgStretch(1); 
+			dlgLabel("Correct setup:");
+			int i=!checkAll(getSystemFilename(drc_file));
+			dlgCheckBox("",i){
+				i=!i;
+				if(!i){
+					exit("RUN '" + getUlpDir("../EasySetup.ulp") + "';");
+				}
+			};
 			dlgPushButton(lanGetText("button.ok")) {
 				saveUsersettings();
 

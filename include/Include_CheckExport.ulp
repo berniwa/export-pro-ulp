@@ -156,6 +156,18 @@ char checkDRU(string druname){
 	return 0;
 }
 
-char checkAll(){
-	return 0;
+char checkAll(string druname){
+	char checkFlag = 0;
+
+	checkFlag += checkBOM();
+	checkFlag += checkPDFTK();
+	checkFlag += checkPrintSettings();
+	checkFlag += checkDrillsymbols();
+	checkFlag += checkLayerBrd();
+	checkFlag += checkLayerSch();
+	checkFlag += checkFrameSch();
+	checkFlag += checkFrameBrd();
+	checkFlag += checkDRU(druname);
+
+	return checkFlag;
 }
