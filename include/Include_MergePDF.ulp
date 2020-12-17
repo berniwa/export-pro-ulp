@@ -113,7 +113,7 @@ void main(){
 				printf("ren \"%s\" \"%s\"\n",tmpFile,filename(outputFile));
 			}
 
-			printf("copy \"%s\" \"%s\"\n",outputFile,filename(outputFile));
+			printf("2>NUL copy \"%s\" \"%s\"\n",outputFile,filename(outputFile));
 			printf("rd /S /Q pdf\n");
 		}
 		else {

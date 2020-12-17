@@ -15,7 +15,6 @@ tmp[0]=batPath[0];
 output(batPath, "at"){
 	if(argv[3]){
 		//waiting for all async operations to finish
-		printf("ECHO Finishing export...\n");
 		printf(":loop\n");
 		for (int i = 3; argv[i]; i++) {
 			printf("2>NUL ( >>\"%s\" ECHO OFF) || (GOTO :loop)\n",argv[i]);
