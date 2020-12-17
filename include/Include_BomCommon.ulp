@@ -72,7 +72,7 @@ void bomLoadSchematic(UL_PART P, int s, string prefix){
 void bomLoadData()
 {
 	partcount = 0;
-	schematic(SCH)
+	project.schematic(SCH)
 	{
 		SCH.sheets(S) {	
 			S.parts(P) {
@@ -89,7 +89,7 @@ void bomLoadData()
 
 UL_PART bomGetPartByName(string name)
 {
-	schematic(SCH)
+	project.schematic(SCH)
 	{
 		SCH.sheets(S)
 		{	
@@ -157,7 +157,7 @@ int bomMatchModuleName(string partname, string name, string prefix){
 	}
 
 	if(prefix != ""){
-		schematic(SCH){
+		project.schematic(SCH){
 			SCH.sheets(S){	
 				S.moduleinsts(M){
 					if(M.module.name == prefix){
@@ -229,7 +229,7 @@ string bomUpdateChanges()
 
 	partNr=0;
 
-	schematic(SCH){
+	project.schematic(SCH){
 		SCH.sheets(S){	
 			S.parts(P){
 				sprintf(mysheet, ".s%d", S.number);
