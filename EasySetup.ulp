@@ -640,17 +640,68 @@ void run(int runOrder){
 			dlgLabel(lanGetText("dlg.setup.expl"));
 			
 			dlgGroup(lanGetText("headline.setup.steps")){
-				dlgHBoxLayout{dlgLabel(lanGetText("settings.setup.layer")); dlgStretch(1); dlgPushButton(lanGetText("button.add")) {
-					executeButton("EDIT .brd;" + setLayer() +
-						"EDIT .sch;" + setLayer());};}
-				dlgHBoxLayout{dlgLabel(lanGetText("settings.setup.FrameBrd")); dlgStretch(1); dlgPushButton(lanGetText("button.add")) {executeButton("EDIT .brd;"+addFrameBrd(1));};}
-				dlgHBoxLayout{dlgLabel(lanGetText("settings.setup.FrameSch")); dlgStretch(1); dlgPushButton(lanGetText("button.add")) {executeButton("EDIT .sch;"+addFrameSch(1));};}
-				dlgHBoxLayout{dlgLabel(lanGetText("settings.setup.drill")); dlgStretch(1); dlgPushButton(lanGetText("button.add")){if(detectDrillsymbols()) dlgMessageBox(lanGetText("dlg.setup.drillSymbolsCreated"));};}
-				dlgHBoxLayout{dlgLabel(("Print")); dlgStretch(1); dlgPushButton(lanGetText("button.add")){if(checkPrintSettings()) setPrintSettings(); executeButton(""); };}
-				dlgHBoxLayout{dlgLabel(("pdf")); dlgStretch(1); dlgPushButton(lanGetText("button.add")){if(checkPDFTK()) dialogPDFtk();};}
-				dlgHBoxLayout{dlgLabel(("bom")); dlgStretch(1); dlgPushButton(lanGetText("button.add")){if(checkBOM()) executeButton(dialogBOM());};}
-				dlgHBoxLayout{dlgLabel(("DRC")); dlgStretch(1); dlgPushButton(lanGetText("button.add")){if(checkBOM()) executeButton(dialogBOM());};}
-
+				dlgHBoxLayout{
+					dlgLabel(lanGetText("settings.setup.layer")); 
+					dlgStretch(1); 
+					dlgPushButton(lanGetText("button.add")) {
+						executeButton("EDIT .brd;" + setLayer() + "EDIT .sch;" + setLayer());
+					};
+				}
+				dlgHBoxLayout{
+					dlgLabel(lanGetText("settings.setup.FrameBrd")); 
+					dlgStretch(1); 
+					dlgPushButton(lanGetText("button.add")) {
+						executeButton("EDIT .brd;"+addFrameBrd(1));
+					};
+				}
+				dlgHBoxLayout{
+					dlgLabel(lanGetText("settings.setup.FrameSch")); 
+					dlgStretch(1); 
+					dlgPushButton(lanGetText("button.add")) {
+						executeButton("EDIT .sch;"+addFrameSch(1));
+					};
+				}
+				dlgHBoxLayout{
+					dlgLabel(lanGetText("settings.setup.drill")); 
+					dlgStretch(1); 
+					dlgPushButton(lanGetText("button.add")){
+						if(detectDrillsymbols()) 
+							dlgMessageBox(lanGetText("dlg.setup.drillSymbolsCreated"));
+					};
+				}
+				dlgHBoxLayout{
+					dlgLabel(lanGetText("settings.setup.print")); 
+					dlgStretch(1); 
+					dlgPushButton(lanGetText("button.add")){
+						if(checkPrintSettings()) 
+							setPrintSettings(); 
+						executeButton(""); 
+					};
+				}
+				dlgHBoxLayout{
+					dlgLabel(lanGetText("settings.setup.PDFtk")); 
+					dlgStretch(1); 
+					dlgPushButton(lanGetText("button.add")){
+						if(checkPDFTK()) 
+							dialogPDFtk();
+					};
+				}
+				dlgHBoxLayout{
+					dlgLabel(lanGetText("settings.setup.bom")); 
+					dlgStretch(1); 
+					dlgPushButton(lanGetText("button.add")){
+						if(checkBOM()) 
+							executeButton(dialogBOM());
+					};
+				}
+				dlgHBoxLayout{
+					dlgLabel(lanGetText("settings.setup.dru")); 
+					dlgStretch(1); 
+					dlgPushButton(lanGetText("button.add")){
+						if(checkBOM()) 
+							executeButton(dialogDRU());
+					};
+				}
 			}
 			dlgHBoxLayout{
 				dlgStretch(1); 

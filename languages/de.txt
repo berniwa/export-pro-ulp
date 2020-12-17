@@ -169,6 +169,10 @@ settings.setup.layer = Layer einstellungen
 settings.setup.FrameBrd = Rahmen im Layout
 settings.setup.FrameSch = Rahmen im Schltplan
 settings.setup.drill = Bohrsümbole
+settings.setup.print = Druckereinstellungen
+settings.setup.PDFtk = Werkzeug um PDFs zusammen zu fügen
+settings.setup.bom = Deteilierte Stücklisteneinträge
+settings.setup.dru = Designeregeln
 
 comb.res = 600dpi - normale Auflösung;1200dpi - hohe Auflösung;2400dpi - extrem hohe Auflösung
 comb.pcbColor = Grüne PCB;Rote PCB;Schwarze PCB;Weiße PCB;Polyimid
