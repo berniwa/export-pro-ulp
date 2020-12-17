@@ -648,7 +648,7 @@ void run(int runOrder){
 	}
 	else if (runOrder == 1){ 	//execution #1
 		//not file type specific settings 
-		dlgDialog(filename(argv[0])){
+		int d = dlgDialog(filename(argv[0])){
 			dlgLabel(lanGetText("dlg.setup.expl"));
 			
 			dlgGroup(lanGetText("headline.setup.steps")){
@@ -752,9 +752,13 @@ void run(int runOrder){
 			dlgHBoxLayout{
 				dlgStretch(1); 
 				dlgPushButton(lanGetText("button.setup.run")) { dlgAccept();};
-				dlgPushButton(lanGetText("button.cancel")){dlgReject(); exit("");};
+				dlgPushButton(lanGetText("button.cancel")){dlgReject(-1); /*exit("");*/};
 			}
 		};
+
+		if(d<0){
+			exit("");
+		}
 		if(checkPDFTK())
 			dialogPDFtk();
 
