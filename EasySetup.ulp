@@ -607,6 +607,18 @@ string dialogBOM(){
 	return "";
 }
 
+void dialogDrill(){
+	dlgDialog("Dirll"){
+		dlgLabel(lanGetText("dlg.DrillError"));
+		dlgLabel("<img src=\"" + filedir(argv[0]) + "/bin/ExpDrillSymb.png\">");
+		dlgHBoxLayout{
+			dlgStretch(1);
+			dlgPushButton(lanGetText("button.ok")) {exit("EDIT .brd;");};
+			dlgPushButton(lanGetText("button.continue")) {dlgReject();};
+		}
+	};
+}
+
 void dialogDRU(){
 	int opt = dlgMessageBox(lanGetText("dlg.setup.stdDRU"), lanGetText("general.yes"), lanGetText("button.continue"));
 
@@ -640,66 +652,100 @@ void run(int runOrder){
 			dlgLabel(lanGetText("dlg.setup.expl"));
 			
 			dlgGroup(lanGetText("headline.setup.steps")){
-				dlgHBoxLayout{
+				dlgHBoxLayout{ //layer setup
 					dlgLabel(lanGetText("settings.setup.layer")); 
 					dlgStretch(1); 
+
+					int c = !(checkLayerBrd() || checkLayerSch());
+					dlgCheckBox("", c) {c = !c;};
+
 					dlgPushButton(lanGetText("button.add")) {
 						executeButton("EDIT .brd;" + setLayer() + "EDIT .sch;" + setLayer());
 					};
 				}
-				dlgHBoxLayout{
+				dlgHBoxLayout{ //frame brd
 					dlgLabel(lanGetText("settings.setup.FrameBrd")); 
 					dlgStretch(1); 
+
+					int c = !(checkFrameBrd());
+					dlgCheckBox("", c) {c = !c;};
+
 					dlgPushButton(lanGetText("button.add")) {
 						executeButton("EDIT .brd;"+addFrameBrd(1));
 					};
 				}
-				dlgHBoxLayout{
+				dlgHBoxLayout{ //frame sch
 					dlgLabel(lanGetText("settings.setup.FrameSch")); 
 					dlgStretch(1); 
+
+					int c = !(checkFrameSch());
+					dlgCheckBox("", c) {c = !c;};
+					 
 					dlgPushButton(lanGetText("button.add")) {
 						executeButton("EDIT .sch;"+addFrameSch(1));
 					};
 				}
-				dlgHBoxLayout{
+				dlgHBoxLayout{ //drill symbols
 					dlgLabel(lanGetText("settings.setup.drill")); 
-					dlgStretch(1); 
+					dlgStretch(1);  
+
+					int c = !(checkDrillsymbols());
+					dlgCheckBox("", c) {c = !c;};
+					
 					dlgPushButton(lanGetText("button.add")){
-						if(detectDrillsymbols()) 
+						if(checkDrillsymbols()) 
+							dialogDrill();
+						else
 							dlgMessageBox(lanGetText("dlg.setup.drillSymbolsCreated"));
 					};
 				}
-				dlgHBoxLayout{
+				dlgHBoxLayout{ //Print settings
 					dlgLabel(lanGetText("settings.setup.print")); 
-					dlgStretch(1); 
+					dlgStretch(1);  
+
+					int c = !(checkPrintSettings());
+					dlgCheckBox("", c) {c = !c;};
+					
 					dlgPushButton(lanGetText("button.add")){
 						if(checkPrintSettings()) 
 							setPrintSettings(); 
 						executeButton(""); 
 					};
 				}
-				dlgHBoxLayout{
+				dlgHBoxLayout{ //PDFtk
 					dlgLabel(lanGetText("settings.setup.PDFtk")); 
-					dlgStretch(1); 
+					dlgStretch(1);  
+
+					int c = !(checkPDFTK());
+					dlgCheckBox("", c) {c = !c;};
+					
 					dlgPushButton(lanGetText("button.add")){
 						if(checkPDFTK()) 
 							dialogPDFtk();
 					};
 				}
-				dlgHBoxLayout{
+				dlgHBoxLayout{ //BOM
 					dlgLabel(lanGetText("settings.setup.bom")); 
-					dlgStretch(1); 
+					dlgStretch(1);  
+
+					int c = !(checkBOM());
+					dlgCheckBox("", c) {c = !c;};
+					
 					dlgPushButton(lanGetText("button.add")){
 						if(checkBOM()) 
 							executeButton(dialogBOM());
 					};
 				}
-				dlgHBoxLayout{
+				dlgHBoxLayout{ //DRU
 					dlgLabel(lanGetText("settings.setup.dru")); 
-					dlgStretch(1); 
+					dlgStretch(1);  
+
+					int c = !(checkDRU(druname));
+					dlgCheckBox("", c) {c = !c;};
+					
 					dlgPushButton(lanGetText("button.add")){
-						if(checkBOM()) 
-							executeButton(dialogDRU());
+						if(checkDRU(druname)) 
+							dialogDRU();
 					};
 				}
 			}
@@ -726,7 +772,9 @@ void run(int runOrder){
 	}
 	else if (runOrder == 2){ 	//execution #2
 		//Settings that only can be edited in the .brd file
-		detectDrillsymbols();
+		if(checkDrillsymbols()){
+			dialogDrill();
+		}
 
 		if(checkLayerBrd()){
 			cmd += setLayer();
