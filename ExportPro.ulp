@@ -864,7 +864,8 @@ string updateFrameInformationSch(){
 		sprintf(cmd,"%sEDIT .s%d;\n",cmd,she[j]);
 
 		//cmd += "CHANGE DISPLAY OFF;\n";
-	 	
+		
+	 	/*
 		if(strstr(attribute,"TITLE")==-1) {
 			cmd += "ATTRIBUTE " + name[j] + " TITLE DELETE;\n";
 		}
@@ -891,7 +892,7 @@ string updateFrameInformationSch(){
 				cmd += "ATTRIBUTE " + name[j] + " CREATE_DATE '';\n";
 			}
 		}
-
+		*/
 
 		
 	 	int t = time();
@@ -910,7 +911,7 @@ string updateFrameInformationSch(){
 	 	if(EAGLE_VERSION>=9){
 	 		cmd += "REPOSITION " + name[j] + ";\n\n";
 	 	}
-	 }
+	}
 
 	return cmd;
 }
@@ -939,6 +940,7 @@ string updateFrameInformationBrd(string drawing){
 
 		//cmd += "CHANGE DISPLAY OFF;";
 	 	
+	 	/*
 		if(strstr(attribute,"TITLE")==-1) {
 			cmd += "ATTRIBUTE " + name + " TITLE DELETE;";
 		}
@@ -968,7 +970,7 @@ string updateFrameInformationBrd(string drawing){
 				cmd += "ATTRIBUTE " + name + " CREATE_DATE '';";
 			}
 		}
-
+		*/
 
 
 	 	int t = time();
