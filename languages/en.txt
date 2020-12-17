@@ -172,7 +172,7 @@ settings.setup.drill = Drill symbols
 settings.setup.print = Print settings
 settings.setup.PDFtk = Tool for PDF merging
 settings.setup.bom = Detiled BOM-entrys
-settings.setup.dru =Designe rules
+settings.setup.dru = Designe rules
 
 comb.res = 600dpi - normal resolution;1200dpi - high resolution;2400dpi - very high resolution
 comb.pcbColor = Green;Red;Black;White;Polyimid
