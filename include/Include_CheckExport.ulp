@@ -149,7 +149,8 @@ char checkDRU(string druname){
 		fileread(data, druname);
 
 		if ((strstr(data, "Eurocircuits-EAGLE design rules")!=-1)||
-			(strstr(data, "Standard-Design-Regeln")!=-1)){
+			(strstr(data, "default Design Rules")!=-1)||
+			(strstr(data, "Standard-Design-Regeln")!=-1)) {
 			return 1;
 		}
 	}
