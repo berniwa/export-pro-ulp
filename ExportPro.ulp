@@ -1135,19 +1135,19 @@ string resetVew(){
 
 
 	//reseting palette colors (3 palette X 128 entrys)
-	for(int i=0; i<3; i++){
+	for(int i=0; i<PALETTE_TYPES; i++){
 		cmd += "SET PALETTE ";
 		if(i == PALETTE_BLACK)		{ cmd += "BLACK"; 	}
 		else if(i == PALETTE_WHITE)	{ cmd += "WHITE"; 	}
 		else						{ cmd += "COLORED"; }
 		cmd += ";";
 
-		for(int l=0; l<128; l++){
+		for(int l=0; l<PALETTE_ENTRIES; l++){
 			if(i==PALETTE_WHITE && l==0){	//palett white 0 cant be changed
 				continue;
 			}
 
-			sprintf(cmd,"%sSET PALETTE %d %s;", cmd, l, cfgget("EAGLE:Palette."+stringFromInt(i)+"."+stringFromInt(l)));
+			sprintf(cmd,"%sSET PALETTE %d %s;", cmd, l, palette(l, i));
 		}
 	}
 
