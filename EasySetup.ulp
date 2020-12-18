@@ -610,7 +610,13 @@ string dialogBOM(){
 void dialogDrill(){
 	dlgDialog("Dirll"){
 		dlgLabel(lanGetText("dlg.DrillError"));
-		dlgLabel("<img src=\"" + filedir(argv[0]) + "/bin/ExpDrillSymb.png\">");
+		debugMsg(filedir(argv[0]) + "/bin/ExpDrillSymb" + strupr(filesetext(cfg_textLanguage,"")) + ".png");
+		if(filesize(filedir(argv[0]) + "/bin/ExpDrillSymb" + strupr(filesetext(cfg_textLanguage,"")) + ".png")){
+			dlgLabel("<img src=\"" + filedir(argv[0]) + "/bin/ExpDrillSymb" + strupr(filesetext(cfg_textLanguage,"")) + ".png\">");
+		}
+		else{
+			dlgLabel("<img src=\"" + filedir(argv[0]) + "/bin/ExpDrillSymbEN.png\">");
+		}
 		dlgHBoxLayout{
 			dlgStretch(1);
 			dlgPushButton(lanGetText("button.ok")) {exit("EDIT .brd;");};
