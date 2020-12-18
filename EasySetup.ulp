@@ -610,7 +610,6 @@ string dialogBOM(){
 void dialogDrill(){
 	dlgDialog("Dirll"){
 		dlgLabel(lanGetText("dlg.DrillError"));
-		debugMsg(filedir(argv[0]) + "/bin/ExpDrillSymb" + strupr(filesetext(cfg_textLanguage,"")) + ".png");
 		if(filesize(filedir(argv[0]) + "/bin/ExpDrillSymb" + strupr(filesetext(cfg_textLanguage,"")) + ".png")){
 			dlgLabel("<img src=\"" + filedir(argv[0]) + "/bin/ExpDrillSymb" + strupr(filesetext(cfg_textLanguage,"")) + ".png\">");
 		}
