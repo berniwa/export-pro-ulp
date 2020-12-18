@@ -1593,13 +1593,16 @@ void export(){
 			for(int i = 0; i < 16; i++){
 				if(board_layer[i] == 1){
 					if(i == 0){	
-						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_copper_top,  i+1);
+						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' '%s' %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_copper_top, getSystemFilename(".bat"), i+1);
+						addToWaitinglist(output_file_gerber_copper_top + ".tmp");
 					} else if(i == 15){
-						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_copper_bottom,  i+1);
+						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' '%s' %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_copper_bottom, getSystemFilename(".bat"), i+1);
+						addToWaitinglist(output_file_gerber_copper_bottom + ".tmp");
 					} else {
 						string tfname = "";
 						sprintf(tfname, "%s%d", output_file_gerber_copper_other, i+1); 			
-						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' %d;", cmd,  getSystemFilename(".brd"), tfname ,  i+1);					
+						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' '%s' %d;", cmd,  getSystemFilename(".brd"), tfname, getSystemFilename(".bat"), i+1);					
+						addToWaitinglist(tfname + ".tmp");
 					}
 					count++;
 				}			
@@ -2022,6 +2025,8 @@ void mainManu(){
 		//Load the users project settings
 		loadUsersettings();
 		loadConfig();
+
+		lanLoadText(cfg_textLanguage);
 
 		drcLoadRules(getSystemFilename(drc_file), 0);
 
