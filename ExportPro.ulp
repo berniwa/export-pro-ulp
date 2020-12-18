@@ -1698,44 +1698,6 @@ void export(){
 	exit(cmd);
 }
 
-void detectDrillsymbols(){
-	board(B){
-		char cDrillSymbols = 1;
-		B.holes(H) {
-			if(!H.drillsymbol){
-				cDrillSymbols=0;
-			}
-		}
-		B.signals(S){
-			S.vias(V){
-				if(!V.drillsymbol){
-					cDrillSymbols=0;
-				}
-			}
-		}
-		B.elements(E) {
-			E.package.contacts(C) {
-				if(C.pad && (!C.pad.drillsymbol)){
-					cDrillSymbols=0;
-				}
-			}
-			E.package.holes(H) {
-				if(!H.drillsymbol){
-					cDrillSymbols=0;
-				}
-			}
-		}
-
-		if(!cDrillSymbols){
-			int opt=dlgMessageBox(":"+lanGetText("dlg.DrillError"),lanGetText("button.continue"),lanGetText("button.cancel"));
-			
-			if(opt){
-				exit("");
-			}
-		}
-	}
-}
-
 void dialogImageSettings(){
 	dlgDialog(lanGetText("headline.exportDlg")){
 
@@ -2111,8 +2073,6 @@ void mainManu(){
 	loadConfig();
 
 	lanLoadText(cfg_textLanguage);
-
-	detectDrillsymbols();	
 
 	//Create the main dialog
 	int dialog = dlgDialog(ULP_VERSION){
