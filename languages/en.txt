@@ -11,7 +11,7 @@ button.add = Add
 button.edit = Edit
 button.delete = Delete
 button.setpopulate = Update
-button.setup.run = Check setup
+button.setup.run = Check all
 
 dlg.imag.footnote = * This may take a few minutes, depending on the size of the board
 dlg.pfd.footnote = * To merge the pdf-files we use pdftk_server. <br>You can get this tool <a href=\"https://www.pdflabs.com/tools/pdftk-server/\">here</a>.
@@ -20,7 +20,9 @@ dlg.drcError = :The DRC found some errors within this layout
 dlg.newVal.footnote = * might be overwritten when requesting the price over the internet
 dlg.username = Pleace enter your name and short-name
 dlg.cantEdit = Can not edit "Last"
-dlg.DrillError = Not all diameters have asigned drill symbols. <br>Please set them in Options>Set>Drill! 
+dlg.DrillError = Not all diameters have asigned drill symbols. <br>Please set them in Options>Set>Drill!
+dlg.Check.err = A quick check of your setup detected some problems.<br>Do you want to fix them?
+dlg.Check.noErr = No errors found, your board is ready to export
 dlg.add2Menu = Would you like to ad the ULP to the text menu?
 dlg.ExportCompleted = The export is finished
 dlg.setup.expl = //todo: erkärung was das easy setup macht

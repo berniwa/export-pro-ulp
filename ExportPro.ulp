@@ -2219,19 +2219,26 @@ void mainManu(){
 			  		}
 					//dlgHBoxLayout {dlgCheckBox(lanGetText("settings.DateFolder"), output_date_folder); dlgStretch(1);}		
 				}
+				dlgGroup("Easy Setup"){
+					if(checkAll(getSystemFilename(drc_file))){
+						dlgLabel(lanGetText("dlg.Check.err"));
+						dlgHBoxLayout{
+							dlgStretch(1);
+							dlgPushButton(lanGetText("general.yes")){
+								saveUsersettings();
+								exit("RUN '" + getUlpDir("../EasySetup.ulp") + "';");
+							};
+						}
+					}
+					else{
+						dlgLabel("<html>" + lanGetText("dlg.Check.noErr") + "</html>");
+					}
+				}
 				dlgStretch(1);
 			}
 		}
 		dlgHBoxLayout {
 			dlgStretch(1); 
-			dlgLabel("Correct setup:");
-			int i=!checkAll(getSystemFilename(drc_file));
-			dlgCheckBox("",i){
-				i=!i;
-				if(!i){
-					exit("RUN '" + getUlpDir("../EasySetup.ulp") + "';");
-				}
-			};
 			dlgPushButton(lanGetText("button.ok")) {
 				saveUsersettings();
 
