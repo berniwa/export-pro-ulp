@@ -1152,7 +1152,7 @@ string resetVew(){
 				continue;
 			}
 
-			sprintf(cmd,"%sSET PALETTE %d %d;", cmd, l, palette(l, i));
+			sprintf(cmd,"%sSET PALETTE %d %s;", cmd, l, cfgget("EAGLE:Palette."+stringFromInt(i)+"."+stringFromInt(l)));
 		}
 	}
 
