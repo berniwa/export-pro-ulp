@@ -1147,7 +1147,7 @@ string resetVew(){
 				continue;
 			}
 
-			sprintf(cmd,"%sSET PALETTE %d %s;", cmd, l, palette(l, i));
+			sprintf(cmd,"%sSET PALETTE %d %d;", cmd, l, palette(l, i));
 		}
 	}
 
