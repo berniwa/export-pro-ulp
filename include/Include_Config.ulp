@@ -76,8 +76,8 @@ string isNotMenu(){
 	string scrI;
 
 	fileread(scrI,pathSCR);
-
-	if(strstr(scrI,"/ExportPro.ulp")==-1){
+	//searching for 2 entrys in the eagle script
+	if(strstr(scrI,argv[0],(strstr(scrI,argv[0]) + 1))==-1){ 
 		pathO=pathSCR;
 	}
 
@@ -96,6 +96,7 @@ void setToMenu(){
 		string scr;
 		int index;
 
+
 		fileread(scr,pathSCR);
 		
 		index = strstr(scr,"MENU",strstr(scr,"BRD:"))+5;
@@ -109,6 +110,15 @@ void setToMenu(){
 		output(pathSCR){
 			printf(scr);
 		}
+		
+		/*		//attempt to updaite the manu instently without restarting the editor window
+		string re = "SCRIPT \"" + pathSCR + "\";\nRUN";
+		for(int i = 0;argv[i];i++)
+			re += " \"" + argv[i] + "\"";
+
+		re += ";";
+		exit(re);
+		*/
 	}	
 }
 
@@ -234,7 +244,7 @@ void loadConfig(){
 	cfg_defaultVoltage = cfgget("ULP:ExportPro.defaultVoltage",cfg_defaultVoltage);
 	string tmp = cfgget("ULP:ExportPro.bomPresets");
 
-	if(!isNotMenu()){
+	if(isNotMenu()){
 		updateManu();
 	}
 	if(tmp!=""){
