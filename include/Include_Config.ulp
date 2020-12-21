@@ -20,6 +20,8 @@ cfg_defaultTolerance = "1%",
 cfg_defaultVoltage = "50V"
 ;
 
+int cfg_enableAsync = 1;
+
 int 
 lay_dimension = 123,
 lay_background = 124,
@@ -40,6 +42,7 @@ void saveConfig() {
 	cfgset("ULP:ExportPro.pricingURL",cfg_pricingURL);
 	cfgset("ULP:ExportPro.defaultTolerance",cfg_defaultTolerance);
 	cfgset("ULP:ExportPro.defaultVoltage",cfg_defaultVoltage);
+	cfgset("ULP:ExportPro.cfg_enableAsync",(cfg_enableAsync?"1":"0"));
 
 	if(cfg_bomPreNames[1]!=""){
 		string data="";
@@ -210,6 +213,8 @@ char editUserConfig(){
 					dlgCell(4, 1) dlgHBoxLayout {dlgRealEdit(tol); dlgLabel("%");}
 					dlgCell(5, 0) dlgLabel(lanGetText("settings.default.voltage")+":");
 					dlgCell(5, 1) dlgHBoxLayout {dlgRealEdit(volt); dlgLabel("V");}
+					dlgCell(6, 0) dlgLabel(lanGetText("settings.general.async"));
+					dlgCell(6, 1) dlgCheckBox("",cfg_enableAsync);
 				}
 				if(isNotMenu()){
 					dlgPushButton(lanGetText("settings.menu")){setToMenu();};
@@ -236,13 +241,14 @@ char editUserConfig(){
 
 void loadConfig(){
 	
-	cfg_textLanguage = cfgget("ULP:ExportPro.language",(language()+".txt"));
-	cfg_userName = cfgget("ULP:ExportPro.userName");
-	cfg_shortUserName = cfgget("ULP:ExportPro.shortUserName");
-	cfg_pricingURL = cfgget("ULP:ExportPro.pricingURL",cfg_pricingURL);
-	cfg_defaultTolerance = cfgget("ULP:ExportPro.defaultTolerance",cfg_defaultTolerance);
-	cfg_defaultVoltage = cfgget("ULP:ExportPro.defaultVoltage",cfg_defaultVoltage);
-	string tmp = cfgget("ULP:ExportPro.bomPresets");
+	cfg_textLanguage 		= cfgget("ULP:ExportPro.language" ,(language()+".txt"));
+	cfg_userName 			= cfgget("ULP:ExportPro.userName");
+	cfg_shortUserName 		= cfgget("ULP:ExportPro.shortUserName");
+	cfg_pricingURL 			= cfgget("ULP:ExportPro.pricingURL", cfg_pricingURL);
+	cfg_defaultTolerance 	= cfgget("ULP:ExportPro.defaultTolerance", cfg_defaultTolerance);
+	cfg_defaultVoltage 		= cfgget("ULP:ExportPro.defaultVoltage", cfg_defaultVoltage);
+	cfg_enableAsync 		= strtol(cfgget("ULP:ExportPro.cfg_enableAsync", (cfg_enableAsync?"1":"0")));
+	string tmp 				= cfgget("ULP:ExportPro.bomPresets");
 
 	if(isNotMenu()){
 		updateManu();
