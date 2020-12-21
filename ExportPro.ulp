@@ -69,7 +69,8 @@ enable_export_pdf = 1, pdf_keep_frame = 1, pdf_merge = 1,
 enable_export_image = 1,
 bomToPDF = 1,
 board_format = 0,
-bomPreset=0;
+bomPreset=0,
+export_async = 1
 ;
 
 real board_thickness = 0.0, board_copper_thickness = 0.0,
@@ -539,6 +540,9 @@ void loadUsersettings(){
 			else if (con=="minMeasureDiameter") {
 				minMeasureDiameter = strtod(parseUserSetting(data[i]));				
 			}
+			else if (con=="export_async") {
+				export_async = strtol(parseUserSetting(data[i]));
+			}
 			else {
 				for(int l=0; l<16;l++){
 					string s;
@@ -797,6 +801,7 @@ void saveUsersettings(){
 		printf("board_title  = %s\n", board_title);
 		printf("board_subtitle  = %s\n", board_subtitle);
 		printf("minMeasureDiameter = %f\n", minMeasureDiameter);
+		printf("export_async = %d\n", export_async);
 	}
 }
 
@@ -1050,7 +1055,7 @@ string pngCrop(string folder, string index){
 	string fields[];
 	int count = strsplit(fields, ExportSetup[i], ';');
 	addToWaitinglist(folder + stringTrim(fields[1]));
-	return "RUN '"  + include_path + "Crop.ulp' '" + folder + stringTrim(fields[1]) + ".png' '"+getSystemFilename(".bat")+"';";
+	return "RUN '"  + include_path + "Crop.ulp' '" + folder + stringTrim(fields[1]) + ".png' '"+getSystemFilename(".bat")+"' " + (export_async?"1":"0") + ";";
 }
 
 string pdfExport(string folder, string index){
@@ -1552,7 +1557,7 @@ void export(){
 
 		//Export colored images
 		if((pcbimage_top || pcbimage_bottom) && (enable_export_png || enable_export_pdf)) {
-			sprintf(cmd, "%s RUN '"  + include_path + "ImageExport.ulp' %d %d %d '%s' '%s' %d '%s' '%s' %d %d %d '%s' '%s' '%s' '%s' '%s' '%s' %d %d;", cmd, 
+			sprintf(cmd, "%s RUN '"  + include_path + "ImageExport.ulp' %d %d %d '%s' '%s' %d '%s' '%s' %d %d %d '%s' '%s' '%s' '%s' '%s' '%s' %d %d %d;", cmd, 
 				enable_export_png, (enable_export_pdf&&EAGLE_VERSION>=9),
 				pcbimage_bottom, output_file_img_pcbb, output_file_pdf_pcbb,
 				pcbimage_top, output_file_img_pcbt, output_file_pdf_pcbt,
@@ -1563,7 +1568,8 @@ void export(){
 				pcbImageSilkscreenColors[pcbimage_silkscreen_color],
 				pcbImagePlating[pcbimage_plating],
 				tsilcsreenLayer, bsilcsreenLayer,
-				board_format, pdf_keep_frame
+				board_format, pdf_keep_frame,
+				export_async
 			);
 
 			if (pcbimage_top && enable_export_png && crop_all) 
@@ -1593,31 +1599,31 @@ void export(){
 			for(int i = 0; i < 16; i++){
 				if(board_layer[i] == 1){
 					if(i == 0){	
-						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' '%s' %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_copper_top, getSystemFilename(".bat"), i+1);
+						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' '%s' %d %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_copper_top, getSystemFilename(".bat"), export_async, i+1);
 						addToWaitinglist(output_file_gerber_copper_top + ".tmp");
 					} else if(i == 15){
-						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' '%s' %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_copper_bottom, getSystemFilename(".bat"), i+1);
+						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' '%s' %d %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_copper_bottom, getSystemFilename(".bat"), export_async, i+1);
 						addToWaitinglist(output_file_gerber_copper_bottom + ".tmp");
 					} else {
 						string tfname = "";
 						sprintf(tfname, "%s%d", output_file_gerber_copper_other, i+1); 			
-						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' '%s' %d;", cmd,  getSystemFilename(".brd"), tfname, getSystemFilename(".bat"), i+1);					
+						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' '%s' %d %d;", cmd,  getSystemFilename(".brd"), tfname, getSystemFilename(".bat"), export_async, i+1);					
 						addToWaitinglist(tfname + ".tmp");
 					}
 					count++;
 				}			
 			}
 		}
-		if(gerber_stc){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 1 '%s' '%s' '%s' 1;", 			cmd,  getSystemFilename(".brd"), output_file_gerber_st, getSystemFilename(".bat")); addToWaitinglist(output_file_gerber_st + ".tmp"); }
-		if(gerber_sts){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 1 '%s' '%s' '%s' 0;", 			cmd,  getSystemFilename(".brd"), output_file_gerber_sb, getSystemFilename(".bat")); addToWaitinglist(output_file_gerber_sb + ".tmp"); }
-		if(gerber_crc){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 2 '%s' '%s' '%s' 1;", 			cmd,  getSystemFilename(".brd"), output_file_gerber_ct, getSystemFilename(".bat")); addToWaitinglist(output_file_gerber_ct + ".tmp"); }
-		if(gerber_crs){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 2 '%s' '%s' '%s' 0;", 			cmd,  getSystemFilename(".brd"), output_file_gerber_cb, getSystemFilename(".bat")); addToWaitinglist(output_file_gerber_cb + ".tmp"); }
-		if(gerber_plc){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 3 '%s' '%s' '%s' 1 %d %d %d %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_pt, getSystemFilename(".bat"), silkscreen_tplace, silkscreen_tnames, silkscreen_tvalues, silkscreen_tdocu); addToWaitinglist(output_file_gerber_pt + ".tmp"); }
-		if(gerber_pls){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 3 '%s' '%s' '%s' 0 %d %d %d %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_pb, getSystemFilename(".bat"), silkscreen_bplace, silkscreen_bnames, silkscreen_bvalues, silkscreen_bdocu); addToWaitinglist(output_file_gerber_pb + ".tmp"); }
-		if(gerber_drd){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 4 '%s' '%s' '%s';",   			cmd,  getSystemFilename(".brd"), output_file_gerber_drill, getSystemFilename(".bat")); addToWaitinglist(output_file_gerber_drill + ".tmp"); }	
-		if(gerber_otl){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 5 '%s' '%s' '%s';",   			cmd,  getSystemFilename(".brd"), output_file_gerber_otl, getSystemFilename(".bat")); addToWaitinglist(output_file_gerber_otl + ".tmp"); }	
-		if(gerber_ref){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 6 '%s' '%s' '%s';",   			cmd,  getSystemFilename(".brd"), output_file_gerber_ref, getSystemFilename(".bat")); addToWaitinglist(output_file_gerber_ref + ".tmp"); }	
-		if(gerber_fab){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 7 '%s' '%s' '%s';",   			cmd,  getSystemFilename(".brd"), output_file_gerber_fab, getSystemFilename(".bat")); addToWaitinglist(output_file_gerber_fab + ".tmp"); }	
+		if(gerber_stc){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 1 '%s' '%s' '%s' %d 1;", 			cmd,  getSystemFilename(".brd"), output_file_gerber_st, getSystemFilename(".bat"), export_async); addToWaitinglist(output_file_gerber_st + ".tmp"); }
+		if(gerber_sts){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 1 '%s' '%s' '%s' %d 0;", 			cmd,  getSystemFilename(".brd"), output_file_gerber_sb, getSystemFilename(".bat"), export_async); addToWaitinglist(output_file_gerber_sb + ".tmp"); }
+		if(gerber_crc){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 2 '%s' '%s' '%s' %d 1;", 			cmd,  getSystemFilename(".brd"), output_file_gerber_ct, getSystemFilename(".bat"), export_async); addToWaitinglist(output_file_gerber_ct + ".tmp"); }
+		if(gerber_crs){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 2 '%s' '%s' '%s' %d 0;", 			cmd,  getSystemFilename(".brd"), output_file_gerber_cb, getSystemFilename(".bat"), export_async); addToWaitinglist(output_file_gerber_cb + ".tmp"); }
+		if(gerber_plc){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 3 '%s' '%s' '%s' %d 1 %d %d %d %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_pt, getSystemFilename(".bat"), export_async, silkscreen_tplace, silkscreen_tnames, silkscreen_tvalues, silkscreen_tdocu); addToWaitinglist(output_file_gerber_pt + ".tmp"); }
+		if(gerber_pls){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 3 '%s' '%s' '%s' %d 0 %d %d %d %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_pb, getSystemFilename(".bat"), export_async, silkscreen_bplace, silkscreen_bnames, silkscreen_bvalues, silkscreen_bdocu); addToWaitinglist(output_file_gerber_pb + ".tmp"); }
+		if(gerber_drd){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 4 '%s' '%s' '%s' %d;",   			cmd,  getSystemFilename(".brd"), output_file_gerber_drill, getSystemFilename(".bat"), export_async); addToWaitinglist(output_file_gerber_drill + ".tmp"); }	
+		if(gerber_otl){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 5 '%s' '%s' '%s' %d;",   			cmd,  getSystemFilename(".brd"), output_file_gerber_otl, getSystemFilename(".bat"), export_async); addToWaitinglist(output_file_gerber_otl + ".tmp"); }	
+		if(gerber_ref){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 6 '%s' '%s' '%s' %d;",   			cmd,  getSystemFilename(".brd"), output_file_gerber_ref, getSystemFilename(".bat"), export_async); addToWaitinglist(output_file_gerber_ref + ".tmp"); }	
+		if(gerber_fab){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 7 '%s' '%s' '%s' %d;",   			cmd,  getSystemFilename(".brd"), output_file_gerber_fab, getSystemFilename(".bat"), export_async); addToWaitinglist(output_file_gerber_fab + ".tmp"); }	
 	
 		//Generate specification file
 		sprintf(cmd, "%s RUN '"  + include_path + "Specification.ulp' '%s' %fmm '%s' %d %fum '%s' '%s' '%s';", cmd, output_file_gerber_spec, board_thickness, PcbType[board_type], count, board_copper_thickness, pcbSpecColor[pcbimage_color], pcbSpecSilkscreenColor[pcbimage_silkscreen_color], pcbSpecPlating[pcbimage_plating]); 		
@@ -1697,6 +1703,12 @@ void export(){
 	cmd += resetVew();
 
 	cmd += "RUN '" + include_path + "EndMessage.ulp' '" + lanGetText("dlg.ExportCompleted") +"';\n";
+
+	/*
+	output("C:\\Work\\tmp\\tmp.scr","wt"){
+		printf("%s\n", cmd);
+	}
+	*/
 
 	exit(cmd);
 }
@@ -2117,7 +2129,6 @@ void mainManu(){
 						dlgCell(4,1) dlgComboBox(tmp4, pcbimage_plating);
 					};								
 				}
-
 				dlgGroup(lanGetText("headline.usedLayers")) {
 					dlgGridLayout {
 						dlgCell(0,0) dlgLabel(lanGetText("general.layer"));
@@ -2137,8 +2148,7 @@ void mainManu(){
 						}
 					}
 				}
-
-				dlgGroup(lanGetText("headline.general.siscTop")) {		
+				dlgGroup(lanGetText("headline.general.siscTop")) {
 					dlgHBoxLayout {
 						dlgCheckBox("tPlace", silkscreen_tplace);
 						dlgCheckBox("tNames", silkscreen_tnames);
@@ -2153,6 +2163,9 @@ void mainManu(){
 		 				dlgCheckBox("bValues", silkscreen_bvalues);
 		 				dlgCheckBox("bDocu", silkscreen_bdocu);
 					};			
+				}
+				dlgGroup("Async"){
+					dlgCheckBox("Export async",export_async);
 				}
 				dlgStretch(1);
 			}

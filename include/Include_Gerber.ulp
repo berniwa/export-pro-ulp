@@ -65,7 +65,7 @@ if(EAGLE_VERSION > 7){
 string cmd = "";
 
 if(type == 0) {
-	int layer = strtol(argv[5]);
+	int layer = strtol(argv[6]);
 
 	string tmp = "";
 	sprintf(tmp, "Processing copper layer %d", layer);
@@ -75,7 +75,7 @@ if(type == 0) {
 	sprintf(cmd, "\"%s\" -X -dGERBER_RS274X %s -o \"%s\" \"%s\" %d 17 18", eagle_binary, option, outputfile, inputfile, layer);
 }
 else if(type == 1) {
-	int top_bottom = strtol(argv[5]);
+	int top_bottom = strtol(argv[6]);
 	int layer = 30; 			//bStop	
 	if(top_bottom){layer = 29;}	//tStop
 
@@ -86,7 +86,7 @@ else if(type == 1) {
 	sprintf(cmd, "\"%s\" -X -dGERBER_RS274X %s -o \"%s\" \"%s\" %d ", eagle_binary, option, outputfile, inputfile, layer);	
 }
 else if(type == 2) {
-	int top_bottom = strtol(argv[5]);
+	int top_bottom = strtol(argv[6]);
 	int layer = 32; 			//bCream
 	if(top_bottom){layer = 31;}	//tCream
 
@@ -97,11 +97,11 @@ else if(type == 2) {
 	sprintf(cmd, "\"%s\" -X -dGERBER_RS274X %s -o \"%s\" \"%s\" %d ", eagle_binary, option, outputfile, inputfile, layer);		
 }
 else if(type == 3) {
-	int top_bottom	= strtol(argv[5]);
-	int use_place 	= strtol(argv[6]);
-	int use_names 	= strtol(argv[7]);
-	int use_values = strtol(argv[8]);
-	int use_docu 	= strtol(argv[9]);
+	int top_bottom	= strtol(argv[6]);
+	int use_place 	= strtol(argv[7]);
+	int use_names 	= strtol(argv[8]);
+	int use_values = strtol(argv[9]);
+	int use_docu 	= strtol(argv[10]);
 
 	string tmp = "";
 	sprintf(tmp, "Processing silkscreen layer %d", top_bottom);
@@ -157,7 +157,7 @@ if((0 <= type) && (type < 8)){
 	// dlgMessageBox(cmd);
 	output(argv[4],"at"){ 
 		printf("2>NUL (MKDIR \"%s\")\n", filedir(outputfile));
-		printf("START \"\" /B %s ", cmd);
+		printf("START \"\" /B%s %s ", (argv[5]=="1")?"":" /WAIT", cmd);
 		printf("> \"%s.tmp\"\n", (filedir(filedir(outputfile)) + "../" + filename(outputfile)));
 	}
 }
