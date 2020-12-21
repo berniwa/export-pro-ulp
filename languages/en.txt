@@ -71,6 +71,7 @@ headline.general.usedCopper = Used copper layers
 headline.general.siscTop = Silkscreen top settings
 headline.general.siscBot = Silkscreen bottom settings
 headline.general.execution = PCB settings
+headline.general.async = Asyncronus execution settings
 headline.gerber.naming = File name
 headline.gerber.RS274X = Gerber RS274X
 headline.gerber.excellon = Excellon
@@ -121,6 +122,7 @@ settings.general.copperThickness = Copper thickness
 settings.general.pcbColor = PCB color: 
 settings.general.siscColor = Silkscreen color:
 settings.general.surface = Surface: 
+settings.general.async = Parallel execution of gerber export <br>and cropping images 
 settings.gerber.eagle = EAGLE (for Eurocircuits)
 settings.gerber.protel = Protel (for JLC) 
 settings.gerber.copper = All copper layers
@@ -200,5 +202,3 @@ tab.note = Note
 tab.minTemp = Min. Temp.
 tab.maxTemp = Max. Temp.
 tab.rohs = Rohs state
-
-

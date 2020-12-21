@@ -2164,8 +2164,12 @@ void mainManu(){
 		 				dlgCheckBox("bDocu", silkscreen_bdocu);
 					};			
 				}
-				dlgGroup("Async"){
-					dlgCheckBox("Export async",export_async);
+				dlgGroup(lanGetText("headline.general.async")){
+					dlgGridLayout {
+						//sorry for the botch ;)
+						dlgCell(0, 0, 0, 9) {dlgLabel(lanGetText("settings.general.async"));};
+						dlgCell(0, 10) {dlgCheckBox("",export_async);};
+					}
 				}
 				dlgStretch(1);
 			}
