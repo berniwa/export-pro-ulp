@@ -278,7 +278,8 @@ void bomOutputPdfFile(real offsetX, real offsetY, real width){
 		cmd += "DELETE BOM;\n";
 	}
 
-	sprintf(cmd, "%sADD 'bom' BOM R0 (%.3f %.3f);\n", cmd, 
+	sprintf(cmd, "%sADD 'bom@%s' BOM R0 (%.3f %.3f);\n", cmd,
+		LIBRARY_NAME, 
  		startX, startY
  	);
 

@@ -613,7 +613,8 @@ void run(int info, int drilltable, int stackup, string PcbMaterial, string Stopm
 	 } else {
 	 	getBoardSize();
 	 	int width = getTotalWidth(colsInfo);
-	 	sprintf(data, "%sADD 'fabriaction' FABRICATION R0 (%.3f %.3f);\n", data, 
+	 	sprintf(data, "%sADD 'fabriaction@%s' FABRICATION R0 (%.3f %.3f);\n", data, 
+	 		LIBRARY_NAME,
 	 		u2mm((min_x+max_x)/2) - width/2, 
 	 		u2mm(min_y) - tableOffset
 	 	);
