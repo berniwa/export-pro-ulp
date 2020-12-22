@@ -628,7 +628,7 @@ void dialogDRU(){
 	int opt = dlgMessageBox(lanGetText("dlg.setup.stdDRU"), lanGetText("general.yes"), lanGetText("button.continue"));
 
 	if (opt==0){
-		exit("DRC *;");
+		exit("EDIT .brd;DRC *;");
 	}
 }
 
