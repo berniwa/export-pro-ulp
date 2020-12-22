@@ -815,7 +815,9 @@ string setLayerFill(){
 string restoreLayerFill(){
 	string cmd = "";
 	for(int i = 1; i < 52;i++){
-		sprintf(cmd, "%sSET FILL_LAYER %d %s;", cmd, i, layer_fill[i]);
+		if(layer_fill[i]){
+			sprintf(cmd, "%sSET FILL_LAYER %d %s;", cmd, i, layer_fill[i]);
+		}
 	}
 	return cmd;	
 }
