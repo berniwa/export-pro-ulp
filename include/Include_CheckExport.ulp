@@ -22,7 +22,7 @@ char checkBOM(){
 		if(order_no[l])
 			hasONr = 0;
 	}
-	return (hasDist || hasManu || hasONr);
+	return (hasDist || hasManu || hasONr) && partcount; //&& partcount is necasary to avoid a wrong check with empty boards e.g. gerber frames
 }
 
 char checkPDFTK(){
