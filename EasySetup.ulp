@@ -525,7 +525,7 @@ string placeFrameSh(UL_SHEET S){
 		}
 	}
 
-	if(u2mm(maxX - minX)<170) {		//adding an A4 frame for boars smaler then 170mm to fitt multiple mesurments
+	if(u2mm(maxX - minX)<170) {		//adding an A4 frame for boars smaler then 170mm
 		cmd+="'XDEVELOP-A4@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
 
 		sprintf(cmd, "%s(%fmm %fmm)", cmd, (u2mm((maxX + minX)/2) - 90), (u2mm((maxY + minY)/2) - 164));
