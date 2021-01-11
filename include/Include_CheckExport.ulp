@@ -144,17 +144,39 @@ char checkFrameBrd(){
 }
 
 char checkDRU(string druname){
+	char c = 0;
+	char i = 0;
 	if(filesize(druname)) {
 		string data;
 		fileread(data, druname);
 
+		// chack dru values 
+		string checkValues[] = {
+			"layerSetup = (1*16)",
+			"mtCopper = 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm",
+			"mtIsolate = 1.5mm 0.15mm 0.2mm 0.15mm 0.2mm 0.15mm 0.2mm 0.15mm 0.2mm 0.15mm 0.2mm 0.15mm 0.2mm 0.15mm 0.2mm",
+			"mdWireWire = 6mil",
+			"mdCopperDimension = 40mil",
+			"rlMinPadTop = 10mil",
+			"rlMaxPadTop = 20mil"
+		};
+
+		while(checkValues[i]){
+			if(strstr(data, checkValues[i]) != -1)
+				c++;
+
+			i++;
+		}
+
+		// check description
+		i++;
 		if ((strstr(data, "Eurocircuits-EAGLE design rules")!=-1)||
 			(strstr(data, "default Design Rules")!=-1)||
 			(strstr(data, "Standard-Design-Regeln")!=-1)) {
-			return 1;
+			c++;
 		}
 	}
-	return 0;
+	return c == i;
 }
 
 char checkAll(string druname){
