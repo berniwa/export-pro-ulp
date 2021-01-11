@@ -632,26 +632,28 @@ void dialogDRU(){
 	}
 }
 
-void run(int runOrder){
-	string cmd="";
+void run(string druname){
 	loadConfig();
 
 	lanLoadText(cfg_textLanguage);
 
-	//getting the filename to export/readout the dru
-	string druname = "";
-	project.board(B){
-		druname=filesetext(B.name,"-exportpro.dru");
-	}
-
-	if (runOrder == 0){ 		//execution #0
+	if (!druname) { 		//getting a new dru file
+		string cmd="";
 		if(schematic){
 			cmd += "EDIT .brd; ";
 		}
 
+		//getting the filename to export the dru
+		project.board(B){
+			druname=filesetext(B.name,"-exportpro.dru");
+		}
+
 		cmd += "DRC SAVE \'" + druname + "\'; ";
+		sprintf(cmd, "%sRUN \'%s\' \'%s\'", cmd, argv[0], druname);
+
+		exit(cmd);
 	}
-	else if (runOrder == 1){ 	//execution #1
+	else {
 		//not file type specific settings 
 		int d = dlgDialog(filename(argv[0])){
 			dlgLabel(lanGetText("dlg.setup.expl"));
@@ -756,81 +758,11 @@ void run(int runOrder){
 			}
 			dlgHBoxLayout{
 				dlgStretch(1); 
-				dlgPushButton(lanGetText("button.setup.run")) { dlgAccept();};
-				dlgPushButton(lanGetText("button.cancel")){dlgReject(-1); /*exit("");*/};
+				dlgPushButton(lanGetText("button.setup.back")) { dlgAccept(); exit("RUN '"+filedir(argv[0])+"/ExportPro.ulp';");};
+				dlgPushButton(lanGetText("button.cancel"));
 			}
 		};
-
-		if(d<0){
-			exit("");
-		}
-		if(checkPDFTK())
-			dialogPDFtk();
-
-		//Check if printer options are correct
-		if(checkPrintSettings()){
-			int opt = dlgMessageBox(lanGetText("dlg.setup.editPrintSettings"), lanGetText("general.yes"), lanGetText("general.no"));
-			if(opt == 0){
-				setPrintSettings();
-			}
-		}
-
-		if(schematic){
-			cmd += "EDIT .brd; ";
-		}
 	}
-	else if (runOrder == 2){ 	//execution #2
-		//Settings that only can be edited in the .brd file
-		if(checkDrillsymbols()){
-			dialogDrill();
-		}
-
-		if(checkLayerBrd()){
-			cmd += setLayer();
-		}
-
-		cmd += addFrameBrd(0);
-
-		/*
-		project.board(B){			
-			//todo: check ob die fabdoc layer schon benuzt werden
-		}
-		*/
-
-		//checking if the default dru file is loaded
-		if(checkDRU(druname)) {
-			dialogDRU();
-		}
-
-		cmd+="EDIT .sch;";
-	}
-	else if (runOrder == 3){ 	//execution #3
-		//Settings that only can be edited in the .sch file
-		//generating bom entrys
-		if(checkBOM()){
-			cmd += dialogBOM();
-		} 
-
-		if(checkLayerSch()){
-			cmd += setLayer();
-		}
-
-		cmd += addFrameSch(0);
-	}
-	else if (runOrder == 4){ 	//execution #4
-		int opt = dlgMessageBox(lanGetText("dlg.setup.finished"), lanGetText("general.yes"), lanGetText("general.no"));
-		if (opt==0){
-			cmd+="RUN '"+filedir(argv[0])+"/ExportPro.ulp';";
-		}
-	}
-
-
-	if(runOrder<4){
-		sprintf(cmd, "%sRUN \'%s\' %d", cmd, argv[0], ++runOrder);
- 	}
-
- 	// debugVal(cmd+"\n\nRUN Nr. ",runOrder);
-	exit(cmd);
 }
 
-run(strtol(argv[1]));
+run(argv[1]);

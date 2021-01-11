@@ -2202,7 +2202,7 @@ void mainManu(){
 							dlgStretch(1);
 							dlgPushButton(lanGetText("general.yes")){
 								saveUsersettings();
-								exit("RUN '" + getUlpDir("../EasySetup.ulp") + "';");
+								exit("RUN '" + getUlpDir("../EasySetup.ulp") + "' '" + getSystemFilename(drc_file) + "';");
 							};
 						}
 					}
