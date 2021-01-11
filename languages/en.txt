@@ -29,11 +29,16 @@ dlg.setup.expl = //todo: erkärung was das easy setup macht
 dlg.setup.noFrame = !There was no frame in the board detected. <br>Should the ulp place one automatically?
 dlg.setup.editPrintSettings = !The printer settings are not adjusted to the xDevelop frame.<br>Should that be changed?
 dlg.setup.stdDRU = !The default Eagle Design Rules are loaded.<br>Do you want to change that?
+dlg.setup.nostdDRU = You allredy have custom designe rules loaded.<br>Do you want to change them anyway?
 dlg.setup.noBom = !There were no detiled BOM entrys found. <br>Should those be generated?
+dlg.setup.Bom = There were some detiled BOM entrys found. <br>Do you want to edit them?
 dlg.setup.noFrameSch = !There was no frame in at least one sheet of the schematic detected. <br>Should the ulp place them automatically?
 dlg.setup.finished = ;EasySetup is finished. <br>Shoult the ExportPro.ulp be started?
 dlg.setup.drillSymbolsCreated = ;All necesary drill symbols are already assinged.
 dlg.setup.noFrameNeeded = ;There is no frame needed
+dlg.setup.layer = All necessary Layers have been created
+dlg.setup.print = All printer settings are adjusted to fitt the xDevelop-frame
+dlg.setup.pdftk = PDFtk is already installed on this PC
 
 general.copper = Copper
 general.side = Side

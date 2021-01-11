@@ -168,15 +168,15 @@ string placeFrameBrd(){
 	else{							//adding an A3 frame
 		cmd+="'FRAME-A3@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
 		sprintf(cmd, "%s(%fmm %fmm)", cmd, (u2mm((max_x + min_x)/2)-195), (u2mm((max_y + min_y)/2)-160));
-		}
+	}
 
 	return cmd+"; ";
 }
 
-string addFrameBrd(char menu){
+string addFrameBrd(char check){
 	string cmd="";
 	project.board(B){
-		if (checkFrameBrd()){
+		if (check){
 			int opt = dlgMessageBox(lanGetText("dlg.setup.noFrame"),lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("button.continue"));
 			if(opt == 0) {
 				cmd += placeFrameBrd();
@@ -186,9 +186,8 @@ string addFrameBrd(char menu){
 				exit(cmd);
 			}
 		}
-		else if (menu){
-			dlgMessageBox(lanGetText("dlg.setup.noFrameNeeded"));
-		}
+		
+		dlgMessageBox(lanGetText("dlg.setup.noFrameNeeded"));
 	}
 	return cmd;
 }
@@ -538,13 +537,13 @@ string placeFrameSh(UL_SHEET S){
 	return cmd+"; ";
 }
 
-string addFrameSch(char menu){
+string addFrameSch(char check){
 	string cmd="";
 	project.schematic(Sc){
 		//Checking for a frame in .sch
 		int opt=10; //10 ... no need to place frame jet 
 		Sc.sheets(S){
-			if(checkFrameSh(S)&&(opt%10)==0){
+			if(check && (opt%10)==0){
 				if(opt==10){
 					opt=dlgMessageBox(lanGetText("dlg.setup.noFrameSch"),lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("button.continue"));
 					if (opt == 0){
@@ -561,7 +560,7 @@ string addFrameSch(char menu){
 				}
 			}
 		}
-		if(menu && (opt==10)){
+		if(opt==10){
 			dlgMessageBox(lanGetText("dlg.setup.noFrameNeeded"));
 		}
 	}
@@ -585,7 +584,7 @@ string setLayer(){
 }
 
 void dialogPDFtk(){
-		//todo put text in language file
+	//todo put text in language file
 	int opt = dlgMessageBox(":To merge the pdf-files we use pdftk_server.<br>"+
 					"You can get this tool <a href=\"https://www.pdflabs.com/tools/pdftk-server/\">here</a>.",
 					lanGetText("button.continue"),lanGetText("button.cancel"));
@@ -594,14 +593,21 @@ void dialogPDFtk(){
 	}
 }
 
-string dialogBOM(){
-	int opt = dlgMessageBox(lanGetText("dlg.setup.noBom"), lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("general.no"));
+string dialogBOM(char check){
+	int opt;
+	if(check){
+		opt = dlgMessageBox(lanGetText("dlg.setup.noBom"), lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("general.no"));
+	}
+	else{
+		opt = dlgMessageBox(lanGetText("dlg.setup.Bom"), lanGetText("general.yes"), lanGetText("general.no"));
+		opt++;
+	}
 
 	if(opt==0){
-		return addBomValues();
+		executeButton(addBomValues());
 	}
 	else if (opt==1){
-		exit("RUN '"+filedir(argv[0])+"/SelectPart.ulp';");
+		executeButton("RUN '"+filedir(argv[0])+"/SelectPart.ulp';");
 	}
 
 	return "";
@@ -624,11 +630,15 @@ void dialogDrill(){
 	};
 }
 
-void dialogDRU(){
-	int opt = dlgMessageBox(lanGetText("dlg.setup.stdDRU"), lanGetText("general.yes"), lanGetText("button.continue"));
+void dialogDRU(char check){
+	int opt;
+	if(check)
+		opt = dlgMessageBox(lanGetText("dlg.setup.stdDRU"), lanGetText("general.yes"), lanGetText("general.no"));
+	else
+		opt = dlgMessageBox(lanGetText("dlg.setup.nostdDRU"), lanGetText("general.yes"), lanGetText("general.no"));
 
 	if (opt==0){
-		exit("EDIT .brd;DRC *;");
+		executeButton("EDIT .brd;DRC *;");
 	}
 }
 
@@ -667,7 +677,11 @@ void run(string druname){
 					dlgCheckBox("", c) {c = !c;};
 
 					dlgPushButton(lanGetText("button.add")) {
-						executeButton("EDIT .brd;" + setLayer() + "EDIT .sch;" + setLayer());
+						if (!c){
+							executeButton("EDIT .brd;" + setLayer() + "EDIT .sch;" + setLayer());
+						}
+						
+						dlgMessageBox(lanGetText("dlg.setup.layer"));
 					};
 				}
 				dlgHBoxLayout{ //frame brd
@@ -678,7 +692,7 @@ void run(string druname){
 					dlgCheckBox("", c) {c = !c;};
 
 					dlgPushButton(lanGetText("button.add")) {
-						executeButton("EDIT .brd;"+addFrameBrd(1));
+						executeButton("EDIT .brd;"+addFrameBrd(!c));
 					};
 				}
 				dlgHBoxLayout{ //frame sch
@@ -689,7 +703,7 @@ void run(string druname){
 					dlgCheckBox("", c) {c = !c;};
 					 
 					dlgPushButton(lanGetText("button.add")) {
-						executeButton("EDIT .sch;"+addFrameSch(1));
+						executeButton("EDIT .sch;"+addFrameSch(!c));
 					};
 				}
 				dlgHBoxLayout{ //drill symbols
@@ -700,10 +714,12 @@ void run(string druname){
 					dlgCheckBox("", c) {c = !c;};
 					
 					dlgPushButton(lanGetText("button.add")){
-						if(checkDrillsymbols()) 
+						if(!c) {
 							dialogDrill();
-						else
+						}
+						else{
 							dlgMessageBox(lanGetText("dlg.setup.drillSymbolsCreated"));
+						}
 					};
 				}
 				dlgHBoxLayout{ //Print settings
@@ -714,9 +730,11 @@ void run(string druname){
 					dlgCheckBox("", c) {c = !c;};
 					
 					dlgPushButton(lanGetText("button.add")){
-						if(checkPrintSettings()) 
+						if(!c){ 
 							setPrintSettings(); 
-						executeButton(""); 
+							executeButton(""); 
+						}
+						dlgMessageBox(lanGetText("dlg.setup.print"));
 					};
 				}
 				dlgHBoxLayout{ //PDFtk
@@ -727,8 +745,10 @@ void run(string druname){
 					dlgCheckBox("", c) {c = !c;};
 					
 					dlgPushButton(lanGetText("button.add")){
-						if(checkPDFTK()) 
+						if(!c) 
 							dialogPDFtk();
+						else
+							dlgMessageBox(lanGetText("dlg.setup.pdftk"));
 					};
 				}
 				dlgHBoxLayout{ //BOM
@@ -739,8 +759,7 @@ void run(string druname){
 					dlgCheckBox("", c) {c = !c;};
 					
 					dlgPushButton(lanGetText("button.add")){
-						if(checkBOM()) 
-							executeButton(dialogBOM());
+						dialogBOM(!c);
 					};
 				}
 				dlgHBoxLayout{ //DRU
@@ -751,15 +770,14 @@ void run(string druname){
 					dlgCheckBox("", c) {c = !c;};
 					
 					dlgPushButton(lanGetText("button.add")){
-						if(checkDRU(druname)) 
-							dialogDRU();
+						dialogDRU(!c);
 					};
 				}
 			}
 			dlgHBoxLayout{
 				dlgStretch(1); 
 				dlgPushButton(lanGetText("button.setup.back")) { dlgAccept(); exit("RUN '"+filedir(argv[0])+"/ExportPro.ulp';");};
-				dlgPushButton(lanGetText("button.cancel"));
+				dlgPushButton(lanGetText("button.cancel")) {dlgReject();};
 			}
 		};
 	}
