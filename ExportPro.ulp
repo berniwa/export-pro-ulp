@@ -1770,7 +1770,7 @@ void dialogImageSettings(){
 					}
 					else {
 						dlgCheckBox(lanGetText("settings.pdf.Merge")+"*", 	pdf_merge);
-						dlgLabel("* "lanGetText("dlg.pfd.footnote"));
+						dlgLabel("* " + lanGetText("dlg.pfd.footnote"));
 					}
 					dlgStretch(1);
 				}
