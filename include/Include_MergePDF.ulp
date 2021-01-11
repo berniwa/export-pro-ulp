@@ -52,8 +52,7 @@ void main(){
 	}
 
 	if(system("CMD.EXE /C " + filedir(argv[0]) + "../bin/CheckPDFTK.bat")==-1){
-		dlgMessageBox(":To merge the pdf-files we use pdftk_server.<br>"+
-						"You can get this tool <a href=\"https://www.pdflabs.com/tools/pdftk-server/\">here</a>.");
+		dlgMessageBox(":"+argv[6]);
 		exit("");
 	}
 

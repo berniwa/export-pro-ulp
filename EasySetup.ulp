@@ -596,8 +596,7 @@ string setLayer(){
 
 void dialogPDFtk(){
 	//todo put text in language file
-	int opt = dlgMessageBox(":To merge the pdf-files we use pdftk_server.<br>"+
-					"You can get this tool <a href=\"https://www.pdflabs.com/tools/pdftk-server/\">here</a>.",
+	int opt = dlgMessageBox(":"+lanGetText("dlg.pfd.footnote"),
 					lanGetText("button.continue"),lanGetText("button.cancel"));
 	if (opt){
 		exit("");

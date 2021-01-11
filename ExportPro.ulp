@@ -1582,10 +1582,11 @@ void export(){
 	}
 
 	if(pdf_merge&&enable_export_pdf){
-		sprintf(cmd,"%sRUN '%sMergePDF.ulp' %d '%s' '%s' %d %d;\n", cmd, include_path, 
+		sprintf(cmd,"%sRUN '%sMergePDF.ulp' %d '%s' '%s' %d %d '%s';\n", cmd, include_path, 
 			output_date_folder, output_folder_pdf,
 			getSystemFilename(".bat"), 
-			(schematic_export&&schematic_color), (bomToPDF&&bom)
+			(schematic_export&&schematic_color), (bomToPDF&&bom),
+			lanGetText("dlg.pdf.footnote")
 		);
 	}
 
@@ -1769,7 +1770,7 @@ void dialogImageSettings(){
 					}
 					else {
 						dlgCheckBox(lanGetText("settings.pdf.Merge")+"*", 	pdf_merge);
-						dlgLabel(lanGetText("dlg.pfd.footnote"));
+						dlgLabel("* "lanGetText("dlg.pfd.footnote"));
 					}
 					dlgStretch(1);
 				}
