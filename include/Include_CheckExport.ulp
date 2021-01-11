@@ -1,5 +1,5 @@
 
-//all checks return 0 if everything is corect and 1 if somthing needs to be added
+//most checks return 0 if everything is corect and 1 if somthing needs to be added
 
 #include "Include_Boardsize.ulp";
 #include "Include_BomCommon.ulp";
@@ -130,17 +130,17 @@ char checkFrameSch(){
 	return c;
 }
 
-char checkFrameBrd(){
-	char isFrameAdded = 0;
+string checkFrameBrd(){
+	string frame = "";
 	project.board(B){
 		B.elements(E){
 			if(strstr(strupr(E.package.name),"FRAME")!=-1){
-			    isFrameAdded = 1;
+			    frame = E.name;
 			}
 		}
 	}
 
-	return !isFrameAdded;
+	return frame;
 }
 
 char checkDRU(string druname){
@@ -189,7 +189,7 @@ char checkAll(string druname){
 	checkFlag += checkLayerBrd();
 	checkFlag += checkLayerSch();
 	checkFlag += checkFrameSch();
-	checkFlag += checkFrameBrd();
+	checkFlag += (checkFrameBrd() == "");
 	checkFlag += checkDRU(druname);
 
 	return checkFlag;

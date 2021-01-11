@@ -173,21 +173,28 @@ string placeFrameBrd(){
 	return cmd+"; ";
 }
 
-string addFrameBrd(char check){
-	string cmd="";
+string addFrameBrd(string frame){
+	string cmd="EDIT .brd;";
 	project.board(B){
-		if (check){
-			int opt = dlgMessageBox(lanGetText("dlg.setup.noFrame"),lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("button.continue"));
-			if(opt == 0) {
-				cmd += placeFrameBrd();
-			}
-			else if (opt == 1){
-				cmd += "add 'FRAME*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
-				exit(cmd);
+		int opt;
+		if (frame == ""){
+			opt = dlgMessageBox(lanGetText("dlg.setup.noFrame"),lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("button.continue"));
+		}
+		else{
+			opt = dlgMessageBox(lanGetText("dlg.setup.noFrameNeeded"),lanGetText("general.yes"), lanGetText("general.no"));
+			opt++;
+			if (opt == 1){
+				cmd += "DELETE " + frame + ";";
 			}
 		}
-		
-		dlgMessageBox(lanGetText("dlg.setup.noFrameNeeded"));
+
+		if(opt == 0) {
+			cmd += placeFrameBrd();
+		}
+		else if (opt == 1){
+			cmd += "add 'FRAME*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
+			exit(cmd);
+		}
 	}
 	return cmd;
 }
@@ -538,7 +545,7 @@ string placeFrameSh(UL_SHEET S){
 }
 
 string addFrameSch(char check){
-	string cmd="";
+	string cmd="EDIT .sch;";
 	project.schematic(Sc){
 		//Checking for a frame in .sch
 		int opt=10; //10 ... no need to place frame jet 
@@ -561,7 +568,11 @@ string addFrameSch(char check){
 			}
 		}
 		if(opt==10){
-			dlgMessageBox(lanGetText("dlg.setup.noFrameNeeded"));
+			opt = dlgMessageBox(lanGetText("dlg.setup.noFrameNeeded"),lanGetText("general.yes"), lanGetText("general.no"));
+			if(opt == 0){
+				cmd += "ADD 'XDEVELOP*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
+				exit(cmd);
+			}
 		}
 	}
 	return cmd;
@@ -688,11 +699,12 @@ void run(string druname){
 					dlgLabel(lanGetText("settings.setup.FrameBrd")); 
 					dlgStretch(1); 
 
-					int c = !(checkFrameBrd());
+					string frame = checkFrameBrd();
+					int c = (frame != "");
 					dlgCheckBox("", c) {c = !c;};
 
 					dlgPushButton(lanGetText("button.add")) {
-						executeButton("EDIT .brd;"+addFrameBrd(!c));
+						executeButton(addFrameBrd(frame));
 					};
 				}
 				dlgHBoxLayout{ //frame sch
@@ -703,7 +715,7 @@ void run(string druname){
 					dlgCheckBox("", c) {c = !c;};
 					 
 					dlgPushButton(lanGetText("button.add")) {
-						executeButton("EDIT .sch;"+addFrameSch(!c));
+						executeButton(addFrameSch(!c));
 					};
 				}
 				dlgHBoxLayout{ //drill symbols
