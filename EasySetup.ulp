@@ -22,6 +22,8 @@ int debugVal(string msg, int val){
 char prefix[] = {'R', 'k', 'M', 'G', 'T'};
 string stdDistributor = "xdevelop";
 
+string druname = argv[1]; 	//even tho i dont like using global variables this is the cleanest solution
+
 string getTolerance(int select){
 	string tol="";
 
@@ -147,7 +149,7 @@ string addBomValues(){
 }
 
 void executeButton(string cmd){
-	cmd += "RUN "+argv[0]+" 1;";
+	cmd += "RUN \'" + argv[0] + "\' \'" + druname + "\';";
 	exit(cmd);
 }
 
@@ -648,11 +650,16 @@ void dialogDRU(char check){
 		opt = dlgMessageBox(lanGetText("dlg.setup.nostdDRU"), lanGetText("general.yes"), lanGetText("general.no"));
 
 	if (opt==0){
-		executeButton("EDIT .brd;DRC *;");
+		string cmd = "";
+		cmd += "EDIT .brd;";
+		cmd += "DRC *;";
+		cmd += "DRC SAVE \'" + druname + "\'; ";
+
+		executeButton(cmd);
 	}
 }
 
-void run(string druname){
+void run(){
 	loadConfig();
 
 	lanLoadText(cfg_textLanguage);
@@ -669,9 +676,7 @@ void run(string druname){
 		}
 
 		cmd += "DRC SAVE \'" + druname + "\'; ";
-		sprintf(cmd, "%sRUN \'%s\' \'%s\'", cmd, argv[0], druname);
-
-		exit(cmd);
+		executeButton(cmd);
 	}
 	else {
 		//not file type specific settings 
@@ -799,4 +804,4 @@ void run(string druname){
 	}
 }
 
-run(argv[1]);
+run();
