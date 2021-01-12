@@ -15,6 +15,7 @@
 #include "Include_Misc.ulp";
 #include "Include_String.ulp";
 #include "Include_Config.ulp";
+#include "Include_Language.ulp";
 
 int ram = 2147483647;	//in byte
 int bytePerPixel = 4;	//R,G,B,Alpha
@@ -145,8 +146,11 @@ void exportImages(int imgExport, int pdfExport,
 	if((height*real(resolution)*width*real(resolution)*real(bytePerPixel)>ram) && imgExport){
 		resolution = int(sqrt(ram/(height*width*bytePerPixel)));
 
+		loadConfig();
+		lanLoadText(cfg_textLanguage);
+
 		string tmp;
-		sprintf(tmp,":PCB image would be to large to export <br>Resolution will be set to: %ddpi",resolution);
+		sprintf(tmp,":%s %ddpi", lanGetText("dlg.imag.resWarning"), resolution); 
 		dlgMessageBox(tmp);
 	}
 
