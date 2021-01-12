@@ -20,7 +20,10 @@ cfg_defaultTolerance = "1%",
 cfg_defaultVoltage = "50V"
 ;
 
-int cfg_enableAsync = 1;
+int 
+cfg_enableAsync = 1,
+cfg_ulpInMenue = 0
+;
 
 char exp_window = 0; //png export window or drawing
 
@@ -44,7 +47,8 @@ void saveConfig() {
 	cfgset("ULP:ExportPro.pricingURL",cfg_pricingURL);
 	cfgset("ULP:ExportPro.defaultTolerance",cfg_defaultTolerance);
 	cfgset("ULP:ExportPro.defaultVoltage",cfg_defaultVoltage);
-	cfgset("ULP:ExportPro.cfg_enableAsync",(cfg_enableAsync?"1":"0"));
+	cfgset("ULP:ExportPro.enableAsync",(cfg_enableAsync?"1":"0"));
+	cfgset("ULP:ExportPro.ulpInMenue",(cfg_ulpInMenue?"1":"0"));
 
 	if(cfg_bomPreNames[1]!=""){
 		string data="";
@@ -91,6 +95,7 @@ string isNotMenu(){
 
 void setToMenu(){
 	string pathULP = filedir(argv[0]);
+
 
 	if(strstr(pathULP,"/include")!=-1) {
 		pathULP += "/../";
@@ -187,7 +192,8 @@ char editUserConfig(){
 
 	if(!cfg_userName){ //first start of the ulp
 		int opt = dlgMessageBox(lanGetText("dlg.add2Menu"),lanGetText("general.yes"),lanGetText("general.no"));
-		if (!opt){
+		if (opt == 0){
+			cfg_ulpInMenue = 1;
 			setToMenu();
 		}
 	} 
@@ -219,7 +225,10 @@ char editUserConfig(){
 					dlgCell(6, 1) dlgCheckBox("",cfg_enableAsync);
 				}
 				if(isNotMenu()){
-					dlgPushButton(lanGetText("settings.menu")){setToMenu();};
+					dlgPushButton(lanGetText("settings.menu")){
+						cfg_ulpInMenue = 1;
+						setToMenu();
+					};
 				}
 			}
 
@@ -248,10 +257,11 @@ void loadConfig(){
 	cfg_pricingURL 			= cfgget("ULP:ExportPro.pricingURL", cfg_pricingURL);
 	cfg_defaultTolerance 	= cfgget("ULP:ExportPro.defaultTolerance", cfg_defaultTolerance);
 	cfg_defaultVoltage 		= cfgget("ULP:ExportPro.defaultVoltage", cfg_defaultVoltage);
-	cfg_enableAsync 		= strtol(cfgget("ULP:ExportPro.cfg_enableAsync", (cfg_enableAsync?"1":"0")));
+	cfg_enableAsync 		= strtol(cfgget("ULP:ExportPro.enableAsync", (cfg_enableAsync?"1":"0")));
+	cfg_ulpInMenue 		= strtol(cfgget("ULP:ExportPro.ulpInMenue", (cfg_ulpInMenue?"1":"0")));
 	string tmp 				= cfgget("ULP:ExportPro.bomPresets");
 
-	if(isNotMenu()){
+	if(isNotMenu() && cfg_ulpInMenue){
 		updateManu();
 	}
 
