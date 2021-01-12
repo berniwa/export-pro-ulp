@@ -688,10 +688,12 @@ void run(string druname){
 
 					dlgPushButton(lanGetText("button.add")) {
 						if (!c){
+							dlgMessageBox(lanGetText("dlg.setup.layer"));
 							executeButton("EDIT .brd;" + setLayer() + "EDIT .sch;" + setLayer());
 						}
-						
-						dlgMessageBox(lanGetText("dlg.setup.layer"));
+						else {
+							dlgMessageBox(lanGetText("dlg.setup.layer"));
+						}
 					};
 				}
 				dlgHBoxLayout{ //frame brd
@@ -742,10 +744,13 @@ void run(string druname){
 					
 					dlgPushButton(lanGetText("button.add")){
 						if(!c){ 
-							setPrintSettings(); 
+							setPrintSettings();
+							dlgMessageBox(lanGetText("dlg.setup.print"));
 							executeButton(""); 
 						}
-						dlgMessageBox(lanGetText("dlg.setup.print"));
+						else {
+							dlgMessageBox(lanGetText("dlg.setup.print"));
+						}
 					};
 				}
 				dlgHBoxLayout{ //PDFtk
