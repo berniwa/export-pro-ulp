@@ -142,7 +142,7 @@ void exportImages(int imgExport, int pdfExport,
 		cmd += "SET CONFIRM YES;\n";
 	}
 
-	if(height*real(resolution)*width*real(resolution)*real(bytePerPixel)>ram){
+	if((height*real(resolution)*width*real(resolution)*real(bytePerPixel)>ram) && imgExport){
 		resolution = int(sqrt(ram/(height*width*bytePerPixel)));
 
 		string tmp;
@@ -218,7 +218,6 @@ void exportImages(int imgExport, int pdfExport,
 	string layers = "";
 
 	board(B) {
-		
 		B.layers(L) {
 			if(L.visible) {
 				sprintf(layers, layers + " %d", L.number);
