@@ -1043,7 +1043,7 @@ string pngExport(string folder, string index){
 					"DISPLAY " + fields[3] + "; " +
 					"RUN " + include_path + "ZoomVisible.ulp; " + 
 					"SET CONFIRM YES; " + 
-					"EXPORT IMAGE '" + folder + stringTrim(fields[1]) + ".png' WINDOW MONOCHROME "+tmp+";";	
+					"EXPORT IMAGE '" + folder + stringTrim(fields[1]) + ".png' " + (exp_window?"WINDOW":"") + " MONOCHROME " + tmp + ";";	
 
 	//to mirror the png within eagle
 	if(mirror_bot && (strchr(fields[6],'1')!=-1)){
@@ -2226,7 +2226,19 @@ void mainManu(){
 			dlgPushButton(lanGetText("button.ok")) {
 				saveUsersettings();
 
-				exit("DRC; RUN '" + getUlpDir("../ExportPro.ulp") + "' execute;");
+				string cmd = "";
+				cmd += "DRC;";
+
+				cmd += "DISPLAY NONE 20;";
+				cmd += "RUN '" + include_path + "ZoomVisible.ulp';";
+				cmd += "SET CONFIRM YES;";
+				cmd += "EXPORT IMAGE '" + bname + "window.png' WINDOW 10;";
+				cmd += "EXPORT IMAGE '" + bname + "all.png' 10;";
+				cmd += "DISPLAY LAST;";
+				cmd += "WINDOW LAST;";
+
+				cmd += "RUN '" + getUlpDir("../ExportPro.ulp") + "' execute;";
+				exit(cmd);
 			};
 			dlgPushButton(lanGetText("button.cancel")) {
 				saveUsersettings();

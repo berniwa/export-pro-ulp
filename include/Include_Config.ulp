@@ -22,6 +22,8 @@ cfg_defaultVoltage = "50V"
 
 int cfg_enableAsync = 1;
 
+char exp_window = 0; //png export window or drawing
+
 int 
 lay_dimension = 123,
 lay_background = 124,
@@ -240,7 +242,6 @@ char editUserConfig(){
 }
 
 void loadConfig(){
-	
 	cfg_textLanguage 		= cfgget("ULP:ExportPro.language" ,(language()+".txt"));
 	cfg_userName 			= cfgget("ULP:ExportPro.userName");
 	cfg_shortUserName 		= cfgget("ULP:ExportPro.shortUserName");
@@ -253,6 +254,7 @@ void loadConfig(){
 	if(isNotMenu()){
 		updateManu();
 	}
+
 	if(tmp!=""){
 		string tmpa[];
 		string tmpb[];
@@ -269,8 +271,24 @@ void loadConfig(){
 			cfg_bomPreWidth[n+1]=strtod(tmpb[3]);
 		}
 	}
+
 	if(cfg_userName=="") {
 		//first time the ulp is started
 		editUserConfig();
+	}
+
+	project.board(B){
+		int all = filesize(filedir(B.name) + "all.png");
+		int window = filesize(filedir(B.name) + "window.png");
+		if (all && window){
+			exp_window = (window <= all)?1:0;
+
+			string cmd = "CMD.EXE /C ";
+			cmd += "DEL /F /Q \"" + stringReplace(filedir(B.name),"/","\\") + "all.png\" & ";
+			cmd += "DEL /F /Q \"" + stringReplace(filedir(B.name),"/","\\") + "window.png\"";
+			//cmd += " & pause";
+			//dlgMessageBox(stringFromInt(exp_window));
+			system(cmd);
+		}
 	}
 }

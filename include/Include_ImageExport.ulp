@@ -17,7 +17,7 @@
 #include "Include_Config.ulp";
 #include "Include_Language.ulp";
 
-int ram = 2147483647;	//in byte
+int ram = (2 * 1024 * 1024 * 1024) - 1;//almost 2GB in byte //"almost" because 2GB wouldn't fit in int
 int bytePerPixel = 4;	//R,G,B,Alpha
 string 
 _dimensionL = stringFromInt(lay_dimension),
@@ -76,6 +76,8 @@ void exportImages(int imgExport, int pdfExport,
 	string bsilcLayers, int format, int frame, int async
 	) {
 	
+	loadConfig();
+
 	string cmd = "";
 
 	string bname = "";
@@ -146,7 +148,6 @@ void exportImages(int imgExport, int pdfExport,
 	if((height*real(resolution)*width*real(resolution)*real(bytePerPixel)>ram) && imgExport){
 		resolution = int(sqrt(ram/(height*width*bytePerPixel)));
 
-		loadConfig();
 		lanLoadText(cfg_textLanguage);
 
 		string tmp;
@@ -158,7 +159,7 @@ void exportImages(int imgExport, int pdfExport,
 		cmd += "DISPLAY NONE;DISPLAY 1 18 29 "+tsilcLayers+" "+versionLayer+";\n";
 		if (imgExport) {
 			cmd += "RUN " + getUlpDir("Include_") + "ZoomVisible.ulp;";
-			sprintf(cmd, "%s EXPORT IMAGE '%s' WINDOW  %d;\n", cmd, topImage, resolution);
+			sprintf(cmd, "%s EXPORT IMAGE '%s' %s %d;\n", cmd, topImage, (exp_window?"WINDOW":""), resolution);
 		}
 		
 		if (pdfExport) {
@@ -176,7 +177,7 @@ void exportImages(int imgExport, int pdfExport,
 		if (imgExport) {
 			cmd += mirror?"window flip;":"";
 			cmd += "RUN " + getUlpDir("Include_") + "ZoomVisible.ulp;";
-			sprintf(cmd, "%s EXPORT IMAGE '%s' WINDOW %d;\n", cmd, botImage, resolution);
+			sprintf(cmd, "%s EXPORT IMAGE '%s' %s %d;\n", cmd, botImage, (exp_window?"WINDOW":""), resolution);
 			cmd += mirror?"window flip;":"";
 		}
 		

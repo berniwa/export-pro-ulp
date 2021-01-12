@@ -32,20 +32,7 @@ void drcLoadRules(string drc, int load){
 		//Load DRC file
 		drcLines = fileread(drcContent, drc);
 	}
-	else if(load==2){
-		//Export DRC file and re-run ULP in execute mode
-		string cmd = "";
-
-		if(schematic){
-			cmd += "EDIT .brd;";
-		}
-
-		cmd += "DRC SAVE \'" + drc + "\';";
-		cmd += "RUN '" + getUlpDir("../ExportPro.ulp") + "' execute drcIgnore;";
-
-		exit(cmd);
-	}
-	else{
+	else if(load == 1){
 		//Export DRC file and re-run ULP
 		string cmd = "";
 
@@ -55,6 +42,28 @@ void drcLoadRules(string drc, int load){
 
 		cmd += "DRC SAVE \'" + drc + "\';";
 		cmd += "RUN '" + getUlpDir("../ExportPro.ulp") + "' drcLoaded;";
+
+		exit(cmd);
+	}
+	else if(load==2){
+		//Export DRC file and re-run ULP in execute mode
+		string cmd = "";
+
+		if(schematic){
+			cmd += "EDIT .brd;";
+		}
+
+		cmd += "DRC SAVE \'" + drc + "\';";
+
+		cmd += "DISPLAY NONE 20;";
+		cmd += "RUN '" +  getUlpDir("Include_ZoomVisible.ulp") + "';";
+		cmd += "SET CONFIRM YES;";
+		cmd += "EXPORT IMAGE '" + filedir(drc) + "window.png' WINDOW 10;";
+		cmd += "EXPORT IMAGE '" + filedir(drc) + "all.png' 10;";
+		cmd += "DISPLAY LAST;";
+		cmd += "WINDOW LAST;";
+
+		cmd += "RUN '" + getUlpDir("../ExportPro.ulp") + "' execute drcIgnore;";
 
 		exit(cmd);
 	}
