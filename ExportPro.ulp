@@ -891,14 +891,6 @@ string updateFrameInformationSch(){
 		if(strstr(attribute,"USERNAME")!=-1) {
 			cmd += "ATTRIBUTE " + name[j] + " USERNAME DELETE;\n";
 		}
-		if (schematic_format){
-			if(strstr(attribute,"OBJECT_NO")==-1) {
-				cmd += "ATTRIBUTE " + name[j] + " OBJECT_NO '';\n";
-			}
-			if(strstr(attribute,"CREATE_DATE")==-1) {
-				cmd += "ATTRIBUTE " + name[j] + " CREATE_DATE '';\n";
-			}
-		}
 		*/
 
 		
@@ -911,9 +903,20 @@ string updateFrameInformationSch(){
 	 	sprintf(cmd, "%sATTRIBUTE %s DRAWING \'Schematic\';\n", cmd, name[j]);
 	 	sprintf(cmd, "%sATTRIBUTE %s FILENAME \'%s\';\n", cmd, name[j], schname);
 	 	sprintf(cmd, "%sATTRIBUTE %s USERNAME \'%s\';\n", cmd, name[j], cfg_userName);
-	 	//sprintf(cmd, "%sATTRIBUTE %s SHORTNAME \'%s\'; ", cmd, name[j], cfg_shortUserName);
 	 	sprintf(cmd, "%sATTRIBUTE %s TITLE \'%s\';\n", cmd, name[j], board_title);
 	 	sprintf(cmd, "%sATTRIBUTE %s SUBTITLE \'%s\';\n", cmd, name[j], board_subtitle);
+
+		if (schematic_format){
+			if(strstr(attribute,"OBJECT_NO")==-1) {
+				cmd += "ATTRIBUTE " + name[j] + " OBJECT_NO '';";
+			}
+			if(strstr(attribute,"CREATE_DATE")==-1) {
+				cmd += "ATTRIBUTE " + name[j] + " CREATE_DATE '';";
+			}
+		}
+		else {	//shortname is only present in the A4 frame
+	 		sprintf(cmd, "%sATTRIBUTE %s SHORTNAME \'%s\'; ", cmd, name[j], cfg_shortUserName);
+		}
 
 	 	if(EAGLE_VERSION>=9){
 	 		cmd += "REPOSITION " + name[j] + ";\n\n";
@@ -969,14 +972,6 @@ string updateFrameInformationBrd(string drawing){
 		if(strstr(attribute,"SHORTNAME")!=-1) {
 			cmd += "ATTRIBUTE " + name + " SHORTNAME DELETE;";
 		}
-		if (board_format){
-			if(strstr(attribute,"OBJECT_NO")==-1) {
-				cmd += "ATTRIBUTE " + name + " OBJECT_NO '';";
-			}
-			if(strstr(attribute,"CREATE_DATE")==-1) {
-				cmd += "ATTRIBUTE " + name + " CREATE_DATE '';";
-			}
-		}
 		*/
 
 
@@ -991,6 +986,18 @@ string updateFrameInformationBrd(string drawing){
 	 	sprintf(cmd, "%sATTRIBUTE %s SHORTNAME \'%s\'; ", cmd, name, cfg_shortUserName);
 	 	sprintf(cmd, "%sATTRIBUTE %s TITLE \'%s\'; ", cmd, name, board_title);
 	 	sprintf(cmd, "%sATTRIBUTE %s SUBTITLE \'%s\'; ", cmd, name, board_subtitle);
+
+		if (board_format){
+			if(strstr(attribute,"OBJECT_NO")==-1) {
+				cmd += "ATTRIBUTE " + name + " OBJECT_NO '';";
+			}
+			if(strstr(attribute,"CREATE_DATE")==-1) {
+				cmd += "ATTRIBUTE " + name + " CREATE_DATE '';";
+			}
+		}
+		else { //shortname is only present in the A4 frame
+	 		sprintf(cmd, "%sATTRIBUTE %s SHORTNAME \'%s\'; ", cmd, name, cfg_shortUserName);
+		}
 
 	 	if(EAGLE_VERSION>=9){
 	 		cmd += "REPOSITION " + name + "; ";
