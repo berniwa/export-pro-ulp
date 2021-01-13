@@ -190,7 +190,7 @@ char editUserConfig(){
 	string lastLanguage = cfg_textLanguage;
 	lanLoadText(cfg_textLanguage);
 
-	if(!cfg_userName){ //first start of the ulp
+	if(!cfg_userName && !cfg_ulpInMenu){ //first start of the ulp
 		int opt = dlgMessageBox(lanGetText("dlg.add2Menu"),lanGetText("general.yes"),lanGetText("general.no"));
 		if (opt == 0){
 			cfg_ulpInMenu = 1;
