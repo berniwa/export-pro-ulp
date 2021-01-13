@@ -22,7 +22,7 @@ cfg_defaultVoltage = "50V"
 
 int 
 cfg_enableAsync = 1,
-cfg_ulpInMenue = 0
+cfg_ulpInMenu = 0
 ;
 
 char exp_window = 0; //png export window or drawing
@@ -48,7 +48,7 @@ void saveConfig() {
 	cfgset("ULP:ExportPro.defaultTolerance",cfg_defaultTolerance);
 	cfgset("ULP:ExportPro.defaultVoltage",cfg_defaultVoltage);
 	cfgset("ULP:ExportPro.enableAsync",(cfg_enableAsync?"1":"0"));
-	cfgset("ULP:ExportPro.ulpInMenue",(cfg_ulpInMenue?"1":"0"));
+	cfgset("ULP:ExportPro.ulpInMenu",(cfg_ulpInMenu?"1":"0"));
 
 	if(cfg_bomPreNames[1]!=""){
 		string data="";
@@ -193,7 +193,7 @@ char editUserConfig(){
 	if(!cfg_userName){ //first start of the ulp
 		int opt = dlgMessageBox(lanGetText("dlg.add2Menu"),lanGetText("general.yes"),lanGetText("general.no"));
 		if (opt == 0){
-			cfg_ulpInMenue = 1;
+			cfg_ulpInMenu = 1;
 			setToMenu();
 		}
 	} 
@@ -226,7 +226,7 @@ char editUserConfig(){
 				}
 				if(isNotMenu()){
 					dlgPushButton(lanGetText("settings.menu")){
-						cfg_ulpInMenue = 1;
+						cfg_ulpInMenu = 1;
 						setToMenu();
 					};
 				}
@@ -258,10 +258,10 @@ void loadConfig(){
 	cfg_defaultTolerance 	= cfgget("ULP:ExportPro.defaultTolerance", cfg_defaultTolerance);
 	cfg_defaultVoltage 		= cfgget("ULP:ExportPro.defaultVoltage", cfg_defaultVoltage);
 	cfg_enableAsync 		= strtol(cfgget("ULP:ExportPro.enableAsync", (cfg_enableAsync?"1":"0")));
-	cfg_ulpInMenue 		= strtol(cfgget("ULP:ExportPro.ulpInMenue", (cfg_ulpInMenue?"1":"0")));
+	cfg_ulpInMenu 		= strtol(cfgget("ULP:ExportPro.ulpInMenu", (cfg_ulpInMenu?"1":"0")));
 	string tmp 				= cfgget("ULP:ExportPro.bomPresets");
 
-	if(isNotMenu() && cfg_ulpInMenue){
+	if(isNotMenu() && cfg_ulpInMenu){
 		updateManu();
 	}
 
