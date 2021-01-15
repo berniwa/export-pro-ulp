@@ -194,6 +194,7 @@ string addFrameBrd(string frame){
 			cmd += placeFrameBrd();
 		}
 		else if (opt == 1){
+			cmd += "DISPLAY 153;";
 			cmd += "add 'FRAME*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
 			exit(cmd);
 		}
@@ -560,6 +561,7 @@ string addFrameSch(char check){
 					}
 					else if(opt==1){
 						sprintf(cmd, "%sEDIT .s%d; ", cmd, S.number);
+						cmd += "DISPLAY 153;";
 						cmd += "ADD 'XDEVELOP*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
 						exit(cmd);
 					}
