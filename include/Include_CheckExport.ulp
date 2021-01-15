@@ -82,7 +82,7 @@ char checkLayerBrd(){
 	project.board(B){
 		B.layers(L){
 			for(i=0;lay_fabDoc[i];i++){
-				if ((L.number == lay_fabDoc[i]) && L.visible){
+				if (L.number == lay_fabDoc[i]){
 					lay++;
 				}
 			}
@@ -97,7 +97,7 @@ char checkLayerSch(){
 	project.schematic(SCH){
 		SCH.layers(L){
 			for(i=0;lay_fabDoc[i];i++){
-				if ((L.number == lay_fabDoc[i]) && L.visible){
+				if (L.number == lay_fabDoc[i]){
 					lay++;
 				}
 			}
