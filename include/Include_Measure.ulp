@@ -489,9 +489,11 @@ board(B) {
 		}
 	}
 	B.holes(D) {
-		drills_x[drill_count] = D.x;
-		drills_y[drill_count] = D.y;
-		drills_radius[drill_count++] = D.drill / 2;
+		if(u2mm(D.drill) > minMeasureDiameter) {//Use Holes > 2.0mm as mounting holes
+			drills_x[drill_count] = D.x;
+			drills_y[drill_count] = D.y;
+			drills_radius[drill_count++] = D.drill / 2;
+		}
 	}
 	B.signals(S) {
 		S.vias(D) {
