@@ -207,6 +207,8 @@ void loadDRCSettings(){
 	int layerCount=0;
 	for(int i=0;i<strlen(layerSetup);i++){
 		if(isdigit(layerSetup[i])){
+			//debugVal(""+layerSetup[i]+":", layerCount);
+
 			layer[layerCount]+=strtol(""+layerSetup[i]);
 
 			if(isdigit(layerSetup[i+1])){
@@ -217,6 +219,16 @@ void loadDRCSettings(){
 			}
 		}
 	}
+	sort(layerCount, layer);
+	for(int j=0, y=0; j<layerCount;j++){
+		if(layer[j] != layer[y]){
+			layer[++y] = layer[j];
+			//debugVal(""+layer[y]+":", y);
+		}
+	}
+	layerCount=++y;
+
+	//debugVal("Layercount:", layerCount);
 
 	string copper[]; 
 	strsplit(copper, drcGetRule("mtCopper"), ' ');
@@ -228,7 +240,7 @@ void loadDRCSettings(){
 	board_copper_thickness = 0.0;
 
 	real conFakt=0;
-	i=0;	//Yes this works
+	i=0;	//Yes this works //nope it did not, but I'll fix it
 	for (int l=0;l<16;l++) {
 		if(l<(layerCount-1)){
 			board_thickness += convert2mm(isolate[l]);
