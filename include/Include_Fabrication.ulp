@@ -88,6 +88,17 @@ string Symbol[] = {
 "C 22 42,W 00 44"};
 
 
+void debugMsg(string msg){
+	//to prevent debug messages to apear in releace
+	dlgMessageBox(msg);
+}
+
+void debugVal(string msg, int val){
+	sprintf(msg,"%s%d",msg,val);
+	debugMsg(msg);
+}
+
+
 /**
  * Analyze the DRU data
  * Note: Blind via handling is currently not implemented
@@ -119,6 +130,8 @@ void analyzeDru(){
 	int layerCurrent 			= 0;
 	int isolationCurrent 		= 0;
 
+	//debugMsg(layerSetup);
+
 	//String in Eagle are zero terminated
 	for(i = 0; layerSetup[i]; i++){
 		//dlgMessageBox("S: " + layerSetup[i]);
@@ -127,6 +140,8 @@ void analyzeDru(){
 		} else if (layerSetup[i] == ')'){	//Via ends
 			viaLayerStop[viaLayerStopCurrent++]	= layerCurrent;
 		} else if (layerSetup[i] == '['){	//Blind via start
+
+		} else if (layerSetup[i] == ':'){	//Blind via
 
 		} else if (layerSetup[i] == ']'){	//Blind via end
 
@@ -145,6 +160,18 @@ void analyzeDru(){
 			}
 			layers[layerCurrent++]	= layer;
 		}
+	}
+
+
+	sort(layerCurrent, layers);
+	for(int j=0, y=0; j<layerCurrent;j++){
+		if(layers[j] != layers[y]){
+			layers[++y] = layers[j];
+			//debugVal(""+layers[y]+":", y);
+		}
+	}
+	for(i = y+1; i<layerCurrent;i++){
+		layers[i] = 0;
 	}
 
 	//Load layer heights
@@ -533,7 +560,7 @@ void run(int info, int drilltable, int stackup, string PcbMaterial, string Stopm
 		data += drawRow(startX, startY, row++, 0, 0, colsMain, ";Silkscreen;;");
 		data += drawRow(startX, startY, row++, 0, 0, colsMain, ";Stopmask;;");
 		for(i = 0; i < LAYERS_MAX; i++){
-			sprintf(buffer, "%s;Copper;L%d: %s", layerThicknesses[i], layers[i], layerNames[i]);
+			sprintf(buffer, "%s;Copper;L%d: %s", layerThicknesses[layers[i]-1], layers[i], layerNames[i]);
 			data += drawRow(startX, startY, row++, 0, 0, colsMain, buffer);
 			
 			//Build stackup
