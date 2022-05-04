@@ -1,0 +1,196 @@
+
+//most checks return 0 if everything is corect and 1 if somthing needs to be added
+
+#include "Include_Boardsize.ulp";
+#include "Include_BomCommon.ulp";
+#include "Include_BomCategory.ulp";
+#include "Include_BomConfig.ulp";
+#include "Include_BomPricing.ulp";
+#include "Include_Si.ulp";
+
+char checkBOM(){
+	//check if there are specific bom entrys
+	bomLoadData();
+	char hasDist = 1, hasManu = 1, hasONr = 1;
+	for(int l=0; l<partcount && (hasDist||hasManu||hasONr); l++){
+		if(distributor[l])
+			hasDist = 0;
+		
+		if(manufacturer[l])
+			hasManu = 0;
+		
+		if(order_no[l])
+			hasONr = 0;
+	}
+	return (hasDist || hasManu || hasONr) && partcount; //&& partcount is necasary to avoid a wrong check with empty boards e.g. gerber frames
+}
+
+char checkPDFTK(){
+	if(system("CMD.EXE /C " + filedir(argv[0]) + "bin/CheckPDFTK.bat")==-1){
+		return 1;
+	}
+	return 0;
+}
+
+char checkPrintSettings(){
+	if (cfgget("EAGLE:Printer.Border.Top")!="50000" ||
+		cfgget("EAGLE:Printer.Border.Bottom")!="50000" ||
+		cfgget("EAGLE:Printer.Border.Right")!="50000" ||
+		cfgget("EAGLE:Printer.Border.Left")!="200000"||
+		cfgget("EAGLE:Printer.Caption")!="0"){
+
+		return 1;
+	}
+	return 0;
+}
+
+char checkDrillsymbols(){
+	char cDrillSymbols = 0;
+	project.board(B){
+		B.holes(H) {
+			if(!H.drillsymbol){
+				cDrillSymbols=1;
+			}
+		}
+		B.signals(S){
+			S.vias(V){
+				if(!V.drillsymbol){
+					cDrillSymbols=1;
+				}
+			}
+		}
+		B.elements(E) {
+			E.package.contacts(C) {
+				if(C.pad && (!C.pad.drillsymbol)){
+					cDrillSymbols=1;
+				}
+			}
+			E.package.holes(H) {
+				if(!H.drillsymbol){
+					cDrillSymbols=1;
+				}
+			}
+		}
+	}
+
+	return cDrillSymbols;
+}
+
+char checkLayerBrd(){
+	char lay = 0;
+	int i;
+	project.board(B){
+		B.layers(L){
+			for(i=0;lay_fabDoc[i];i++){
+				if (L.number == lay_fabDoc[i]){
+					lay++;
+				}
+			}
+		}
+	}
+	return (lay < i);
+}
+
+char checkLayerSch(){
+	char lay = 0;
+	int i;
+	project.schematic(SCH){
+		SCH.layers(L){
+			for(i=0;lay_fabDoc[i];i++){
+				if (L.number == lay_fabDoc[i]){
+					lay++;
+				}
+			}
+		}
+	}
+	return (lay < i);
+}
+
+char checkFrameSh(UL_SHEET S){
+	S.parts(P){
+		if((strstr(P.device.name,"XDEVELOP-")!=-1)||(strstr(P.device.library,"frame")!=-1)){
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+char checkFrameSch(){
+	char c=0;
+
+	project.schematic(S){
+		S.sheets(SH){
+			if(checkFrameSh(SH)){
+				c=1;
+			}
+		}
+	}
+
+	return c;
+}
+
+string checkFrameBrd(){
+	string frame = "";
+	project.board(B){
+		B.elements(E){
+			if(strstr(strupr(E.package.name),"FRAME")!=-1){
+			    frame = E.name;
+			}
+		}
+	}
+
+	return frame;
+}
+
+char checkDRU(string druname){
+	char c = 0;
+	char i = 0;
+	if(filesize(druname)) {
+		string data;
+		fileread(data, druname);
+
+		// chack dru values 
+		string checkValues[] = {
+			"layerSetup = (1*16)",
+			"mtCopper = 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm",
+			"mtIsolate = 1.5mm 0.15mm 0.2mm 0.15mm 0.2mm 0.15mm 0.2mm 0.15mm 0.2mm 0.15mm 0.2mm 0.15mm 0.2mm 0.15mm 0.2mm",
+			"mdWireWire = 6mil",
+			"mdCopperDimension = 40mil",
+			"rlMinPadTop = 10mil",
+			"rlMaxPadTop = 20mil"
+		};
+
+		while(checkValues[i]){
+			if(strstr(data, checkValues[i]) != -1)
+				c++;
+
+			i++;
+		}
+
+		// check description
+		i++;
+		if ((strstr(data, "Eurocircuits-EAGLE design rules")!=-1)||
+			(strstr(data, "default Design Rules")!=-1)||
+			(strstr(data, "Standard-Design-Regeln")!=-1)) {
+			c++;
+		}
+	}
+	return c == i;
+}
+
+char checkAll(string druname){
+	char checkFlag = 0;
+
+	checkFlag += checkBOM();
+	checkFlag += checkPDFTK();
+	checkFlag += checkPrintSettings();
+	checkFlag += checkDrillsymbols();
+	checkFlag += checkLayerBrd();
+	checkFlag += checkLayerSch();
+	checkFlag += checkFrameSch();
+	checkFlag += (checkFrameBrd() == "");
+	checkFlag += checkDRU(druname);
+
+	return checkFlag;
+}

@@ -9,6 +9,7 @@
 
 
 #include "Include_FastExecute.ulp";
+#include "Include_Config.ulp";
 
 real startX=0, startY=0;
 string LIBRARY_NAME = "fabrication.lbr";
@@ -21,7 +22,7 @@ real 	frameWith			= 0.5;		//in mm
 real 	rowHeight 			= 2.5; 		//in mm
 int 	headHight 			= 51;		//in mm
 string 	outputLayerName 	= "FabDoc3";	//in mm
-int 	outputLayer 		= 155;		//in mm
+int 	outputLayer 		= lay_fabDoc[2];		//in mm
 real 	lineWidth 			= 0.1016;	//in mm
 real 	textSize 			= 1.778;	//in mm
 real 	lineWidthBorder		= 0.2032; 	//in mm
@@ -277,7 +278,8 @@ void bomOutputPdfFile(real offsetX, real offsetY, real width){
 		cmd += "DELETE BOM;\n";
 	}
 
-	sprintf(cmd, "%sADD 'bom' BOM R0 (%.3f %.3f);\n", cmd, 
+	sprintf(cmd, "%sADD 'bom@%s' BOM R0 (%.3f %.3f);\n", cmd,
+		LIBRARY_NAME, 
  		startX, startY
  	);
 

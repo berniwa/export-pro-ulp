@@ -1,0 +1,11 @@
+/**
+ * This ULP will display an message at after the export is finished
+ *
+ * @author 		Tobias Hofer <thofer@xdevelop.at>
+ * @copyright	2020, Bernhard Wörndl-Aichriedler
+ * @license 	BSD-3-Clause
+ */
+
+//it has to be an ulp, otherwise it would display the message befor the export is finished
+
+dlgMessageBox(argv[1]);

@@ -194,12 +194,13 @@ void requestAllPrices(){
 
 void updateAttributeList(){
 	for(int i = 0; i < partcount; i++){
-		sprintf(list[i], "%s\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s", 
+		sprintf(list[i], "%s\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s", 
 			names[i], values[i], packages[i] , pages[i], 
 			distributor[i], order_no[i], 
 			manufacturer[i], part_no[i],
 			price[i], available[i], per_pkg[i], min_qty[i], qty_mul[i], 
-			populate[i], BOM_PART_CATEGORIES[category[i]], note[i]
+			populate[i], BOM_PART_CATEGORIES[category[i]], note[i],
+			minTemp[i], maxTemp[i], rohs[i]
 		);	
 	}
 		
@@ -371,8 +372,14 @@ void editDevice(int selected){
 				dlgCell(5, 1) dlgStringEdit(datasheet[selected]);
 				dlgCell(5, 2) dlgLabel(lanGetText("tab.category"));
 				dlgCell(5, 3) dlgComboBox(BOM_PART_CATEGORIES, category[selected]);
-				dlgCell(6, 0, 6, 2) dlgLabel(lanGetText("dlg.newVal.footnote"));	
-				dlgCell(6, 3, 6, 3) dlgPushButton(lanGetText("button.request")) { 
+				dlgCell(6, 0) dlgLabel(lanGetText("tab.minTemp")+"*");
+				dlgCell(6, 1) dlgStringEdit(minTemp[selected]);	
+				dlgCell(6, 2) dlgLabel(lanGetText("tab.maxTemp")+"*");
+				dlgCell(6, 3) dlgStringEdit(maxTemp[selected]);
+				dlgCell(7, 0) dlgLabel(lanGetText("tab.rohs")+"*");
+				dlgCell(7, 1) dlgStringEdit(rohs[selected]);	
+				dlgCell(8, 0, 8, 2) dlgLabel(lanGetText("dlg.newVal.footnote"));	
+				dlgCell(8, 3, 8, 3) dlgPushButton(lanGetText("button.request")) { 
 					bomPricingRequest(selected); 
 				} 	
 			}
@@ -442,7 +449,10 @@ int showListOfDevices(char singelPart){
 						lanGetText("tab.QuantityMulti")+"\t"+
 						lanGetText("tab.populate")+"\t"+
 						lanGetText("tab.category")+"\t"+
-						lanGetText("tab.note"), 
+						lanGetText("tab.note")+"\t"+
+						lanGetText("tab.minTemp")+"\t"+
+						lanGetText("tab.maxTemp")+"\t"+
+						lanGetText("tab.rohs"), 
 						list, selected, sorted)
 					{
 						if (dlgSelectionChanged()){

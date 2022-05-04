@@ -19,6 +19,7 @@ real width_origin = 200; //Breite des
 real width_arrow = 40; //Breite des Pfeils
 real length_arrow = 125; //Länge des Pfeils
 real length_line = 20; //Schwanzl vom Pfeil
+real minMeasureDiameter = strtod(argv[1]); //minimal durchmesser von bemaßten via
 
 
 real length_arrow45 = length_arrow / sqrt(2);
@@ -163,6 +164,7 @@ string generateArrow(real x, real y, int degree) {
 	//dlgMessageBox(data);
 	return data;
 }
+
 string generateMeasureY(int y, int paint_line, int mirror) {
 	int add_y = 1; 	
 
@@ -232,8 +234,6 @@ string generateMeasureY(int y, int paint_line, int mirror) {
 	return data;
 }
 
-
-
 string generateMeasureX(int x, int paint_line, int mirror) {
 	int add_x = 1; 	
 
@@ -292,8 +292,7 @@ string generateMeasureX(int x, int paint_line, int mirror) {
 	return data;
 }
 
-string generateDiameter(int x, int y, int radius)
-{
+string generateDiameter(int x, int y, int radius){
 	string data = "";
 	if(radius) {
 		real str_len45 = realLength(u2mm(radius) * 2) / sqrt(2);
@@ -387,7 +386,7 @@ void writeScr() {
 			printf("UPDATE '%sfabrication.lbr';\n", prj_path);
 			printf("DELETE MEASURE;\n");
 		}
-		printf("ADD 'MEASURE' MEASURE R0 (0 0);\n");
+		printf("ADD 'MEASURE@%sfabrication.lbr' MEASURE R0 (0 0);\n", prj_path);
 		
 	}
 }
@@ -440,18 +439,65 @@ board(B) {
 		}
 	}
 	B.elements(E) {
+		E.package.wires(W) {
+			if(W.layer == 20) {
+				if(W.arc) {
+					setCoordinates(W.arc.x1, W.arc.y1);
+					setCoordinates(W.arc.x2, W.arc.y2);
+					
+					int angle = W.arc.angle2 - W.arc.angle1;
+					
+					int set_elements = round(angle/90);
+					int start_element = round(W.arc.angle1/90);
+					start_element = start_element % 4;
+
+					/*string tmp = "";
+					sprintf(tmp, "%f %f %d %d", W.arc.angle1, W.arc.angle2, start_element, set_elements);
+					dlgMessageBox(tmp);*/
+					
+					for(int i = start_element; i < (start_element + set_elements); i++) {
+						if(i == 0) {
+							setCoordinates(W.arc.xc - W.arc.radius, W.arc.y1);
+						}
+						else if(i == 1) {
+							setCoordinates(W.arc.x2, W.arc.yc + W.arc.radius);
+						}
+						else if(i == 2) {
+							setCoordinates(W.arc.xc + W.arc.radius, W.arc.y1);
+						}
+						else if(i == 3) {
+							setCoordinates(W.arc.x2, W.arc.yc - W.arc.radius);
+						}
+					}
+				}
+				else {
+					setCoordinates(W.x1, W.y1);
+					setCoordinates(W.x2, W.y2);
+				}
+			}
+		}
+		E.package.circles(C) {
+			if(C.layer == 20) {
+				setCoordinates(C.x + C.radius, C.y + C.radius);
+				setCoordinates(C.x - C.radius, C.y - C.radius);
+			}
+		}
+
+
 		if(E.name == "MEASURE") {	
 			update = 1;
 		}
 	}
 	B.holes(D) {
-		drills_x[drill_count] = D.x;
-		drills_y[drill_count] = D.y;
-		drills_radius[drill_count++] = D.drill / 2;
+		if(u2mm(D.drill) > minMeasureDiameter) {//Use Holes > 2.0mm as mounting holes
+			drills_x[drill_count] = D.x;
+			drills_y[drill_count] = D.y;
+			drills_radius[drill_count++] = D.drill / 2;
+		}
 	}
 	B.signals(S) {
 		S.vias(D) {
-			if(u2mm(D.drill) > 2) {//Use Vias > 2.0mm as mounting holes
+			if(u2mm(D.drill) > minMeasureDiameter) {//Use Vias > 2.0mm as mounting holes
 				drills_x[drill_count] = D.x;
 				drills_y[drill_count] = D.y;
 				drills_radius[drill_count++] = D.drill / 2;

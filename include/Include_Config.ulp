@@ -20,6 +20,19 @@ cfg_defaultTolerance = "1%",
 cfg_defaultVoltage = "50V"
 ;
 
+int 
+cfg_enableAsync = 1,
+cfg_ulpInMenu = 0
+;
+
+char exp_window = 0; //png export window or drawing
+
+int 
+lay_dimension = 123,
+lay_background = 124,
+lay_empty = 127,
+lay_fabDoc[] = {153, 154, 155}; //fabDoc1 - fabDoc3 
+
 //variables for bom export presets
 string 	cfg_bomPreNames[];
 real 	cfg_bomPreOffX[];
@@ -34,6 +47,8 @@ void saveConfig() {
 	cfgset("ULP:ExportPro.pricingURL",cfg_pricingURL);
 	cfgset("ULP:ExportPro.defaultTolerance",cfg_defaultTolerance);
 	cfgset("ULP:ExportPro.defaultVoltage",cfg_defaultVoltage);
+	cfgset("ULP:ExportPro.enableAsync",(cfg_enableAsync?"1":"0"));
+	cfgset("ULP:ExportPro.ulpInMenu",(cfg_ulpInMenu?"1":"0"));
 
 	if(cfg_bomPreNames[1]!=""){
 		string data="";
@@ -52,23 +67,27 @@ void saveConfig() {
 	}
 }
 
-string isNotMenu(){
-	string pathSCR="",scrI;
-	string pathO="";
-
+string getScrPath(){
+	string pathSCR="";
 	for(int i=0;path_scr[i];i++){
 		pathSCR = path_scr[i]+"/eagle.scr";
 		
 		if(filesize(pathSCR)){
-			string scrI, scrO;
-
-			fileread(scrI,pathSCR);
-
-			if(strstr(scrI,"/ExportPro.ulp")==-1){
-				pathO=pathSCR;
-			}
 			break;
 		}
+	}
+	return pathSCR;
+}
+
+string isNotMenu(){
+	string pathSCR = getScrPath();
+	string pathO="";
+	string scrI;
+
+	fileread(scrI,pathSCR);
+	//searching for 2 entrys in the eagle script
+	if(strstr(scrI,argv[0],(strstr(scrI,argv[0]) + 1))==-1){ 
+		pathO=pathSCR;
 	}
 
 	return pathO;
@@ -76,26 +95,74 @@ string isNotMenu(){
 
 void setToMenu(){
 	string pathULP = filedir(argv[0]);
+
+
+	if(strstr(pathULP,"/include")!=-1) {
+		pathULP += "/../";
+	}
+
 	string pathSCR = isNotMenu();
 	if(pathSCR){
-		string scrO,scrI;
+		string scr;
+		int index;
 
-		fileread(scrI,pathSCR);
 
-		scrO  = strsub(scrI,0,strstr(scrI,"MENU",strstr(scrI,"BRD:"))+5);
-		scrO += "'Export Pro: RUN \""+pathULP+"ExportPro.ulp;\"'\\\n\t";
-		scrO += "'Select Part: RUN \""+pathULP+"SelectPart.ulp;\"'\\\n\t";
-		scrO += strsub(scrI,strstr(scrI,"MENU",strstr(scrI,"BRD:"))+5,(strstr(scrI,"MENU",strstr(scrI,"SCH:"))-strstr(scrI,"MENU",strstr(scrI,"BRD:"))));
-		scrO += "'Export Pro: RUN \""+pathULP+"ExportPro.ulp;\"'\\\n\t";
-		scrO += "'Select Part: RUN \""+pathULP+"SelectPart.ulp;\"'\\\n\t";
-		scrO += strsub(scrI,strstr(scrI,"MENU",strstr(scrI,"SCH:"))+5);
+		fileread(scr,pathSCR);
+		
+		index = strstr(scr,"MENU",strstr(scr,"BRD:"))+5;
+		scr = stringApend(scr, "'Export Pro: RUN "+pathULP+"ExportPro.ulp;'\\\n\t'Select Part: RUN "+pathULP+"SelectPart.ulp;'\\\n\t",index);
+		
+		index = strstr(scr,"MENU",strstr(scr,"SCH:"))+5;
+		scr = stringApend(scr, "'Export Pro: RUN "+pathULP+"ExportPro.ulp;'\\\n\t'Select Part: RUN "+pathULP+"SelectPart.ulp;'\\\n\t",index);
 
-		scrO = stringReplace(scrO,"SCH:","SCH:\nSET CONTEXT instance SelectPart 'run \""+getUlpDir("../SelectPart.ulp")+"\" 1';");
+		scr = stringReplace(scr,"SCH:","SCH:\nSET CONTEXT instance 'Select Part' 'run "+getUlpDir("../SelectPart.ulp")+" 1';");
 
 		output(pathSCR){
-			printf(scrO);
+			printf(scr);
 		}
+		
+		/*		//attempt to updaite the manu instently without restarting the editor window
+		string re = "SCRIPT \"" + pathSCR + "\";\nRUN";
+		for(int i = 0;argv[i];i++)
+			re += " \"" + argv[i] + "\"";
+
+		re += ";";
+		exit(re);
+		*/
 	}	
+}
+
+void removeFromMenu(){
+	string pathSCR = getScrPath();
+	string scr, tmp;
+	int start, end;
+
+	fileread(scr,pathSCR);
+	
+	start = strstr(scr,"'Export Pro",strstr(scr,"MENU",strstr(scr,"BRD:")));
+	end = strstr(scr, ";'",strstr(scr, "'Select Part", start))+5;
+	scr = stringCutout(scr, start, end);
+
+	start = strstr(scr,"'Export Pro",strstr(scr,"MENU",strstr(scr,"SCH:")));
+	end = strstr(scr, ";'",strstr(scr, "'Select Part", start))+5;
+	scr = stringCutout(scr, start, end);
+
+	start = strstr(scr,"'SelectPart",strstr(scr,"SET CONTEXT",strstr(scr,"BRD:")));
+	tmp = strsub(scr, 0, start);				//to just remove the one entery
+	start = strrstr(tmp,"SET CONTEXT");
+	end = strstr(scr, ";", start)+2;
+	scr = stringCutout(scr, start, end);
+
+	//dlgMessageBox(scr);
+
+	output(pathSCR){
+		printf(scr);
+	}
+}
+
+void updateManu(){
+	removeFromMenu();
+	setToMenu();
 }
 
 char editUserConfig(){
@@ -123,12 +190,13 @@ char editUserConfig(){
 	string lastLanguage = cfg_textLanguage;
 	lanLoadText(cfg_textLanguage);
 
-	if(!cfg_userName){ //first start of the ulp
+	if(!cfg_userName && !cfg_ulpInMenu){ //first start of the ulp
 		int opt = dlgMessageBox(lanGetText("dlg.add2Menu"),lanGetText("general.yes"),lanGetText("general.no"));
-		if (!opt){
+		if (opt == 0){
+			cfg_ulpInMenu = 1;
 			setToMenu();
 		}
-	}
+	} 
 
 	real tol = strtod(cfg_defaultTolerance);
 	real volt = strtod(cfg_defaultVoltage);
@@ -153,9 +221,14 @@ char editUserConfig(){
 					dlgCell(4, 1) dlgHBoxLayout {dlgRealEdit(tol); dlgLabel("%");}
 					dlgCell(5, 0) dlgLabel(lanGetText("settings.default.voltage")+":");
 					dlgCell(5, 1) dlgHBoxLayout {dlgRealEdit(volt); dlgLabel("V");}
+					dlgCell(6, 0) dlgLabel(lanGetText("settings.general.async"));
+					dlgCell(6, 1) dlgCheckBox("",cfg_enableAsync);
 				}
 				if(isNotMenu()){
-					dlgPushButton(lanGetText("settings.menu")){setToMenu();};
+					dlgPushButton(lanGetText("settings.menu")){
+						cfg_ulpInMenu = 1;
+						setToMenu();
+					};
 				}
 			}
 
@@ -178,14 +251,20 @@ char editUserConfig(){
 }
 
 void loadConfig(){
-	
-	cfg_textLanguage = cfgget("ULP:ExportPro.language",(language()+".txt"));
-	cfg_userName = cfgget("ULP:ExportPro.userName");
-	cfg_shortUserName = cfgget("ULP:ExportPro.shortUserName");
-	cfg_pricingURL = cfgget("ULP:ExportPro.pricingURL",cfg_pricingURL);
-	cfg_defaultTolerance = cfgget("ULP:ExportPro.defaultTolerance",cfg_defaultTolerance);
-	cfg_defaultVoltage = cfgget("ULP:ExportPro.defaultVoltage",cfg_defaultVoltage);
-	string tmp = cfgget("ULP:ExportPro.bomPresets");
+	cfg_textLanguage 		= cfgget("ULP:ExportPro.language" ,(language()+".txt"));
+	cfg_userName 			= cfgget("ULP:ExportPro.userName");
+	cfg_shortUserName 		= cfgget("ULP:ExportPro.shortUserName");
+	cfg_pricingURL 			= cfgget("ULP:ExportPro.pricingURL", cfg_pricingURL);
+	cfg_defaultTolerance 	= cfgget("ULP:ExportPro.defaultTolerance", cfg_defaultTolerance);
+	cfg_defaultVoltage 		= cfgget("ULP:ExportPro.defaultVoltage", cfg_defaultVoltage);
+	cfg_enableAsync 		= strtol(cfgget("ULP:ExportPro.enableAsync", (cfg_enableAsync?"1":"0")));
+	cfg_ulpInMenu 		= strtol(cfgget("ULP:ExportPro.ulpInMenu", (cfg_ulpInMenu?"1":"0")));
+	string tmp 				= cfgget("ULP:ExportPro.bomPresets");
+
+	if(isNotMenu() && cfg_ulpInMenu){
+		updateManu();
+	}
+
 	if(tmp!=""){
 		string tmpa[];
 		string tmpb[];
@@ -202,7 +281,24 @@ void loadConfig(){
 			cfg_bomPreWidth[n+1]=strtod(tmpb[3]);
 		}
 	}
+
 	if(cfg_userName=="") {
+		//first time the ulp is started
 		editUserConfig();
+	}
+
+	project.board(B){
+		int all = filesize(filedir(B.name) + "all.png");
+		int window = filesize(filedir(B.name) + "window.png");
+		if (all && window){
+			exp_window = (window <= all)?1:0;
+
+			string cmd = "CMD.EXE /C ";
+			cmd += "DEL /F /Q \"" + stringReplace(filedir(B.name),"/","\\") + "all.png\" & ";
+			cmd += "DEL /F /Q \"" + stringReplace(filedir(B.name),"/","\\") + "window.png\"";
+			//cmd += " & pause";
+			//dlgMessageBox(stringFromInt(exp_window));
+			system(cmd);
+		}
 	}
 }

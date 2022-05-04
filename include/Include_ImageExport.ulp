@@ -14,12 +14,17 @@
 #include "Include_FastExecute.ulp";
 #include "Include_Misc.ulp";
 #include "Include_String.ulp";
+#include "Include_Config.ulp";
+#include "Include_Language.ulp";
 
-int ram = 2147483647;	//in byte
+int ram = (2 * 1024 * 1024 * 1024) - 1;//almost 2GB in byte //"almost" because 2GB wouldn't fit in int
 int bytePerPixel = 4;	//R,G,B,Alpha
+string 
+_dimensionL = stringFromInt(lay_dimension),
+_BackgoundL = stringFromInt(lay_background),
+_emptyL = stringFromInt(lay_empty);
 
-string getFilename(string basename, string ends_with)
-{
+string getFilename(string basename, string ends_with) {
 	return filesetext(basename,ends_with);
 }
 
@@ -62,35 +67,43 @@ string updateFrameInformation(string drawing){
 	return cmd;
 }
 
-void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, string botPdf, int exportTop, string topImage, string topPdf, int resolution, int crop, int mirror, string colorPcb, string colorCopper, string colorSilkscreen, string colorPlating, string tsilcLayers, string bsilcLayers, int format, int frame) {
+void exportImages(int imgExport, int pdfExport, 
+	int exportBot, string botImage, string botPdf, 
+	int exportTop, string topImage, string topPdf, 
+	int resolution, int crop, int mirror, string colorPcb, 
+	string colorCopper, string colorSilkscreen, 
+	string colorPlating, string tsilcLayers, 
+	string bsilcLayers, int format, int frame, int async
+	) {
+	
+	loadConfig();
+
 	string cmd = "";
 
 	string bname = "";
 	real height, width;
-	board(B)
-	{
+	board(B) {
 		bname = B.name;
 
 		height = u2inch(B.area.y2-B.area.y1);
 		width = u2inch(B.area.x2-B.area.x1);
-
 	}
 	string versionLayer="";
 
 	if(EAGLE_VERSION>=9){
 		cmd += "SET PALETTE WHITE;\n";
-		cmd += "SET COLOR_LAYER 123 20;\n";
-		cmd += "SET COLOR_LAYER 124 22;\n";
-		cmd += "SET COLOR_LAYER 127 8;\n";
+		cmd += "SET COLOR_LAYER " + _dimensionL + " 20;\n";
+		cmd += "SET COLOR_LAYER " + _BackgoundL + " 22;\n";
+		cmd += "SET COLOR_LAYER " + _emptyL +" 8;\n";
 		cmd += "SET PALETTE 22 " + colorPcb + ";\n";
-		cmd += "SET Option.LayerSequence 124;\n";
-		versionLayer= "123 124 127";
+		cmd += "SET Option.LayerSequence " + _BackgoundL + ";\n";
+		versionLayer= _dimensionL + " " + _BackgoundL + " " +_emptyL;
 	}
 	else{
 		cmd += "SET PALETTE COLORED;\n";
 		cmd += "SET PALETTE 0 " + colorPcb + ";\n";
 		cmd += "SET Option.LayerSequence 20;\n";
-		versionLayer= "20 123";
+		versionLayer= "20 " + _dimensionL;
 	}
 
 	cmd += "SET COLOR_LAYER 1 16;\n";
@@ -115,7 +128,7 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 	cmd += "SET COLOR_LAYER 28 21;\n";
 	cmd += "SET COLOR_LAYER 52 21;\n";
 	cmd += "SET COLOR_LAYER 20 20;\n";
-	cmd += "SET COLOR_LAYER 153 20;\n";
+	cmd += "SET COLOR_LAYER " + stringFromInt(lay_fabDoc[0]) + " 20;\n";
 
 	//cmd += "SET COLOR_LAYER 125 18;\n";
 	//cmd += "SET COLOR_LAYER 126 18;\n";
@@ -132,50 +145,60 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 		cmd += "SET CONFIRM YES;\n";
 	}
 
-	if(height*real(resolution)*width*real(resolution)*real(bytePerPixel)>ram){
+	if((height*real(resolution)*width*real(resolution)*real(bytePerPixel)>ram) && imgExport){
 		resolution = int(sqrt(ram/(height*width*bytePerPixel)));
 
+		lanLoadText(cfg_textLanguage);
+
 		string tmp;
-		sprintf(tmp,":PCB image would be to large to export <br>Resolution will be set to: %ddpi",resolution);
+		sprintf(tmp,":%s %ddpi", lanGetText("dlg.imag.resWarning"), resolution); 
 		dlgMessageBox(tmp);
 	}
 
-	if(exportTop)
-	{
+	if(exportTop) {
 		cmd += "DISPLAY NONE;DISPLAY 1 18 29 "+tsilcLayers+" "+versionLayer+";\n";
 		if (imgExport) {
-			sprintf(cmd, "%s EXPORT IMAGE '%s' %d;\n", cmd, topImage, resolution);
+			cmd += "RUN " + getUlpDir("Include_") + "ZoomVisible.ulp;";
+			sprintf(cmd, "%s EXPORT IMAGE '%s' %s %d;\n", cmd, topImage, (exp_window?"WINDOW":""), resolution);
 		}
 		
 		if (pdfExport) {
 			if(frame){
 				cmd += updateFrameInformation("PCB - Top");
-				cmd += "DISPLAY NONE;DISPLAY 1 18 29 "+tsilcLayers+" "+versionLayer+" 153;\n";
+				cmd += "DISPLAY NONE;DISPLAY 1 18 29 "+tsilcLayers+" "+versionLayer+" " + stringFromInt(lay_fabDoc[0]) + ";\n";
 			}
 			sprintf(cmd,"%s PRINT SHEETS ALL HIERARCHY -BLACK -CAPTION PAPER %s FILE '%s';\n", cmd, (format?"A3 landscape":"A4 portrait"), topPdf);
 		}
 		
 	}
-	if(exportBot)
-	{
+	if(exportBot) {
 		cmd += "DISPLAY NONE;DISPLAY 16 18 30 "+bsilcLayers+" "+versionLayer+";\n";
+
 		if (imgExport) {
-			sprintf(cmd, "%s EXPORT IMAGE '%s' %d;\n", cmd, botImage, resolution);
+			cmd += mirror?"window flip;":"";
+			cmd += "RUN " + getUlpDir("Include_") + "ZoomVisible.ulp;";
+			sprintf(cmd, "%s EXPORT IMAGE '%s' %s %d;\n", cmd, botImage, (exp_window?"WINDOW":""), resolution);
+			cmd += mirror?"window flip;":"";
 		}
 		
 		if (pdfExport) {
 			if(frame){
 				cmd += updateFrameInformation("PCB - Bottom");
-				cmd += "DISPLAY NONE;DISPLAY 16 18 30 "+bsilcLayers+" "+versionLayer+" 153;\n";
+				cmd += mirror?"RUN " + filedir(argv[0]) + "Include_MirrorPDF.ulp;":"";
+				cmd += "DISPLAY NONE;DISPLAY 16 18 30 "+bsilcLayers+" "+versionLayer+" " + stringFromInt(lay_fabDoc[0]) + ";\n";
 			}
-			sprintf(cmd,"%s PRINT SHEETS ALL HIERARCHY -BLACK -CAPTION PAPER %s FILE '%s';\n", cmd, (format?"A3 landscape":"A4 portrait"), botPdf);
+
+			sprintf(cmd,"%s PRINT SHEETS ALL HIERARCHY -BLACK -CAPTION PAPER %s %s FILE '%s';\n", cmd, 
+				(format?"A3 landscape":"A4 portrait"), 
+				(mirror?"MIRROR":"-MIRROR"),
+				botPdf);
+
+			cmd += ((mirror && frame)?("RUN " + filedir(argv[0]) + "Include_MirrorPDF.ulp;"):"");
 		}
-		
 	}
 
 
-	if(EAGLE_VERSION > 5 || (EAGLE_VERSION == 5 && EAGLE_RELEASE >= 11) ) //Support for SET CONFIRM form Eagle 5.11 on
-	{
+	if(EAGLE_VERSION > 5 || (EAGLE_VERSION == 5 && EAGLE_RELEASE >= 11) ) { 	//Support for SET CONFIRM form Eagle 5.11 on 
 		cmd += "SET CONFIRM NO;\n";
 	}
 
@@ -199,13 +222,9 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 
 	string layers = "";
 
-	board(B)
-	{
-		
-		B.layers(L)
-		{
-			if(L.visible)
-			{
+	board(B) {
+		B.layers(L) {
+			if(L.visible) {
 				sprintf(layers, layers + " %d", L.number);
 			}
 		}
@@ -213,37 +232,30 @@ void exportImages(int imgExport, int pdfExport, int exportBot, string botImage, 
 
 	cmd += "DISPLAY NONE; DISPLAY " + layers + ";\n";
 
-	if(palette(-1) == PALETTE_BLACK)
-	{
+	if(palette(-1) == PALETTE_BLACK) {
 		cmd += "SET PALETTE BLACK;\n";
 	}
-	else if(palette(-1) == PALETTE_WHITE)
-	{
+	else if(palette(-1) == PALETTE_WHITE) {
 		cmd += "SET PALETTE WHITE;\n";
 	}
-	else
-	{
+	else {
 		cmd += "SET PALETTE COLORED;\n";
 	}
 
 	cmd += "SET FILL_LAYER 29 LtSlash;\n";
 	cmd += "SET FILL_LAYER 30 BkSlash;\n";
 	
-	if(exportBot && crop && imgExport)
-	{
-		sprintf(cmd, "%s RUN '%sCropColor.ulp' '%s' %d '%s';\n", cmd, getUlpDir("Include_"), botImage, resolution,filesetext(bname,".bat"));
+	if(exportBot && crop && imgExport) {
+		sprintf(cmd, "%s RUN '%sCropColor.ulp' '%s' %d '%s' %d;\n", cmd, getUlpDir("Include_"), botImage, resolution,filesetext(bname,".bat"), async);
 	}
-	if(exportTop && crop && imgExport)
-	{
-		sprintf(cmd, "%s RUN '%sCropColor.ulp' '%s' %d '%s';\n", cmd, getUlpDir("Include_"), topImage, resolution,filesetext(bname,".bat"));
+	if(exportTop && crop && imgExport) {
+		sprintf(cmd, "%s RUN '%sCropColor.ulp' '%s' %d '%s' %d;\n", cmd, getUlpDir("Include_"), topImage, resolution,filesetext(bname,".bat"), async);
 	}
-
-	if(exportBot && mirror && imgExport)
-	{
-		sprintf(cmd, "%s RUN '%sMirrorColor.ulp' '%s' '%s';\n", cmd, getUlpDir("Include_"), botImage,filesetext(bname,".bat"));
-	}	
-	
 	executeAndExit(cmd);
 }
 
-exportImages(strtol(argv[1]),strtol(argv[2]),strtol(argv[3]),argv[4],argv[5],strtol(argv[6]),argv[7],argv[8],strtol(argv[9]),strtol(argv[10]),strtol(argv[11]), argv[12], argv[13], argv[14], argv[15], argv[16], argv[17], strtol(argv[18]), strtol(argv[19]));
+exportImages(
+	strtol(argv[1]), strtol(argv[2]), strtol(argv[3]), argv[4], argv[5], strtol(argv[6]), 
+	argv[7], argv[8], strtol(argv[9]), strtol(argv[10]), strtol(argv[11]), argv[12], 
+	argv[13], argv[14], argv[15], argv[16], argv[17], strtol(argv[18]), strtol(argv[19]), strtol(argv[20])
+);

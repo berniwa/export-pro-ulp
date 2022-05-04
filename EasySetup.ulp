@@ -1,0 +1,809 @@
+#include "include/Include_Misc.ulp";
+#include "include/Include_Language.ulp";
+#include "include/Include_BomCommon.ulp";
+#include "include/Include_BomCategory.ulp";
+#include "include/Include_BomConfig.ulp";
+#include "include/Include_BomPricing.ulp";
+#include "include/Include_Config.ulp";
+#include "include/Include_CheckExport.ulp";
+
+
+void debugMsg(string msg){
+	//to prevent debug messages to apear in releace
+	dlgMessageBox(msg);
+}
+
+int debugVal(string msg, int val){
+	sprintf(msg,"%s%d",msg,val);
+	debugMsg(msg);
+	return val;
+}
+
+char prefix[] = {'R', 'k', 'M', 'G', 'T'};
+string stdDistributor = "xdevelop";
+
+string druname = argv[1]; 	//even tho i dont like using global variables this is the cleanest solution
+
+string getTolerance(int select){
+	string tol="";
+
+	if(category[select]==0){
+		if(strchr(values[select],'%')==-1){
+			tol = cfg_defaultTolerance;
+		}
+		else{
+			tol = strsub(values[select],(strchr(values[select],' ')+1));
+		}
+	}	
+	return tol;
+}
+
+string getVoltage(int select){
+	int tmp = strchr(values[select],'/');
+
+	if(tmp>=0){
+		return strsub(values[select],(tmp+1));
+	}
+	else {
+		return cfg_defaultVoltage;
+	}
+}
+
+string getOrderNo(int select){
+	if(category[select]!=0&&category[select]!=2){
+		return "";
+	}
+
+	string orderNo = "GP";
+
+	if (category[select]==0){
+		orderNo+="R";
+	}
+	else if(category[select]==2){
+		orderNo+="C";
+	}
+
+	int l=0, a=0;
+	for (int i = 0; i < strlen(packages[select]); i++){
+		if(isdigit(packages[select][i])){
+			l++;
+			if(l>=4){
+				break;
+			}
+		}
+		else{
+			l=0;
+			a=i+1;
+		}
+	}
+	orderNo+=strsub(packages[select],a,l);
+
+	real val;
+	val=siParseValue(values[select]);
+	if (category[select]==0){
+		val*=10;
+
+		string tmp = "";
+		sprintf(tmp,"%d",int(val));
+		val=(((strlen(tmp)+1)%3)+1);
+
+		orderNo+=strsub(tmp,0,int(val))+prefix[(strlen(tmp)-2)/3];
+
+		tmp=strsub(tmp,int(val),(strchr(tmp,'0')-int(val)));
+
+		if(strtod(tmp)==0){
+			tmp="";
+		}
+
+		orderNo+=tmp;
+	}
+	else if(category[select]==2){
+		val*=pow(10,12); //to get value in pF
+
+		string tmp = "";
+		sprintf(tmp,"%d",int(val));
+
+		val=strlen(tmp)-2;
+		tmp=strsub(tmp,0,2);
+
+		sprintf(orderNo,"%s%s%d",orderNo,tmp,int(val));
+	}
+
+	string v=getVoltage(select);
+
+	if(v!="50V"){
+		orderNo+="-"+strsub(v,0,strlen(v)-1);
+	}
+
+	return orderNo;
+}
+
+string addBomValues(){
+	for(int i=0; i<partcount; i++){
+		if (category[i]==0||category[i]==2){
+			string orderNr = "";
+			string volt = "";
+			string tol = "";
+
+			tol = getTolerance(i);
+			volt = getVoltage(i);
+			orderNr=getOrderNo(i);
+
+			distributor[i]=stdDistributor;
+			order_no[i]=orderNr;
+			manufacturer[i]="any";
+
+			//If the voltage is the default voltage, it is already in the value
+			part_no[i]=strsub(values[i],0,strchr(values[i],' '));
+			if(volt == cfg_defaultVoltage){
+				part_no[i] += "/" + volt;
+			}
+			if(tol == cfg_defaultTolerance){
+				part_no[i] += "/" + tol;
+			}
+			bomPricingRequest(i);
+		}
+	}
+
+	return bomUpdateChanges();
+}
+
+void executeButton(string cmd){
+	cmd += "RUN \'" + argv[0] + "\' \'" + druname + "\';";
+	exit(cmd);
+}
+
+string placeFrameBrd(){
+	string cmd = "Add ";
+	getBoardSize();
+
+	if(u2mm(max_x - min_x)<155) {		//adding an A4 frame for boars smaler then 155mm to fitt multiple mesurments
+		cmd+="'FRAME-A4@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
+
+		real offset=0.0;
+		if(u2mm(max_y - min_y)>80){
+			offset = u2mm(max_y - min_y) - 80;
+		}
+
+		sprintf(cmd, "%s(%fmm %fmm)", cmd, u2mm((max_x + min_x)/2), (u2mm((max_y + min_y)/2) + offset));
+	}
+	else{							//adding an A3 frame
+		cmd+="'FRAME-A3@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
+		sprintf(cmd, "%s(%fmm %fmm)", cmd, (u2mm((max_x + min_x)/2)-195), (u2mm((max_y + min_y)/2)-160));
+	}
+
+	return cmd+"; ";
+}
+
+string addFrameBrd(string frame){
+	string cmd="EDIT .brd;";
+	project.board(B){
+		int opt;
+		if (frame == ""){
+			opt = dlgMessageBox(lanGetText("dlg.setup.noFrame"),lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("button.continue"));
+		}
+		else{
+			opt = dlgMessageBox(lanGetText("dlg.setup.noFrameNeeded"),lanGetText("general.yes"), lanGetText("general.no"));
+			opt++;
+			if (opt == 1){
+				cmd += "DELETE " + frame + ";";
+			}
+		}
+
+		if(opt == 0) {
+			cmd += placeFrameBrd();
+		}
+		else if (opt == 1){
+			cmd += "DISPLAY 153;";
+			cmd += "add 'FRAME*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
+			exit(cmd);
+		}
+	}
+	return cmd;
+}
+
+string placeFrameSh(UL_SHEET S){
+	//debugVal("adding frame in sheet: ", S.number);
+
+	string cmd;
+
+	sprintf(cmd,"EDIT .s%d;",S.number);
+
+	cmd += "Add ";
+
+	//getting the outline of the sheet 
+	//the algorythem is not perfect but good enouth for now
+	int minX, maxX, minY, maxY;
+	char init=0;
+	S.wires(W){
+		if(!init){
+			init=1;
+			if(W.x1<=W.x2){
+				minX = W.x1;
+				maxX = W.x2;
+			}
+			else{
+				minX = W.x2;
+				maxX = W.x1;						
+			}
+
+			if(W.y1<=W.y2){
+				minY = W.y1;
+				maxY = W.y2;
+			}
+			else{
+				minY = W.y2;
+				maxY = W.y1;						
+			}
+		}
+		else{
+			if(minX>W.x1)
+				minX=W.x1;
+			else if(maxX<W.x1)
+				maxX=W.x1;
+
+			if(minX>W.x2)
+				minX=W.x2;
+			else if(maxX<W.x2)
+				maxX=W.x2;
+
+			if(minY>W.y1)
+				minY=W.y1;
+			else if(maxY<W.y1)
+				maxY=W.y1;
+
+			if(minY>W.y2)
+				minY=W.y2;
+			else if(maxY<W.y2)
+				maxY=W.y2;
+		}
+	}
+	S.texts(T){
+		T.wires(W){
+			if(!init){
+				init=1;
+				if(W.x1<=W.x2){
+					minX = W.x1;
+					maxX = W.x2;
+				}
+				else{
+					minX = W.x2;
+					maxX = W.x1;						
+				}
+
+				if(W.y1<=W.y2){
+					minY = W.y1;
+					maxY = W.y2;
+				}
+				else{
+					minY = W.y2;
+					maxY = W.y1;						
+				}
+			}
+			else{
+				if(minX>W.x1)
+					minX=W.x1;
+				else if(maxX<W.x1)
+					maxX=W.x1;
+
+				if(minX>W.x2)
+					minX=W.x2;
+				else if(maxX<W.x2)
+					maxX=W.x2;
+
+				if(minY>W.y1)
+					minY=W.y1;
+				else if(maxY<W.y1)
+					maxY=W.y1;
+
+				if(minY>W.y2)
+					minY=W.y2;
+				else if(maxY<W.y2)
+					maxY=W.y2;
+			}
+		}
+	}
+	S.parts(P){
+		UL_PACKAGE p = P.device.package;
+		if(p){
+			p.wires(W){
+				if(!init){
+					init=1;
+					if(W.x1<=W.x2){
+						minX = W.x1;
+						maxX = W.x2;
+					}
+					else{
+						minX = W.x2;
+						maxX = W.x1;						
+					}
+
+					if(W.y1<=W.y2){
+						minY = W.y1;
+						maxY = W.y2;
+					}
+					else{
+						minY = W.y2;
+						maxY = W.y1;						
+					}
+				}
+				else{
+					if(minX>W.x1)
+						minX=W.x1;
+					else if(maxX<W.x1)
+						maxX=W.x1;
+
+					if(minX>W.x2)
+						minX=W.x2;
+					else if(maxX<W.x2)
+						maxX=W.x2;
+
+					if(minY>W.y1)
+						minY=W.y1;
+					else if(maxY<W.y1)
+						maxY=W.y1;
+
+					if(minY>W.y2)
+						minY=W.y2;
+					else if(maxY<W.y2)
+						maxY=W.y2;
+				}
+			}
+		}
+	}
+	S.nets(N){
+		N.segments(SE){
+			SE.wires(W){
+				if(!init){
+					init=1;
+					if(W.x1<=W.x2){
+						minX = W.x1;
+						maxX = W.x2;
+					}
+					else{
+						minX = W.x2;
+						maxX = W.x1;						
+					}
+
+					if(W.y1<=W.y2){
+						minY = W.y1;
+						maxY = W.y2;
+					}
+					else{
+						minY = W.y2;
+						maxY = W.y1;						
+					}
+				}
+				else{
+					if(minX>W.x1)
+						minX=W.x1;
+					else if(maxX<W.x1)
+						maxX=W.x1;
+
+					if(minX>W.x2)
+						minX=W.x2;
+					else if(maxX<W.x2)
+						maxX=W.x2;
+
+					if(minY>W.y1)
+						minY=W.y1;
+					else if(maxY<W.y1)
+						maxY=W.y1;
+
+					if(minY>W.y2)
+						minY=W.y2;
+					else if(maxY<W.y2)
+						maxY=W.y2;
+				}
+			}
+			SE.texts(T){
+				T.wires(W){
+					if(!init){
+						init=1;
+						if(W.x1<=W.x2){
+							minX = W.x1;
+							maxX = W.x2;
+						}
+						else{
+							minX = W.x2;
+							maxX = W.x1;						
+						}
+
+						if(W.y1<=W.y2){
+							minY = W.y1;
+							maxY = W.y2;
+						}
+						else{
+							minY = W.y2;
+							maxY = W.y1;						
+						}
+					}
+					else{
+						if(minX>W.x1)
+							minX=W.x1;
+						else if(maxX<W.x1)
+							maxX=W.x1;
+
+						if(minX>W.x2)
+							minX=W.x2;
+						else if(maxX<W.x2)
+							maxX=W.x2;
+
+						if(minY>W.y1)
+							minY=W.y1;
+						else if(maxY<W.y1)
+							maxY=W.y1;
+
+						if(minY>W.y2)
+							minY=W.y2;
+						else if(maxY<W.y2)
+							maxY=W.y2;
+					}
+				}
+			}
+		}
+	}
+	S.frames(F){
+		F.wires(W){
+			if(!init){
+				init=1;
+				if(W.x1<=W.x2){
+					minX = W.x1;
+					maxX = W.x2;
+				}
+				else{
+					minX = W.x2;
+					maxX = W.x1;						
+				}
+
+				if(W.y1<=W.y2){
+					minY = W.y1;
+					maxY = W.y2;
+				}
+				else{
+					minY = W.y2;
+					maxY = W.y1;						
+				}
+			}
+			else{
+				if(minX>W.x1)
+					minX=W.x1;
+				else if(maxX<W.x1)
+					maxX=W.x1;
+
+				if(minX>W.x2)
+					minX=W.x2;
+				else if(maxX<W.x2)
+					maxX=W.x2;
+
+				if(minY>W.y1)
+					minY=W.y1;
+				else if(maxY<W.y1)
+					maxY=W.y1;
+
+				if(minY>W.y2)
+					minY=W.y2;
+				else if(maxY<W.y2)
+					maxY=W.y2;
+			}
+		}
+	}
+	S.polygons(P){
+		P.wires(W){
+			if(!init){
+				init=1;
+				if(W.x1<=W.x2){
+					minX = W.x1;
+					maxX = W.x2;
+				}
+				else{
+					minX = W.x2;
+					maxX = W.x1;						
+				}
+
+				if(W.y1<=W.y2){
+					minY = W.y1;
+					maxY = W.y2;
+				}
+				else{
+					minY = W.y2;
+					maxY = W.y1;						
+				}
+			}
+			else{
+				if(minX>W.x1)
+					minX=W.x1;
+				else if(maxX<W.x1)
+					maxX=W.x1;
+
+				if(minX>W.x2)
+					minX=W.x2;
+				else if(maxX<W.x2)
+					maxX=W.x2;
+
+				if(minY>W.y1)
+					minY=W.y1;
+				else if(maxY<W.y1)
+					maxY=W.y1;
+
+				if(minY>W.y2)
+					minY=W.y2;
+				else if(maxY<W.y2)
+					maxY=W.y2;
+			}
+		}
+	}
+
+	if(u2mm(maxX - minX)<170) {		//adding an A4 frame for boars smaler then 170mm
+		cmd+="'XDEVELOP-A4@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
+
+		sprintf(cmd, "%s(%fmm %fmm)", cmd, (u2mm((maxX + minX)/2) - 90), (u2mm((maxY + minY)/2) - 164));
+	}
+	else{							//adding an A3 frame
+		cmd+="'XDEVELOP-A3@" + filedir(argv[0]) + "xdevelop-frame.lbr' ";
+		sprintf(cmd, "%s(%fmm %fmm)", cmd, (u2mm((maxX + minX)/2) - 190), (u2mm((maxY + minY)/2) - 130));
+	}
+
+	return cmd+"; ";
+}
+
+string addFrameSch(char check){
+	string cmd="EDIT .sch;";
+	project.schematic(Sc){
+		//Checking for a frame in .sch
+		int opt=10; //10 ... no need to place frame jet 
+		Sc.sheets(S){
+			if(check && (opt%10)==0){
+				if(opt==10){
+					opt=dlgMessageBox(lanGetText("dlg.setup.noFrameSch"),lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("button.continue"));
+					if (opt == 0){
+						cmd+=placeFrameSh(S);
+					}
+					else if(opt==1){
+						sprintf(cmd, "%sEDIT .s%d; ", cmd, S.number);
+						cmd += "DISPLAY 153;";
+						cmd += "ADD 'XDEVELOP*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
+						exit(cmd);
+					}
+				}
+				else {
+					cmd+=placeFrameSh(S);
+				}
+			}
+		}
+		if(opt==10){
+			opt = dlgMessageBox(lanGetText("dlg.setup.noFrameNeeded"),lanGetText("general.yes"), lanGetText("general.no"));
+			if(opt == 0){
+				cmd += "ADD 'XDEVELOP*@"+filedir(argv[0])+"/xdevelop-frame.lbr'";
+				exit(cmd);
+			}
+		}
+	}
+	return cmd;
+}
+
+void setPrintSettings(){
+	cfgset("EAGLE:Printer.Border.Top","50000");
+	cfgset("EAGLE:Printer.Border.Bottom","50000");
+	cfgset("EAGLE:Printer.Border.Right","50000");
+	cfgset("EAGLE:Printer.Border.Left","200000");
+	cfgset("EAGLE:Printer.Caption","0");
+}
+
+string setLayer(){
+	string cmd="";
+	cmd += "LAYER 153 FabDoc1;";
+	cmd += "LAYER 154 FabDoc2;";
+	cmd += "LAYER 155 FabDoc3;";
+	return cmd;
+}
+
+void dialogPDFtk(){
+	//todo put text in language file
+	int opt = dlgMessageBox(":"+lanGetText("dlg.pfd.footnote"),
+					lanGetText("button.continue"),lanGetText("button.cancel"));
+	if (opt){
+		exit("");
+	}
+}
+
+string dialogBOM(char check){
+	int opt;
+	if(check){
+		opt = dlgMessageBox(lanGetText("dlg.setup.noBom"), lanGetText("general.yes"), lanGetText("general.manual"), lanGetText("general.no"));
+	}
+	else{
+		opt = dlgMessageBox(lanGetText("dlg.setup.Bom"), lanGetText("general.yes"), lanGetText("general.no"));
+		opt++;
+	}
+
+	if(opt==0){
+		executeButton(addBomValues());
+	}
+	else if (opt==1){
+		executeButton("RUN '"+filedir(argv[0])+"/SelectPart.ulp';");
+	}
+
+	return "";
+}
+
+void dialogDrill(){
+	dlgDialog("Dirll"){
+		dlgLabel(lanGetText("dlg.DrillError"));
+		if(filesize(filedir(argv[0]) + "/bin/ExpDrillSymb" + strupr(filesetext(cfg_textLanguage,"")) + ".png")){
+			dlgLabel("<img src=\"" + filedir(argv[0]) + "/bin/ExpDrillSymb" + strupr(filesetext(cfg_textLanguage,"")) + ".png\">");
+		}
+		else{
+			dlgLabel("<img src=\"" + filedir(argv[0]) + "/bin/ExpDrillSymbEN.png\">");
+		}
+		dlgHBoxLayout{
+			dlgStretch(1);
+			dlgPushButton(lanGetText("button.ok")) {exit("EDIT .brd;");};
+			dlgPushButton(lanGetText("button.continue")) {dlgReject();};
+		}
+	};
+}
+
+void dialogDRU(char check){
+	int opt;
+	if(check)
+		opt = dlgMessageBox(lanGetText("dlg.setup.stdDRU"), lanGetText("general.yes"), lanGetText("general.no"));
+	else
+		opt = dlgMessageBox(lanGetText("dlg.setup.nostdDRU"), lanGetText("general.yes"), lanGetText("general.no"));
+
+	if (opt==0){
+		string cmd = "";
+		cmd += "EDIT .brd;";
+		cmd += "DRC *;";
+		cmd += "DRC SAVE \'" + druname + "\'; ";
+
+		executeButton(cmd);
+	}
+}
+
+void run(){
+	loadConfig();
+
+	lanLoadText(cfg_textLanguage);
+
+	if (!druname) { 		//getting a new dru file
+		string cmd="";
+		if(schematic){
+			cmd += "EDIT .brd; ";
+		}
+
+		//getting the filename to export the dru
+		project.board(B){
+			druname=filesetext(B.name,"-exportpro.dru");
+		}
+
+		cmd += "DRC SAVE \'" + druname + "\'; ";
+		executeButton(cmd);
+	}
+	else {
+		//not file type specific settings 
+		int d = dlgDialog(filename(argv[0])){
+			dlgLabel(lanGetText("dlg.setup.expl"));
+			
+			dlgGroup(lanGetText("headline.setup.steps")){
+				dlgHBoxLayout{ //layer setup
+					dlgLabel(lanGetText("settings.setup.layer")); 
+					dlgStretch(1); 
+
+					int c = !(checkLayerBrd() || checkLayerSch());
+					dlgCheckBox("", c) {c = !c;};
+
+					dlgPushButton(lanGetText("button.add")) {
+						if (!c){
+							dlgMessageBox(lanGetText("dlg.setup.layer"));
+							executeButton("EDIT .brd;" + setLayer() + "EDIT .sch;" + setLayer());
+						}
+						else {
+							dlgMessageBox(lanGetText("dlg.setup.layer"));
+						}
+					};
+				}
+				dlgHBoxLayout{ //frame brd
+					dlgLabel(lanGetText("settings.setup.FrameBrd")); 
+					dlgStretch(1); 
+
+					string frame = checkFrameBrd();
+					int c = (frame != "");
+					dlgCheckBox("", c) {c = !c;};
+
+					dlgPushButton(lanGetText("button.add")) {
+						executeButton(addFrameBrd(frame));
+					};
+				}
+				dlgHBoxLayout{ //frame sch
+					dlgLabel(lanGetText("settings.setup.FrameSch")); 
+					dlgStretch(1); 
+
+					int c = !(checkFrameSch());
+					dlgCheckBox("", c) {c = !c;};
+					 
+					dlgPushButton(lanGetText("button.add")) {
+						executeButton(addFrameSch(!c));
+					};
+				}
+				dlgHBoxLayout{ //drill symbols
+					dlgLabel(lanGetText("settings.setup.drill")); 
+					dlgStretch(1);  
+
+					int c = !(checkDrillsymbols());
+					dlgCheckBox("", c) {c = !c;};
+					
+					dlgPushButton(lanGetText("button.add")){
+						if(!c) {
+							dialogDrill();
+						}
+						else{
+							dlgMessageBox(lanGetText("dlg.setup.drillSymbolsCreated"));
+						}
+					};
+				}
+				dlgHBoxLayout{ //Print settings
+					dlgLabel(lanGetText("settings.setup.print")); 
+					dlgStretch(1);  
+
+					int c = !(checkPrintSettings());
+					dlgCheckBox("", c) {c = !c;};
+					
+					dlgPushButton(lanGetText("button.add")){
+						if(!c){ 
+							setPrintSettings();
+							dlgMessageBox(lanGetText("dlg.setup.print"));
+							executeButton(""); 
+						}
+						else {
+							dlgMessageBox(lanGetText("dlg.setup.print"));
+						}
+					};
+				}
+				dlgHBoxLayout{ //PDFtk
+					dlgLabel(lanGetText("settings.setup.PDFtk")); 
+					dlgStretch(1);  
+
+					int c = !(checkPDFTK());
+					dlgCheckBox("", c) {c = !c;};
+					
+					dlgPushButton(lanGetText("button.add")){
+						if(!c) 
+							dialogPDFtk();
+						else
+							dlgMessageBox(lanGetText("dlg.setup.pdftk"));
+					};
+				}
+				dlgHBoxLayout{ //BOM
+					dlgLabel(lanGetText("settings.setup.bom")); 
+					dlgStretch(1);  
+
+					int c = !(checkBOM());
+					dlgCheckBox("", c) {c = !c;};
+					
+					dlgPushButton(lanGetText("button.add")){
+						dialogBOM(!c);
+					};
+				}
+				dlgHBoxLayout{ //DRU
+					dlgLabel(lanGetText("settings.setup.dru")); 
+					dlgStretch(1);  
+
+					int c = !(checkDRU(druname));
+					dlgCheckBox("", c) {c = !c;};
+					
+					dlgPushButton(lanGetText("button.add")){
+						dialogDRU(!c);
+					};
+				}
+			}
+			dlgHBoxLayout{
+				dlgStretch(1); 
+				dlgPushButton(lanGetText("button.setup.back")) { dlgAccept(); exit("RUN '"+filedir(argv[0])+"/ExportPro.ulp';");};
+				dlgPushButton(lanGetText("button.cancel")) {dlgReject();};
+			}
+		};
+	}
+}
+
+run();

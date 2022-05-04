@@ -1,0 +1,53 @@
+#include "Include_Config.ulp";
+
+void debugMsg(string msg){
+	//to prevent debug messages to apear in releace
+	dlgMessageBox(msg);
+}
+
+string cmd="";
+
+project.board(B){
+	B.elements(E){
+		if(strstr(E.package.name, "FRAME")!=-1){
+			cmd+="MIRROR " + E.name + ";";
+
+			// determening min and max x cordinates
+			int minX, maxX;
+			char init=0;
+			E.package.wires(W){
+				if(W.layer==lay_fabDoc[0]){
+					if(!init){
+						init=1;
+						if(W.x1<=W.x2){
+							minX = W.x1;
+							maxX = W.x2;
+						}
+						else{
+							minX = W.x2;
+							maxX = W.x1;						
+						}
+					}
+					else{
+						if(minX>W.x1)
+							minX=W.x1;
+						if(minX>W.x2)
+							minX=W.x2;
+
+						if(maxX<W.x1)
+							maxX=W.x1;
+						if(maxX<W.x2)
+							maxX=W.x2;
+					}
+				}
+			}
+
+			sprintf(cmd,"%sMove %s (%fmm %fmm);",cmd, E.name, u2mm(minX+maxX-E.x), u2mm(E.y));
+		}
+	}
+}
+
+// cfgset("EAGLE:Printer.Mirror",(cfgget(EAGLE:Printer.Mirror)=="1")?"0":"1");
+//cmd+="WINDOW FLIP;\n";
+//debugMsg(cmd);
+exit(cmd);

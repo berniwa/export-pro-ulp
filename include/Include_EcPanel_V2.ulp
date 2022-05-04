@@ -19,6 +19,12 @@ void dbgMsg(string msg,real val){
 	sprintf(tmp,msg+"%f",val);
 	dlgMessageBox(tmp);
 }
+void dbgPoint(string msg,real x,real y){
+	//to prevent debug messages to apear in releace
+	string tmp="";
+	sprintf(tmp,msg+" (%f %f)",x,y);
+	dlgMessageBox(tmp);
+}
 
 real wireX1[];
 real wireY1[];
@@ -42,13 +48,15 @@ string lib = "";
 string brd = "";
 
 void reverseDirection(int index){
-	wireX2[index] = wireX2[index] + wireX1[index];
-	wireX1[index] = wireX2[index] - wireX1[index];
-	wireX2[index] = wireX2[index] - wireX1[index];
+	real tmp;
 
-	wireY2[index] = wireY2[index] + wireY1[index];
-	wireY1[index] = wireY2[index] - wireY1[index];
-	wireY2[index] = wireY2[index] - wireY1[index];
+	tmp 			= wireX1[index];
+	wireX1[index]	= wireX2[index];
+	wireX2[index]	= tmp;
+
+	tmp 			= wireY1[index];
+	wireY1[index]	= wireY2[index];
+	wireY2[index]	= tmp;
 
 	wireRad[index]*=-1;
 }
@@ -86,8 +94,6 @@ void deletWirePart(real startX, real startY, real endX, real endY){
 
 void main(){
 
-	
-
 	getBoardSize();
 
 	real maxX = u2mm(max_x);
@@ -117,24 +123,43 @@ void main(){
 		brd=B.name;
 		lib=filedir(B.name)+"fabrication.lbr";
 
-		int i=0;
 		B.wires(W){
 			if(W.layer == 20){
-				wireX1[i]=u2mm(W.x1);
-				wireY1[i]=u2mm(W.y1);
-				wireX2[i]=u2mm(W.x2);
-				wireY2[i]=u2mm(W.y2);
+				wireX1[wireCount]=u2mm(W.x1);
+				wireY1[wireCount]=u2mm(W.y1);
+				wireX2[wireCount]=u2mm(W.x2);
+				wireY2[wireCount]=u2mm(W.y2);
 
 				if(W.arc){
-					wireRad[i]=(W.arc.radius/320000);//to convert to mm
+					wireRad[wireCount]=(W.arc.radius/320000);//to convert to mm
 				}
 				else{
-					wireRad[i]=0;
+					wireRad[wireCount]=0;
 				}
-				i++;
+				wireCount++;
 			}
 		}
-		wireCount=i;
+		if(wireCount==0){
+			B.elements(E){
+				E.package.wires(W){
+					if(W.layer == 20){
+						wireX1[wireCount]=u2mm(W.x1);
+						wireY1[wireCount]=u2mm(W.y1);
+						wireX2[wireCount]=u2mm(W.x2);
+						wireY2[wireCount]=u2mm(W.y2);
+
+						if(W.arc){
+							wireRad[wireCount]=(W.arc.radius/320000);//to convert to mm
+						}
+						else{
+							wireRad[wireCount]=0;
+						}
+
+						wireCount++;
+					}
+				}
+			}
+		}
 	}
 
 	cclockwise=0;
@@ -143,7 +168,7 @@ void main(){
 		if((wireX1[i]==wireX2[i-1])&&(wireY1[i]==wireY2[i-1])){
 		}
 		else if ((wireX2[i]==wireX2[i-1])&&(wireY2[i]==wireY2[i-1])){
-			//reversing the direction of the wire so every wire either gos cclockwise or countercclockwise
+			//reversing the direction of the wire so every wire either gos clockwise or counterclockwise
 			reverseDirection(i);
 		}
 		else{
@@ -155,7 +180,7 @@ void main(){
 				else if((wireX2[j]==wireX2[i-1])&&(wireY2[j]==wireY2[i-1])){
 					swopPlaces(i,j);
 
-					//reversing the direction of the wire so every wire either gos cclockwise or countercclockwise
+					//reversing the direction of the wire so every wire either gos clockwise or counterclockwise
 					reverseDirection(i);
 
 					break;
@@ -288,60 +313,60 @@ void main(){
 
 				if(cclockwise>0){
 					if(wireRad[n]>0){
-						if((wireX1[n]>wireX2[n])&&(wireY1[n]>wireY2[n])){
+						if((wireX1[n]>wireX2[n])&&(wireY1[n]>wireY2[n])){			// </
 							drawY+=gapWidth;
 						}
-						else if((wireX1[n]>wireX2[n])&&(wireY1[n]<wireY2[n])){
+						else if((wireX1[n]>wireX2[n])&&(wireY1[n]<wireY2[n])){		// <\
 							drawX+=gapWidth;
 						}
-						else if((wireX1[n]<wireX2[n])&&(wireY1[n]>wireY2[n])){
+						else if((wireX1[n]<wireX2[n])&&(wireY1[n]>wireY2[n])){		// \>
 							drawX-=gapWidth;
 						}
-						else if((wireX1[n]<wireX2[n])&&(wireY1[n]<wireY2[n])){
+						else if((wireX1[n]<wireX2[n])&&(wireY1[n]<wireY2[n])){		// />
 							drawY-=gapWidth;
 						}
 					}
 					else{
-						if((wireX1[n]>wireX2[n])&&(wireY1[n]>wireY2[n])){
-							drawX+=gapWidth;
+						if((wireX1[n]>wireX2[n])&&(wireY1[n]>wireY2[n])){			// </
+							drawX-=gapWidth;
 						}
-						else if((wireX1[n]>wireX2[n])&&(wireY1[n]<wireY2[n])){
+						else if((wireX1[n]>wireX2[n])&&(wireY1[n]<wireY2[n])){		// <\
 							drawY+=gapWidth;
 						}
-						else if((wireX1[n]<wireX2[n])&&(wireY1[n]>wireY2[n])){
+						else if((wireX1[n]<wireX2[n])&&(wireY1[n]>wireY2[n])){		// \>
 							drawY-=gapWidth;
 						}
-						else if((wireX1[n]<wireX2[n])&&(wireY1[n]<wireY2[n])){
+						else if((wireX1[n]<wireX2[n])&&(wireY1[n]<wireY2[n])){		// />
 							drawX+=gapWidth;
 						}
 					}
 				}
 				else{
 					if(wireRad[n]<0){
-						if((wireX1[n]>wireX2[n])&&(wireY1[n]>wireY2[n])){
+						if((wireX1[n]>wireX2[n])&&(wireY1[n]>wireY2[n])){			// </
 							drawX+=gapWidth;
 						}
-						else if((wireX1[n]>wireX2[n])&&(wireY1[n]<wireY2[n])){
+						else if((wireX1[n]>wireX2[n])&&(wireY1[n]<wireY2[n])){		// <\
 							drawY-=gapWidth;
 						}
-						else if((wireX1[n]<wireX2[n])&&(wireY1[n]>wireY2[n])){
+						else if((wireX1[n]<wireX2[n])&&(wireY1[n]>wireY2[n])){		// \>
 							drawY+=gapWidth;
 						}
-						else if((wireX1[n]<wireX2[n])&&(wireY1[n]<wireY2[n])){
+						else if((wireX1[n]<wireX2[n])&&(wireY1[n]<wireY2[n])){		// />
 							drawX-=gapWidth;
 						}
 					}
 					else{
-						if((wireX1[n]>wireX2[n])&&(wireY1[n]>wireY2[n])){
+						if((wireX1[n]>wireX2[n])&&(wireY1[n]>wireY2[n])){			// </
 							drawY-=gapWidth;
 						}
-						else if((wireX1[n]>wireX2[n])&&(wireY1[n]<wireY2[n])){
+						else if((wireX1[n]>wireX2[n])&&(wireY1[n]<wireY2[n])){		// <\
 							drawX-=gapWidth;
 						}
-						else if((wireX1[n]<wireX2[n])&&(wireY1[n]>wireY2[n])){
+						else if((wireX1[n]<wireX2[n])&&(wireY1[n]>wireY2[n])){		// \>
 							drawX+=gapWidth;
 						}
-						else if((wireX1[n]<wireX2[n])&&(wireY1[n]<wireY2[n])){
+						else if((wireX1[n]<wireX2[n])&&(wireY1[n]<wireY2[n])){		// />
 							drawY+=gapWidth;
 						}
 					}
@@ -381,8 +406,13 @@ void main(){
 		
 		if(wireRad[n]){//drawing an arc
 			//getting the radius right
-			drawR=wireRad[n];
-			drawR+=(cclockwise*gapWidth);
+
+			// drawR=wireRad[n];
+			// drawR+=(cclockwise*gapWidth);
+
+			drawR = abs(wireRad[n]);
+			drawR = (drawR+gapWidth)*(wireRad[n]/drawR); 
+			drawR*= cclockwise;
 
 			if(drawR<0){
 				sprintf(cmd,"%s @%f ",cmd,drawR);
@@ -398,37 +428,37 @@ void main(){
 			//Ajusting end coordinats
 			if(cclockwise>0){
 				if (wireRad[n]>0) {
-					if((wireX1[n]>wireX2[n])&&(wireY1[n]>wireY2[n])){
+					if((wireX1[n]>wireX2[n])&&(wireY1[n]>wireY2[n])){			// </
 						//dbgMsg("x- y- c:",n);
 						drawX-=gapWidth;
 					}
-					else if((wireX1[n]>wireX2[n])&&(wireY1[n]<wireY2[n])){
+					else if((wireX1[n]>wireX2[n])&&(wireY1[n]<wireY2[n])){		// <\
 						//dbgMsg("x- y+ c:",n);
 						drawY+=gapWidth;
 					}
-					else if((wireX1[n]<wireX2[n])&&(wireY1[n]>wireY2[n])){
+					else if((wireX1[n]<wireX2[n])&&(wireY1[n]>wireY2[n])){		// \>
 						//dbgMsg("x+ y- c:",n);
 						drawY-=gapWidth;
 					}
-					else if((wireX1[n]<wireX2[n])&&(wireY1[n]<wireY2[n])){
+					else if((wireX1[n]<wireX2[n])&&(wireY1[n]<wireY2[n])){		// />
 						//dbgMsg("x+ y+ c:",n);
 						drawX+=gapWidth;
 					}
 				}
 				else {
-					if((wireX1[n]>wireX2[n])&&(wireY1[n]>wireY2[n])){
+					if((wireX1[n]>wireX2[n])&&(wireY1[n]>wireY2[n])){			// </
 						//dbgMsg("x- y- c:",n);
 						drawY+=gapWidth;
 					}
-					else if((wireX1[n]>wireX2[n])&&(wireY1[n]<wireY2[n])){
+					else if((wireX1[n]>wireX2[n])&&(wireY1[n]<wireY2[n])){		// <\
 						//dbgMsg("x- y+ c:",n);
 						drawX+=gapWidth;
 					}
-					else if((wireX1[n]<wireX2[n])&&(wireY1[n]>wireY2[n])){
+					else if((wireX1[n]<wireX2[n])&&(wireY1[n]>wireY2[n])){		// \>
 						//dbgMsg("x+ y- c:",n);
 						drawX-=gapWidth;
 					}
-					else if((wireX1[n]<wireX2[n])&&(wireY1[n]<wireY2[n])){
+					else if((wireX1[n]<wireX2[n])&&(wireY1[n]<wireY2[n])){		// />
 						//dbgMsg("x+ y+ c:",n);
 						drawY-=gapWidth;
 					}
@@ -436,39 +466,39 @@ void main(){
 			}
 			else{
 				if (wireRad[n]<0) {
-					if((wireX1[n]>wireX2[n])&&(wireY1[n]>wireY2[n])){
+					if((wireX1[n]>wireX2[n])&&(wireY1[n]>wireY2[n])){			// </
 						//dbgMsg("x- y- c!:",n);
 						drawY-=gapWidth;
 					}
-					else if((wireX1[n]>wireX2[n])&&(wireY1[n]<wireY2[n])){
+					else if((wireX1[n]>wireX2[n])&&(wireY1[n]<wireY2[n])){		// <\
 						//dbgMsg("x- y+ c!:",n);
 						drawX-=gapWidth;
 					}
-					else if((wireX1[n]<wireX2[n])&&(wireY1[n]>wireY2[n])){
+					else if((wireX1[n]<wireX2[n])&&(wireY1[n]>wireY2[n])){		// \>
 						//dbgMsg("x+ y- c!:",n);
 						drawX+=gapWidth;
 					}
-					else if((wireX1[n]<wireX2[n])&&(wireY1[n]<wireY2[n])){
+					else if((wireX1[n]<wireX2[n])&&(wireY1[n]<wireY2[n])){		// />
 						//dbgMsg("x+ y+ c!:",n);
 						drawY+=gapWidth;
 					}
 				}
 				else {
-					if((wireX1[n]>wireX2[n])&&(wireY1[n]>wireY2[n])){
+					if((wireX1[n]>wireX2[n])&&(wireY1[n]>wireY2[n])){			// </
 						//dbgMsg("x- y- c!:",n);
-						drawX+=gapWidth;
-					}
-					else if((wireX1[n]>wireX2[n])&&(wireY1[n]<wireY2[n])){
-						//dbgMsg("x- y+ c!:",n);
 						drawY-=gapWidth;
 					}
-					else if((wireX1[n]<wireX2[n])&&(wireY1[n]>wireY2[n])){
-						//dbgMsg("x+ y- c!:",n);
-						drawY+=gapWidth;
-					}
-					else if((wireX1[n]<wireX2[n])&&(wireY1[n]<wireY2[n])){
-						//dbgMsg("x+ y+ c!:",n);
+					else if((wireX1[n]>wireX2[n])&&(wireY1[n]<wireY2[n])){		// <\
+						//dbgMsg("x- y+ c!:",n);
 						drawX-=gapWidth;
+					}
+					else if((wireX1[n]<wireX2[n])&&(wireY1[n]>wireY2[n])){		// \>
+						//dbgMsg("x+ y- c!:",n);
+						drawX+=gapWidth;
+					}
+					else if((wireX1[n]<wireX2[n])&&(wireY1[n]<wireY2[n])){		// />
+						//dbgMsg("x+ y+ c!:",n);
+						drawY+=gapWidth;
 					}
 				}
 			}
@@ -708,6 +738,7 @@ void main(){
 				cx = wireX2[((l+1)%wireCount)]-wireX1[((l+1)%wireCount)];
 				cy = wireY2[((l+1)%wireCount)]-wireY1[((l+1)%wireCount)];
 
+			
 				ab=acos((ax * bx + ay * by)/(sqrt(ax * ax + ay * ay) * sqrt(bx * bx + by * by)));
 				bc=acos((cx * bx + cy * by)/(sqrt(cx * cx + cy * cy) * sqrt(bx * bx + by * by)));
 				//ac=acos((ax * cx + ay * cy)/(sqrt(ax * ax + ay * ay) * sqrt(cx * cx + cy * cy)));
@@ -715,6 +746,7 @@ void main(){
 				if(ab<bc){ 
 					sprintf(cmd, "%sMITER %d (%fmm %fmm);\n",cmd,gapWidth,potMitX[l],potMitY[l]);
 				}
+				
 			}
 		}
 	}

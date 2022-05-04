@@ -13,6 +13,31 @@ string tmp = " :";
 tmp[0]=batPath[0];
 
 output(batPath, "at"){
+	if(argv[3]){
+		//waiting for all async operations to finish
+		printf(":loop\n");
+		for (int i = 3; argv[i]; i++) {
+			printf("2>NUL ( >>\"%s\" ECHO OFF) || (GOTO :loop)\n",argv[i]);
+		}
+
+		for (int l = 3; argv[l]; l++) {
+			//changing '/' into '\' for windows
+			string str[], path = argv[l];
+			int e = strsplit(str, path, '/');
+			path = strjoin(str, '\\');
+
+			//deleeting .tmp files
+			printf("DEL \"%s\\%s\"\n", filedir(path), filename(path));
+
+			//handeling gerber
+			if(strstr(path,"gerber")!=-1){
+				printf("COPY /Y \"%s\\*\" \"%s\"", (filedir(path) + fileext(filesetext(path,""))), filedir(path));
+				printf(" && RD /S /Q \"%s\"\n", (filedir(path) + fileext(filesetext(path,""))));
+				//printf(" || pause\n");
+			}
+		}
+	}
+
 	printf(tmp+"\n");
 	printf("CD \""+filedir(batPath)+"\"\n");
 	printf("DEL \"./tmp.scr\"\n");

@@ -178,3 +178,11 @@ int stringCompare(string s1, string s2)
 
 	return 0;
 }
+
+string stringCutout(string str, int start, int end){
+	return strsub(str, 0, start) + strsub(str,end);
+}
+
+string stringApend(string s1, string s2, int index){
+	return strsub(s1, 0, index) + s2 + strsub(s1,index);
+}

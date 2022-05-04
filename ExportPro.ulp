@@ -18,6 +18,7 @@
 #include "include/Include_Dru.ulp";
 #include "include/Include_Language.ulp";
 #include "include/Include_Config.ulp";
+#include "include/Include_CheckExport.ulp";
 
 void debugMsg(string msg){
 	//to prevent debug messages to apear in releace
@@ -42,7 +43,7 @@ string cmd = "", bname = "", layers = "", palette_name = "BLACK", config_file = 
 char UI_LESS=0;
 
 int 
-layout_bot = 1, layout_top = 1, layout_l3 = 0, layout_l2 = 0, parts_top = 1, parts_bot = 1, drills = 1, measure = 1, drilltable = 1, 
+layout_bot = 1, layout_top = 1, parts_top = 1, parts_bot = 1, drills = 1, measure = 1, drilltable = 1, 
 construction = 1, reference = 0, enable_export_png = 1, bom = 1, mirror_bot = 1, crop_all = 1, no_measures = 0, auto_project = 1,
 bom_xls = 1, bom_csv = 0, bom_dbase3 = 0, bom_farnell = 0, bom_shorten_names = 1, bom_display_package_type = 1, 
 parts_display_names = 1, parts_display_values = 1, pricing = 0, idf_export = 1, pcbimage_top = 1, 
@@ -68,12 +69,14 @@ enable_export_pdf = 1, pdf_keep_frame = 1, pdf_merge = 1,
 enable_export_image = 1,
 bomToPDF = 1,
 board_format = 0,
-bomPreset=0;
+bomPreset=0
 ;
 
 real board_thickness = 0.0, board_copper_thickness = 0.0,
 bom_quantity, pnp_offset_x = 0.0, pnp_offset_y = 0.0,
-bom_offsetX = 0.15, bom_offsetY = 0.15, bom_width = 179.6;
+bom_offsetX = 0.15, bom_offsetY = 0.15, bom_width = 179.6,
+temp_min, temp_max, minMeasureDiameter = 2.0
+;
 
 
 
@@ -97,6 +100,9 @@ output_file_gerber_spec, output_folder_eagle,
 output_file_eagle_spec, ecpanel_path
 ;
 
+
+string waitingList[];
+int waitingcount = 0;
 
 
 string layer_fill[];
@@ -135,9 +141,6 @@ string pcbSpecPlating[] = {
 string PcbType[]					= {"FR4", "Roggers", "Aluminium", "Polyamid"};
 
 string ExportSetup[];
-
-string eaglercOptions[];
-
 
 string getSystemFilename(string ends_with){
 	return filesetext(bname + boardname,ends_with);
@@ -204,6 +207,8 @@ void loadDRCSettings(){
 	int layerCount=0;
 	for(int i=0;i<strlen(layerSetup);i++){
 		if(isdigit(layerSetup[i])){
+			//debugVal(""+layerSetup[i]+":", layerCount);
+
 			layer[layerCount]+=strtol(""+layerSetup[i]);
 
 			if(isdigit(layerSetup[i+1])){
@@ -214,6 +219,16 @@ void loadDRCSettings(){
 			}
 		}
 	}
+	sort(layerCount, layer);
+	for(int j=0, y=0; j<layerCount;j++){
+		if(layer[j] != layer[y]){
+			layer[++y] = layer[j];
+			//debugVal(""+layer[y]+":", y);
+		}
+	}
+	layerCount=++y;
+
+	//debugVal("Layercount:", layerCount);
 
 	string copper[]; 
 	strsplit(copper, drcGetRule("mtCopper"), ' ');
@@ -225,7 +240,7 @@ void loadDRCSettings(){
 	board_copper_thickness = 0.0;
 
 	real conFakt=0;
-	i=0;	//Yes this works
+	i=0;	//Yes this works //nope it did not, but I'll fix it
 	for (int l=0;l<16;l++) {
 		if(l<(layerCount-1)){
 			board_thickness += convert2mm(isolate[l]);
@@ -245,10 +260,14 @@ void loadDRCSettings(){
 	board_copper_thickness=strtod(copper[0])*1000;//to get µm
 }
 
+void addToWaitinglist(string file){
+	file = filesetext(file,".tmp");
+	waitingList[waitingcount++] = file;
+}
+
 string parseUserSetting(string data){
 	return stringTrim(strsub(data,(strchr(data,'=')+1)));
 }
-
 
 void loadUsersettings(){
 	string data[];
@@ -529,6 +548,12 @@ void loadUsersettings(){
 			else if (con=="board_subtitle") {
 				board_subtitle = parseUserSetting(data[i]);				
 			}
+			else if (con=="minMeasureDiameter") {
+				minMeasureDiameter = strtod(parseUserSetting(data[i]));				
+			}
+			else if (con=="cfg_enableAsync") {
+				cfg_enableAsync = strtol(parseUserSetting(data[i]));
+			}
 			else {
 				for(int l=0; l<16;l++){
 					string s;
@@ -786,6 +811,8 @@ void saveUsersettings(){
 		printf("board_info = %d\n", board_info);
 		printf("board_title  = %s\n", board_title);
 		printf("board_subtitle  = %s\n", board_subtitle);
+		printf("minMeasureDiameter = %f\n", minMeasureDiameter);
+		printf("cfg_enableAsync = %d\n", cfg_enableAsync);
 	}
 }
 
@@ -800,7 +827,9 @@ string setLayerFill(){
 string restoreLayerFill(){
 	string cmd = "";
 	for(int i = 1; i < 52;i++){
-		sprintf(cmd, "%sSET FILL_LAYER %d %s;", cmd, i, layer_fill[i]);
+		if(layer_fill[i]){
+			sprintf(cmd, "%sSET FILL_LAYER %d %s;", cmd, i, layer_fill[i]);
+		}
 	}
 	return cmd;	
 }
@@ -818,7 +847,98 @@ int exportSetupLookup(string index){
 	return -1;
 }
 
-string updateFrameInformation(string drawing){
+string updateFrameInformationSch(){
+	string name[];
+	int she[]; //sheet is a reserved name
+	string attributes[];
+	string attribute;
+	string schname;
+
+	char numNames = 0;
+
+	project.schematic(S) {
+		schname=filename(S.name);
+		S.sheets(ST){
+			ST.parts(P) {
+				if(strstr(P.device.library, "frame") != -1){
+					name[numNames] = P.name;
+					she[numNames] = ST.number;
+					numNames++;
+					int i=0;
+					P.attributes(A) {
+						attributes[i]=A.name;
+						i++;
+					}
+					attribute = strjoin(attributes,';');
+				}
+			}
+		}
+	}
+
+	string cmd = "EDIT .sch;\n";
+
+	for(int j=0; j<numNames; j++) {
+
+
+		sprintf(cmd,"%sEDIT .s%d;\n",cmd,she[j]);
+
+		//cmd += "CHANGE DISPLAY OFF;\n";
+
+	 	/*
+		if(strstr(attribute,"TITLE")==-1) {
+			cmd += "ATTRIBUTE " + name[j] + " TITLE DELETE;\n";
+		}
+		if(strstr(attribute,"SUBTITLE")==-1) {
+			cmd += "ATTRIBUTE " + name[j] + " SUBTITLE DELETE;\n";
+		}
+	 	if(strstr(attribute,"DRAWING")!=-1) {
+			cmd += "ATTRIBUTE " + name[j] + " DRAWING DELETE;\n";
+		}
+		if(strstr(attribute,"EDIT_DATE")!=-1) {
+			cmd += "ATTRIBUTE " + name[j] + " EDIT_DATE DELETE;";
+		}
+		if(strstr(attribute,"FILENAME")!=-1) {
+			cmd += "ATTRIBUTE " + name[j] + " FILENAME DELETE;\n";
+		}
+		if(strstr(attribute,"USERNAME")!=-1) {
+			cmd += "ATTRIBUTE " + name[j] + " USERNAME DELETE;\n";
+		}
+		*/
+
+		
+	 	int t = time();
+	 	if(UI_LESS){
+	 		t=0;
+	 	}
+
+	 	sprintf(cmd, "%sATTRIBUTE %s EDIT_DATE \'%s\'; ", cmd, name[j], t2string(t, "dd.MM.yy"));
+	 	sprintf(cmd, "%sATTRIBUTE %s DRAWING \'Schematic\';\n", cmd, name[j]);
+	 	sprintf(cmd, "%sATTRIBUTE %s FILENAME \'%s\';\n", cmd, name[j], schname);
+	 	sprintf(cmd, "%sATTRIBUTE %s USERNAME \'%s\';\n", cmd, name[j], cfg_userName);
+	 	sprintf(cmd, "%sATTRIBUTE %s TITLE \'%s\';\n", cmd, name[j], board_title);
+	 	sprintf(cmd, "%sATTRIBUTE %s SUBTITLE \'%s\';\n", cmd, name[j], board_subtitle);
+
+		if (schematic_format){
+			if(strstr(attribute,"OBJECT_NO")==-1) {
+				cmd += "ATTRIBUTE " + name[j] + " OBJECT_NO '';";
+			}
+			if(strstr(attribute,"CREATE_DATE")==-1) {
+				cmd += "ATTRIBUTE " + name[j] + " CREATE_DATE '';";
+			}
+		}
+		else {	//shortname is only present in the A4 frame
+	 		sprintf(cmd, "%sATTRIBUTE %s SHORTNAME \'%s\'; ", cmd, name[j], cfg_shortUserName);
+		}
+
+	 	if(EAGLE_VERSION>=9){
+	 		cmd += "REPOSITION " + name[j] + ";\n\n";
+	 	}
+	}
+
+	return cmd;
+}
+
+string updateFrameInformationBrd(string drawing){
 	string name = "";
 	string attributes[];
 	string attribute;
@@ -840,8 +960,9 @@ string updateFrameInformation(string drawing){
 	string cmd = "";
 	if(name != "") {
 
-		cmd += "CHANGE DISPLAY OFF;";
+		//cmd += "CHANGE DISPLAY OFF;";
 	 	
+	 	/*
 		if(strstr(attribute,"TITLE")==-1) {
 			cmd += "ATTRIBUTE " + name + " TITLE DELETE;";
 		}
@@ -863,15 +984,7 @@ string updateFrameInformation(string drawing){
 		if(strstr(attribute,"SHORTNAME")!=-1) {
 			cmd += "ATTRIBUTE " + name + " SHORTNAME DELETE;";
 		}
-		if (board_format){
-			if(strstr(attribute,"OBJECT_NO")==-1) {
-				cmd += "ATTRIBUTE " + name + " OBJECT_NO '';";
-			}
-			if(strstr(attribute,"CREATE_DATE")==-1) {
-				cmd += "ATTRIBUTE " + name + " CREATE_DATE '';";
-			}
-		}
-
+		*/
 
 
 	 	int t = time();
@@ -885,6 +998,18 @@ string updateFrameInformation(string drawing){
 	 	sprintf(cmd, "%sATTRIBUTE %s SHORTNAME \'%s\'; ", cmd, name, cfg_shortUserName);
 	 	sprintf(cmd, "%sATTRIBUTE %s TITLE \'%s\'; ", cmd, name, board_title);
 	 	sprintf(cmd, "%sATTRIBUTE %s SUBTITLE \'%s\'; ", cmd, name, board_subtitle);
+
+		if (board_format){
+			if(strstr(attribute,"OBJECT_NO")==-1) {
+				cmd += "ATTRIBUTE " + name + " OBJECT_NO '';";
+			}
+			if(strstr(attribute,"CREATE_DATE")==-1) {
+				cmd += "ATTRIBUTE " + name + " CREATE_DATE '';";
+			}
+		}
+		else { //shortname is only present in the A4 frame
+	 		sprintf(cmd, "%sATTRIBUTE %s SHORTNAME \'%s\'; ", cmd, name, cfg_shortUserName);
+		}
 
 	 	if(EAGLE_VERSION>=9){
 	 		cmd += "REPOSITION " + name + "; ";
@@ -905,7 +1030,7 @@ string exportSetup(string index) {
 	int count = strsplit(fields, ExportSetup[i], ';');
 
 	string cmd = "";
-	cmd += updateFrameInformation(fields[5]);
+	cmd += updateFrameInformationBrd(fields[5]);
 	cmd += 	"DISPLAY NONE; "+
 			"DISPLAY " + fields[2] + "; ";
 
@@ -922,13 +1047,22 @@ string pngExport(string folder, string index){
 	string fields[];
 	int count = strsplit(fields, ExportSetup[i], ';');
 
+	
 	string tmp;
 	sprintf(tmp,"%d",pcbImageResolutions[image_resolution]);
-	return 	"DISPLAY NONE; "+
-			"DISPLAY " + fields[2] + "; " + 
-			"DISPLAY " + fields[3] + "; " + 
-			"SET CONFIRM YES; " + 
-			"EXPORT IMAGE '" + folder + stringTrim(fields[1]) + ".png' MONOCHROME "+tmp+";";		
+	string cmd =	"DISPLAY NONE; "+
+					"DISPLAY " + fields[2] + "; " + 
+					"DISPLAY " + fields[3] + "; " +
+					"RUN " + include_path + "ZoomVisible.ulp; " + 
+					"SET CONFIRM YES; " + 
+					"EXPORT IMAGE '" + folder + stringTrim(fields[1]) + ".png' " + (exp_window?"WINDOW":"") + " MONOCHROME " + tmp + ";";	
+
+	//to mirror the png within eagle
+	if(mirror_bot && (strchr(fields[6],'1')!=-1)){
+		cmd = "WINDOW FLIP;" + cmd + "WINDOW FLIP;";
+	}
+
+	return cmd;	
 }
 
 string pngCrop(string folder, string index){
@@ -940,19 +1074,8 @@ string pngCrop(string folder, string index){
 	
 	string fields[];
 	int count = strsplit(fields, ExportSetup[i], ';');
-	return "RUN '"  + include_path + "Crop.ulp' '" + folder + stringTrim(fields[1]) + ".png' '"+getSystemFilename(".bat")+"';";
-}
-
-string pngMirror(string folder, string index){	
-	int i = exportSetupLookup(index);
-	if(i == -1){
-		dlgMessageBox(":Unable to find index " + index);
-		return "";
-	}
-	
-	string fields[];
-	int count = strsplit(fields, ExportSetup[i], ';');
-	return "RUN '"  + include_path + "Mirror.ulp' '" + folder + stringTrim(fields[1]) + ".png' '"+getSystemFilename(".bat")+"';";
+	addToWaitinglist(folder + stringTrim(fields[1]));
+	return "RUN '"  + include_path + "Crop.ulp' '" + folder + stringTrim(fields[1]) + ".png' '"+getSystemFilename(".bat")+"' " + (cfg_enableAsync?"1":"0") + ";";
 }
 
 string pdfExport(string folder, string index){
@@ -964,11 +1087,22 @@ string pdfExport(string folder, string index){
 
 	string fields[];
 	int count = strsplit(fields, ExportSetup[i], ';');
+	string cmd = "" ;
+	cmd += 	"DISPLAY NONE; ";
+	cmd +=	"DISPLAY " + fields[2] + "; ";
+	cmd +=	"DISPLAY " + fields[4] + "; ";
 
-	return 	"DISPLAY NONE; "+
-			"DISPLAY " + fields[2] + "; " + 
-			"DISPLAY " + fields[4] + "; " + 
-			"PRINT SHEETS ALL -CAPTION HIERARCHY PAPER "+(board_format?"A3 landscape":"A4 portrait")+" BLACK FILE '" + folder + stringTrim(fields[1]) + ".pdf';";
+	cmd +=	"PRINT SHEETS ALL -CAPTION HIERARCHY PAPER ";
+	cmd +=	(board_format?"A3 landscape":"A4 portrait");
+	cmd +=	((fields[6]=="1") && mirror_bot)?" MIRROR":" -MIRROR";
+	cmd +=	" BLACK FILE '" + folder + stringTrim(fields[1]) + ".pdf';";
+
+	if ((fields[6]=="1") && mirror_bot && pdf_keep_frame) {
+		cmd  = "RUN " + include_path + "MirrorPDF.ulp;" + cmd;
+		cmd += "RUN " + include_path + "MirrorPDF.ulp;";
+	}
+
+	return cmd;
 } //HERE
 
 string exportLayer(int export_layer, int export_png, int export_pdf, string folder_png, string folder_pdf, string index) {
@@ -978,6 +1112,73 @@ string exportLayer(int export_layer, int export_png, int export_pdf, string fold
 		if(export_png) {cmd += pngExport(folder_png, index);}
 		if(export_pdf) {cmd += pdfExport(folder_pdf, index);}
 	}
+	return cmd;
+}
+
+void getMinMaxTemp(){
+	char initmaxi = 0, initmini = 0;
+
+	project.board(B){
+		B.elements(E){
+			E.attributes(A){
+				if(A.name == "MAX_TEMP"){
+					if(!initmaxi){
+						temp_max=strtod(A.value);
+						initmaxi=1;
+					}
+					else if(temp_max<strtod(A.value)){
+						temp_max=strtod(A.value);
+					}
+				}
+				else if(A.name == "MIN_TEMP"){
+					if(!initmini){
+						temp_min=strtod(A.value);
+						initmini=1;
+					}
+					else if(temp_min>strtod(A.value)){
+						temp_min=strtod(A.value);
+					}
+				}
+			}
+		}
+	}
+}
+
+string resetVew(){
+	string cmd = "";
+
+	//reseting visible layers & reset their colors
+	cmd += "DISPLAY";
+	string cm2 = "";
+	project.board(B){
+		B.layers(L){
+			cmd += " " + (L.visible)?"":"-" + stringFromInt(L.number);
+			cm2 += "SET COLOR_LAYER " + stringFromInt(L.number) + " " + stringFromInt(L.color) + ";";
+		}
+	}
+	cmd += ";" + cm2;
+
+
+	//reseting palette colors (3 palette X 128 entrys)
+	for(int i=0; i<PALETTE_TYPES; i++){
+		cmd += "SET PALETTE ";
+		if(i == PALETTE_BLACK)		{ cmd += "BLACK"; 	}
+		else if(i == PALETTE_WHITE)	{ cmd += "WHITE"; 	}
+		else						{ cmd += "COLORED"; }
+		cmd += ";";
+
+		for(int l=0; l<PALETTE_ENTRIES; l++){
+			if(i==PALETTE_WHITE && l==0){	//palett white 0 cant be changed
+				continue;
+			}
+
+			sprintf(cmd,"%sSET PALETTE %d %s;", cmd, l, cfgget("EAGLE:Palette."+stringFromInt(i)+"."+stringFromInt(l)));
+		}
+	}
+
+	//reseting visibel palette
+	cmd += "SET PALETTE " + palette_name + ";";
+
 	return cmd;
 }
 
@@ -996,8 +1197,14 @@ void export(){
 	cmd+="SET Option.DisplayMode 1;";
 	cmd+="SET Option.PolygonRatsnest 1;\n";
 
+	//Save old palette settings
+	if(palette(-1) == PALETTE_BLACK)		{ palette_name = "BLACK"; 	}
+	else if(palette(-1) == PALETTE_WHITE)	{ palette_name = "WHITE"; 	}
+	else									{ palette_name = "COLORED"; }
+
 	output(getSystemFilename(".bat"), "wt"){
-		printf("echo off\n");
+		printf("ECHO OFF\n");
+		printf("ECHO Finishing export...\n");
 	}
 
 	string tsilcsreenLayer =" ";
@@ -1183,6 +1390,8 @@ void export(){
 		if(schematic_format == 1) {
 			format = "A3 landscape";
 		}
+
+		cmd+=updateFrameInformationSch();
 		
 		if(schematic_bw) {
 			cmd += "SET CONFIRM YES;PRINT SHEETS ALL HIERARCHY PAPER " + format + " BLACK FILE '" + output_file_schematic_bw + "';";
@@ -1214,25 +1423,21 @@ void export(){
 	
 	cmd += "WRITE;";
 	
-	//Save old palette settings
-	if(palette(-1) == PALETTE_BLACK)		{ palette_name = "BLACK"; 	}
-	else if(palette(-1) == PALETTE_WHITE)	{ palette_name = "WHITE"; 	}
-	else									{ palette_name = "COLORED"; }
-
-
 	if(measure) {
-		cmd += "RUN '"  + include_path + "Measure.ulp';";
+		sprintf(cmd,"%sRUN '%sMeasure.ulp' '%f';", cmd, include_path, minMeasureDiameter);
 	}
 	cmd += "WRITE;";
 	
 	if(drilltable || fabrication || stackup) {
+		getMinMaxTemp();
 		//The drilltable ulp has been repalced with the new fabrication ULP
-		sprintf(cmd, "%s RUN '%sFabrication.ulp' %d %d %d \'%s\' \'%s\' \'%s\' \'%s\' \'%s\';", cmd, include_path, 
+		sprintf(cmd, "%s RUN '%sFabrication.ulp' %d %d %d \'%s\' \'%s\' \'%s\' \'%s\' \'%s\' \'%s\' \'%.2f\' \'%.2f\';", cmd, include_path, 
 			fabrication, drilltable, stackup, 
 			PcbType[board_type], pcbSpecColor[pcbimage_color], 
 			pcbSpecSilkscreenColor[pcbimage_silkscreen_color], 
 			pcbSpecPlating[pcbimage_plating],
-			bname
+			bname, (strtod(drcGetRule("mdCopperDimension"))==0.0)?"yes":"no",
+			temp_min, temp_max
 		);
 	}
 	cmd += "WRITE;";
@@ -1247,7 +1452,7 @@ void export(){
 		);
 
 		if(bomToPDF) {
-			ExportSetup[0] = "BOM;"+boardname+"-bom;155;;153; BOM";
+			ExportSetup[0] = "BOM;"+boardname+"-bom;" + stringFromInt(lay_fabDoc[2]) + ";;" + stringFromInt(lay_fabDoc[0]) +"; BOM";
 			cmd+=exportLayer(bomToPDF, 0, 1, "", output_folder,  "BOM");
 		}
 	}
@@ -1256,7 +1461,7 @@ void export(){
 	
 	if(EAGLE_VERSION>=9) {
 		sprintf(cmd, "%s RUN '"  + include_path + "SilkGen.ulp';", cmd);
-		cmd += "DISPLAY -123 -124 -127;";
+		cmd += "DISPLAY -"+stringFromInt(lay_dimension)+" -"+stringFromInt(lay_background)+" -"+stringFromInt(lay_empty)+";";
 	}
 	
 
@@ -1277,39 +1482,39 @@ void export(){
 
 		string layer_pdf = "", layer_image = "";
 		if(pdf_keep_frame) {
-			cmd += "LAYER 153 FabDoc1;";
-			layer_pdf += "153 ";
+			cmd += "LAYER " + stringFromInt(lay_fabDoc[0]) + " FabDoc1;";
+			layer_pdf += stringFromInt(lay_fabDoc[0]) + " ";
 		}
 		//Quick fix, to get correct dimensions, for non mirrored views
-		layer_pdf += "-" + mb + " " + mt;
+		//layer_pdf += "-" + mb + " " + mt;
 
 		int row = 0;
-		//Index, Filenames, Default Layers, Layers PNG, Layers PDF
-		ExportSetup[row++] = "L1 	;-l01-top		;1 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L1 - Top";
-		ExportSetup[row++] = "L2 	;-l02			;2 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L2";
-		ExportSetup[row++] = "L3 	;-l03			;3 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L3";
-		ExportSetup[row++] = "L4 	;-l04			;4 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L4";
-		ExportSetup[row++] = "L5 	;-l05			;5 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L5";
-		ExportSetup[row++] = "L6 	;-l06			;6 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L6";
-		ExportSetup[row++] = "L7 	;-l07			;7 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L7";
-		ExportSetup[row++] = "L8 	;-l08			;8 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L8";
-		ExportSetup[row++] = "L9 	;-l09			;9 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L9";
-		ExportSetup[row++] = "L10 	;-l10 			;10 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L10";
-		ExportSetup[row++] = "L11 	;-l11 			;11 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L11";
-		ExportSetup[row++] = "L12 	;-l12 			;12 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L12";
-		ExportSetup[row++] = "L13 	;-l13 			;13 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L13";
-		ExportSetup[row++] = "L14 	;-l14 			;14 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L14";
-		ExportSetup[row++] = "L15 	;-l15 			;15 17 18 20 " + mt + "						;" + layer_image + ";" + layer_pdf + "; Copper L15";
-		ExportSetup[row++] = "L16	;-l16-bot		;16 17 18 20 " + mb + "						;" + layer_image + ";" + layer_pdf + "; Copper L16 - Bottom";
-		ExportSetup[row++] = "PT 	;-parts-top		;20 " + ltx + tsilcsreenLayer + " " + mt + ";" + layer_image + ";" + layer_pdf + "; Silkscreen - Top";
-		ExportSetup[row++] = "PB 	;-parts-bottom	;20 " + lbx + bsilcsreenLayer + " " + mb + ";" + layer_image + ";" + layer_pdf + "; Silkscreen - Bottom";
-		ExportSetup[row++] = "ST 	;-stop-top		;20 29 " + mt + "							;" + layer_image + ";" + layer_pdf + "; Stopmask - Top";
-		ExportSetup[row++] = "SB 	;-stop-bottom	;20 30 " + mb + "							;" + layer_image + ";" + layer_pdf + "; Stopmask - Bottom";
-		ExportSetup[row++] = "CT 	;-paste-top		;20 31 " + mt + "							;" + layer_image + ";" + layer_pdf + "; Paste - Top";
-		ExportSetup[row++] = "CB 	;-paste-bottom	;20 32 " + mb + "							;" + layer_image + ";" + layer_pdf + "; Paste - Bottom";
-		ExportSetup[row++] = "FAB	;-fabrication 	;44 45 20 154 "  + mt + "					;" + layer_image + ";" + layer_pdf + "; Fabrication";
-		ExportSetup[row++] = "MECH	;-construction 	;111 20 									;" + layer_image + ";" + layer_pdf + " -" + mt + "; Mechanical";
-		ExportSetup[row++] = "REF	;-reference 	;111 49										;" + layer_image + ";" + layer_pdf + "; Reference";
+		//Index, Filenames, Default Layers, Layers PNG, Layers PDF, Drawing, png mirror
+		ExportSetup[row++] = "L1 	;-l01-top		;1 17 18 20 " + mt + "										;" + layer_image + ";" + layer_pdf + "; Copper L1 - Top			;0";
+		ExportSetup[row++] = "L2 	;-l02			;2 17 18 20 " + mt + "										;" + layer_image + ";" + layer_pdf + "; Copper L2				;0";
+		ExportSetup[row++] = "L3 	;-l03			;3 17 18 20 " + mt + "										;" + layer_image + ";" + layer_pdf + "; Copper L3				;0";
+		ExportSetup[row++] = "L4 	;-l04			;4 17 18 20 " + mt + "										;" + layer_image + ";" + layer_pdf + "; Copper L4				;0";
+		ExportSetup[row++] = "L5 	;-l05			;5 17 18 20 " + mt + "										;" + layer_image + ";" + layer_pdf + "; Copper L5				;0";
+		ExportSetup[row++] = "L6 	;-l06			;6 17 18 20 " + mt + "										;" + layer_image + ";" + layer_pdf + "; Copper L6				;0";
+		ExportSetup[row++] = "L7 	;-l07			;7 17 18 20 " + mt + "										;" + layer_image + ";" + layer_pdf + "; Copper L7				;0";
+		ExportSetup[row++] = "L8 	;-l08			;8 17 18 20 " + mt + "										;" + layer_image + ";" + layer_pdf + "; Copper L8				;0";
+		ExportSetup[row++] = "L9 	;-l09			;9 17 18 20 " + mt + "										;" + layer_image + ";" + layer_pdf + "; Copper L9				;0";
+		ExportSetup[row++] = "L10 	;-l10 			;10 17 18 20 " + mt + "										;" + layer_image + ";" + layer_pdf + "; Copper L10				;0";
+		ExportSetup[row++] = "L11 	;-l11 			;11 17 18 20 " + mt + "										;" + layer_image + ";" + layer_pdf + "; Copper L11				;0";
+		ExportSetup[row++] = "L12 	;-l12 			;12 17 18 20 " + mt + "										;" + layer_image + ";" + layer_pdf + "; Copper L12				;0";
+		ExportSetup[row++] = "L13 	;-l13 			;13 17 18 20 " + mt + "										;" + layer_image + ";" + layer_pdf + "; Copper L13				;0";
+		ExportSetup[row++] = "L14 	;-l14 			;14 17 18 20 " + mt + "										;" + layer_image + ";" + layer_pdf + "; Copper L14				;0";
+		ExportSetup[row++] = "L15 	;-l15 			;15 17 18 20 " + mt + "										;" + layer_image + ";" + layer_pdf + "; Copper L15				;0";
+		ExportSetup[row++] = "L16	;-l16-bot		;16 17 18 20 " + mb + "										;" + layer_image + ";" + layer_pdf + "; Copper L16 - Bottom		;1";
+		ExportSetup[row++] = "PT 	;-parts-top		;20 " + ltx + tsilcsreenLayer + " " + mt + "				;" + layer_image + ";" + layer_pdf + "; Silkscreen - Top		;0";
+		ExportSetup[row++] = "PB 	;-parts-bottom	;20 " + lbx + bsilcsreenLayer + " " + mb + "				;" + layer_image + ";" + layer_pdf + "; Silkscreen - Bottom		;1";
+		ExportSetup[row++] = "ST 	;-stop-top		;20 29 " + mt + "											;" + layer_image + ";" + layer_pdf + "; Stopmask - Top			;0";
+		ExportSetup[row++] = "SB 	;-stop-bottom	;20 30 " + mb + "											;" + layer_image + ";" + layer_pdf + "; Stopmask - Bottom		;1";
+		ExportSetup[row++] = "CT 	;-paste-top		;20 31 " + mt + "											;" + layer_image + ";" + layer_pdf + "; Paste - Top				;0";
+		ExportSetup[row++] = "CB 	;-paste-bottom	;20 32 " + mb + "											;" + layer_image + ";" + layer_pdf + "; Paste - Bottom			;1";
+		ExportSetup[row++] = "FAB	;-fabrication 	;44 45 20 " + stringFromInt(lay_fabDoc[1]) + " "  + mt + "	;" + layer_image + ";" + layer_pdf + "; Fabrication				;0";
+		ExportSetup[row++] = "MECH	;-construction 	;111 20 													;" + layer_image + ";" + layer_pdf + " -" + mt + "; Mechanical	;0";
+		ExportSetup[row++] = "REF	;-reference 	;111 49														;" + layer_image + ";" + layer_pdf + "; Reference				;0";
 
 		//Switch palette if export is enabled
 		cmd += "SET PALETTE WHITE;";
@@ -1360,15 +1565,7 @@ void export(){
 				if(drills)		{cmd += pngCrop(output_folder_image, "FAB");}
 				if(construction){cmd += pngCrop(output_folder_image, "MECH");}
 				if(reference)	{cmd += pngCrop(output_folder_image, "REF");}
-			}
-
-			//Mirror
-			if(mirror_bot) {
-				if(layout_bot)	{cmd += pngMirror(output_folder_image, "L16");}
-				if(parts_bot)	{cmd += pngMirror(output_folder_image, "PB");}
-				if(stop_bot)	{cmd += pngMirror(output_folder_image, "SB");}
-				if(creap_bot)	{cmd += pngMirror(output_folder_image, "CB");}
-			}			
+			}		
 		}
 
 
@@ -1380,7 +1577,7 @@ void export(){
 
 		//Export colored images
 		if((pcbimage_top || pcbimage_bottom) && (enable_export_png || enable_export_pdf)) {
-			sprintf(cmd, "%s RUN '"  + include_path + "ImageExport.ulp' %d %d %d '%s' '%s' %d '%s' '%s' %d %d %d '%s' '%s' '%s' '%s' '%s' '%s' %d %d;", cmd, 
+			sprintf(cmd, "%s RUN '"  + include_path + "ImageExport.ulp' %d %d %d '%s' '%s' %d '%s' '%s' %d %d %d '%s' '%s' '%s' '%s' '%s' '%s' %d %d %d;", cmd, 
 				enable_export_png, (enable_export_pdf&&EAGLE_VERSION>=9),
 				pcbimage_bottom, output_file_img_pcbb, output_file_pdf_pcbb,
 				pcbimage_top, output_file_img_pcbt, output_file_pdf_pcbt,
@@ -1391,16 +1588,24 @@ void export(){
 				pcbImageSilkscreenColors[pcbimage_silkscreen_color],
 				pcbImagePlating[pcbimage_plating],
 				tsilcsreenLayer, bsilcsreenLayer,
-				board_format, pdf_keep_frame
+				board_format, pdf_keep_frame,
+				cfg_enableAsync
 			);
+
+			if (pcbimage_top && enable_export_png && crop_all) 
+				addToWaitinglist(output_file_img_pcbt);
+
+			if (pcbimage_bottom && enable_export_png && crop_all) 
+				addToWaitinglist(output_file_img_pcbb);
 		}		
 	}
 
 	if(pdf_merge&&enable_export_pdf){
-		sprintf(cmd,"%sRUN '%sMergePDF.ulp' %d '%s' '%s' %d %d;\n", cmd, include_path, 
+		sprintf(cmd,"%sRUN '%sMergePDF.ulp' %d '%s' '%s' %d %d '%s';\n", cmd, include_path, 
 			output_date_folder, output_folder_pdf,
 			getSystemFilename(".bat"), 
-			(schematic_export&&schematic_color), (bomToPDF&&bom)
+			(schematic_export&&schematic_color), (bomToPDF&&bom),
+			lanGetText("dlg.pdf.footnote")
 		);
 	}
 
@@ -1415,28 +1620,31 @@ void export(){
 			for(int i = 0; i < 16; i++){
 				if(board_layer[i] == 1){
 					if(i == 0){	
-						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_copper_top,  i+1);
+						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' '%s' %d %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_copper_top, getSystemFilename(".bat"), cfg_enableAsync, i+1);
+						addToWaitinglist(output_file_gerber_copper_top + ".tmp");
 					} else if(i == 15){
-						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_copper_bottom,  i+1);
+						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' '%s' %d %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_copper_bottom, getSystemFilename(".bat"), cfg_enableAsync, i+1);
+						addToWaitinglist(output_file_gerber_copper_bottom + ".tmp");
 					} else {
 						string tfname = "";
 						sprintf(tfname, "%s%d", output_file_gerber_copper_other, i+1); 			
-						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' %d;", cmd,  getSystemFilename(".brd"), tfname ,  i+1);					
+						sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 0 '%s' '%s' '%s' %d %d;", cmd,  getSystemFilename(".brd"), tfname, getSystemFilename(".bat"), cfg_enableAsync, i+1);					
+						addToWaitinglist(tfname + ".tmp");
 					}
 					count++;
 				}			
 			}
 		}
-		if(gerber_stc){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 1 '%s' '%s' 1;", cmd,  getSystemFilename(".brd"), output_file_gerber_st); }
-		if(gerber_sts){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 1 '%s' '%s' 0;", cmd,  getSystemFilename(".brd"), output_file_gerber_sb); }
-		if(gerber_crc){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 2 '%s' '%s' 1;", cmd,  getSystemFilename(".brd"), output_file_gerber_ct); }
-		if(gerber_crs){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 2 '%s' '%s' 0;", cmd,  getSystemFilename(".brd"), output_file_gerber_cb); }
-		if(gerber_plc){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 3 '%s' '%s' 1 %d %d %d %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_pt, silkscreen_tplace, silkscreen_tnames, silkscreen_tvalues, silkscreen_tdocu); }
-		if(gerber_pls){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 3 '%s' '%s' 0 %d %d %d %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_pb, silkscreen_bplace, silkscreen_bnames, silkscreen_bvalues, silkscreen_bdocu); }
-		if(gerber_drd){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 4 '%s' '%s';",   cmd,  getSystemFilename(".brd"), output_file_gerber_drill); }	
-		if(gerber_otl){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 5 '%s' '%s';",   cmd,  getSystemFilename(".brd"), output_file_gerber_otl); }	
-		if(gerber_ref){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 6 '%s' '%s';",   cmd,  getSystemFilename(".brd"), output_file_gerber_ref); }	
-		if(gerber_fab){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 7 '%s' '%s';",   cmd,  getSystemFilename(".brd"), output_file_gerber_fab); }	
+		if(gerber_stc){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 1 '%s' '%s' '%s' %d 1;", 			cmd,  getSystemFilename(".brd"), output_file_gerber_st, getSystemFilename(".bat"), cfg_enableAsync); addToWaitinglist(output_file_gerber_st + ".tmp"); }
+		if(gerber_sts){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 1 '%s' '%s' '%s' %d 0;", 			cmd,  getSystemFilename(".brd"), output_file_gerber_sb, getSystemFilename(".bat"), cfg_enableAsync); addToWaitinglist(output_file_gerber_sb + ".tmp"); }
+		if(gerber_crc){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 2 '%s' '%s' '%s' %d 1;", 			cmd,  getSystemFilename(".brd"), output_file_gerber_ct, getSystemFilename(".bat"), cfg_enableAsync); addToWaitinglist(output_file_gerber_ct + ".tmp"); }
+		if(gerber_crs){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 2 '%s' '%s' '%s' %d 0;", 			cmd,  getSystemFilename(".brd"), output_file_gerber_cb, getSystemFilename(".bat"), cfg_enableAsync); addToWaitinglist(output_file_gerber_cb + ".tmp"); }
+		if(gerber_plc){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 3 '%s' '%s' '%s' %d 1 %d %d %d %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_pt, getSystemFilename(".bat"), cfg_enableAsync, silkscreen_tplace, silkscreen_tnames, silkscreen_tvalues, silkscreen_tdocu); addToWaitinglist(output_file_gerber_pt + ".tmp"); }
+		if(gerber_pls){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 3 '%s' '%s' '%s' %d 0 %d %d %d %d;", cmd,  getSystemFilename(".brd"), output_file_gerber_pb, getSystemFilename(".bat"), cfg_enableAsync, silkscreen_bplace, silkscreen_bnames, silkscreen_bvalues, silkscreen_bdocu); addToWaitinglist(output_file_gerber_pb + ".tmp"); }
+		if(gerber_drd){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 4 '%s' '%s' '%s' %d;",   			cmd,  getSystemFilename(".brd"), output_file_gerber_drill, getSystemFilename(".bat"), cfg_enableAsync); addToWaitinglist(output_file_gerber_drill + ".tmp"); }	
+		if(gerber_otl){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 5 '%s' '%s' '%s' %d;",   			cmd,  getSystemFilename(".brd"), output_file_gerber_otl, getSystemFilename(".bat"), cfg_enableAsync); addToWaitinglist(output_file_gerber_otl + ".tmp"); }	
+		if(gerber_ref){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 6 '%s' '%s' '%s' %d;",   			cmd,  getSystemFilename(".brd"), output_file_gerber_ref, getSystemFilename(".bat"), cfg_enableAsync); addToWaitinglist(output_file_gerber_ref + ".tmp"); }	
+		if(gerber_fab){ sprintf(cmd, "%s RUN '"  + include_path + "Gerber.ulp' 7 '%s' '%s' '%s' %d;",   			cmd,  getSystemFilename(".brd"), output_file_gerber_fab, getSystemFilename(".bat"), cfg_enableAsync); addToWaitinglist(output_file_gerber_fab + ".tmp"); }	
 	
 		//Generate specification file
 		sprintf(cmd, "%s RUN '"  + include_path + "Specification.ulp' '%s' %fmm '%s' %d %fum '%s' '%s' '%s';", cmd, output_file_gerber_spec, board_thickness, PcbType[board_type], count, board_copper_thickness, pcbSpecColor[pcbimage_color], pcbSpecSilkscreenColor[pcbimage_silkscreen_color], pcbSpecPlating[pcbimage_plating]); 		
@@ -1489,7 +1697,11 @@ void export(){
 	
 	cmd += "EDIT \'" + filepath + boardname + ".brd\'" + ";";
 
-	cmd += "RUN '" + include_path + "RunBatch.ulp' '"+getSystemFilename(".bat")+"' '"+preCMD+"';";
+	cmd += "RUN '" + include_path + "RunBatch.ulp' '"+getSystemFilename(".bat")+"' '"+preCMD+"'";
+	for(int i = 0; i<waitingcount; i++){
+		cmd += " '" + waitingList[i] + "'";
+	}
+	cmd += ";";
 
 	if(EAGLE_VERSION>=9){
 		cmd+="SET Option.SignalNamesOnTraces "+cfgget("EAGLE:Option.SignalNamesOnTraces")+";";
@@ -1509,45 +1721,17 @@ void export(){
 		cmd+="USE \'-"+filepath+"fabrication.lbr\';";
 	}
 
-	exit(cmd);
-}
+	cmd += resetVew();
 
-void detectDrillsymbols(){
-	board(B){
-		char cDrillSymbols = 1;
-		B.holes(H) {
-			if(!H.drillsymbol){
-				cDrillSymbols=0;
-			}
-		}
-		B.signals(S){
-			S.vias(V){
-				if(!V.drillsymbol){
-					cDrillSymbols=0;
-				}
-			}
-		}
-		B.elements(E) {
-			E.package.contacts(C) {
-				if(C.pad && (!C.pad.drillsymbol)){
-					cDrillSymbols=0;
-				}
-			}
-			E.package.holes(H) {
-				if(!H.drillsymbol){
-					cDrillSymbols=0;
-				}
-			}
-		}
+	cmd += "RUN '" + include_path + "EndMessage.ulp' '" + lanGetText("dlg.ExportCompleted") +"';\n";
 
-		if(!cDrillSymbols){
-			int opt=dlgMessageBox(lanGetText("dlg.DrillError"),lanGetText("button.continue"),lanGetText("button.cancel"));
-			
-			if(opt){
-				exit("");
-			}
-		}
+	/*
+	output("C:\\Work\\tmp\\tmp.scr","wt"){
+		printf("%s\n", cmd);
 	}
+	*/
+
+	exit(cmd);
 }
 
 void dialogImageSettings(){
@@ -1589,7 +1773,6 @@ void dialogImageSettings(){
 					string tmp[];
 					strsplit(tmp, lanGetText("comb.res"), ';');
 					dlgComboBox(tmp, image_resolution);
-					dlgCheckBox(lanGetText("settings.imag.mirror"), mirror_bot);
 					dlgCheckBox(lanGetText("settings.imag.crop"), crop_all);
 					dlgLabel(lanGetText("dlg.imag.footnote"));
 					dlgStretch(1);
@@ -1606,13 +1789,14 @@ void dialogImageSettings(){
 					}
 					else {
 						dlgCheckBox(lanGetText("settings.pdf.Merge")+"*", 	pdf_merge);
-						dlgLabel(lanGetText("dlg.pfd.footnote"));
+						dlgLabel("* " + lanGetText("dlg.pfd.footnote"));
 					}
 					dlgStretch(1);
 				}
 			};
 		}
-		dlgGroup(lanGetText("headline.advancedSettings")){			
+		dlgGroup(lanGetText("headline.advancedSettings")) {
+			dlgCheckBox(lanGetText("settings.imag.mirror"), mirror_bot);
 			dlgCheckBox(lanGetText("settings.imag.noMeasures"), no_measures);	
 			dlgCheckBox(lanGetText("settings.imag.alwaysExpT"), parts_top_docu);
 			dlgCheckBox(lanGetText("settings.imag.alwaysExpB"), parts_bot_docu);
@@ -1849,6 +2033,7 @@ void dialogFabricationSettings() {
 		dlgVBoxLayout {
 			dlgGroup(lanGetText("headline.boardInfo")) {
 				dlgCheckBox(lanGetText("settings.measure"),measure);
+				dlgHBoxLayout{dlgLabel(lanGetText("settings.minViaSize")); dlgStretch(1); dlgRealEdit(minMeasureDiameter, 0.0, 100000.0); dlgLabel("mm");}
 				dlgCheckBox(lanGetText("settings.drilltable"),drilltable); 
 				dlgCheckBox(lanGetText("settings.fabrication"),fabrication);
 				dlgCheckBox(lanGetText("settings.stackup"),stackup);
@@ -1873,6 +2058,8 @@ void mainManu(){
 		//Load the users project settings
 		loadUsersettings();
 		loadConfig();
+
+		lanLoadText(cfg_textLanguage);
 
 		drcLoadRules(getSystemFilename(drc_file), 0);
 
@@ -1925,8 +2112,6 @@ void mainManu(){
 
 	lanLoadText(cfg_textLanguage);
 
-	detectDrillsymbols();	
-
 	//Create the main dialog
 	int dialog = dlgDialog(ULP_VERSION){
 		dlgHBoxLayout {
@@ -1965,7 +2150,6 @@ void mainManu(){
 						dlgCell(4,1) dlgComboBox(tmp4, pcbimage_plating);
 					};								
 				}
-
 				dlgGroup(lanGetText("headline.usedLayers")) {
 					dlgGridLayout {
 						dlgCell(0,0) dlgLabel(lanGetText("general.layer"));
@@ -1985,8 +2169,7 @@ void mainManu(){
 						}
 					}
 				}
-
-				dlgGroup(lanGetText("headline.general.siscTop")) {		
+				dlgGroup(lanGetText("headline.general.siscTop")) {
 					dlgHBoxLayout {
 						dlgCheckBox("tPlace", silkscreen_tplace);
 						dlgCheckBox("tNames", silkscreen_tnames);
@@ -2032,6 +2215,21 @@ void mainManu(){
 			  		}
 					//dlgHBoxLayout {dlgCheckBox(lanGetText("settings.DateFolder"), output_date_folder); dlgStretch(1);}		
 				}
+				dlgGroup("Easy Setup"){
+					if(checkAll(getSystemFilename(drc_file))){
+						dlgLabel(lanGetText("dlg.Check.err"));
+						dlgHBoxLayout{
+							dlgStretch(1);
+							dlgPushButton(lanGetText("general.yes")){
+								saveUsersettings();
+								exit("RUN '" + getUlpDir("../EasySetup.ulp") + "' '" + getSystemFilename(drc_file) + "';");
+							};
+						}
+					}
+					else{
+						dlgLabel("<html>" + lanGetText("dlg.Check.noErr") + "</html>");
+					}
+				}
 				dlgStretch(1);
 			}
 		}
@@ -2040,7 +2238,19 @@ void mainManu(){
 			dlgPushButton(lanGetText("button.ok")) {
 				saveUsersettings();
 
-				exit("DRC; RUN '" + getUlpDir("../ExportPro.ulp") + "' execute;");
+				string cmd = "";
+				cmd += "DRC;";
+
+				cmd += "DISPLAY NONE 20;";
+				cmd += "RUN '" + include_path + "ZoomVisible.ulp';";
+				cmd += "SET CONFIRM YES;";
+				cmd += "EXPORT IMAGE '" + bname + "window.png' WINDOW 10;";
+				cmd += "EXPORT IMAGE '" + bname + "all.png' 10;";
+				cmd += "DISPLAY LAST;";
+				cmd += "WINDOW LAST;";
+
+				cmd += "RUN '" + getUlpDir("../ExportPro.ulp") + "' execute;";
+				exit(cmd);
 			};
 			dlgPushButton(lanGetText("button.cancel")) {
 				saveUsersettings();

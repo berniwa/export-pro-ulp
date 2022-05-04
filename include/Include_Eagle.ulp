@@ -8,5 +8,5 @@
  */
 
 #usage ""
-string tmp =filedir(argv[1]);
-system("CMD.EXE /C W: && cd \"" + tmp + "\" && copy \"" + argv[1] + "\" \"" +  argv[2] + "\" ");
+string tmp =filedir(argv[1]); //tmp[0] is the drive indicator
+system("CMD.EXE /C " + tmp[0] + ": & cd \"" + tmp + "\" & copy \"" + argv[1] + "\" \"" +  argv[2] + "\"");

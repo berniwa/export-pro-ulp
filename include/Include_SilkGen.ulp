@@ -36,17 +36,19 @@
        "Edited to be used in batch mode by Bernhard Wörndl-Aichriedler 20.02.2010"
        "</author>"
 
+#include "Include_Config.ulp";
+       
 // THIS PROGRAM IS PROVIDED AS IS AND WITHOUT WARRANTY OF ANY KIND, EXPRESSED
 // OR IMPLIED.
 
 // You can change these values to modify the ULP's behaviour:
-int dimensionnum = 123;          // Number of the dimension silkscreen layer.
+int dimensionnum = lay_dimension;          // Number of the dimension silkscreen layer.
 string dimensionname = "_dimension"; // Name of the dimension silkscreen layer.
 string dimensioncolor = "20";// Color of the dimension silkscreen layer.
-int backgroundnum = 124;          // Number of the background silkscreen layer.
+int backgroundnum = lay_background;          // Number of the background silkscreen layer.
 string backgroundname = "_background"; // Name of the background silkscreen layer.
 string backgroundcolor = "21";// Color of the background silkscreen layer.
-int emptynum = 127;          // Number of the empty silkscreen layer.
+int emptynum = lay_empty;          // Number of the empty silkscreen layer.
 string emptyname = "_empty"; // Name of the empty silkscreen layer.
 string emptycolor = "20";// Color of the empty silkscreen layer.
 real minwidth = 0.1;   // Default minimum silk screen line width (mils).
@@ -63,6 +65,8 @@ int show_script = 0;         // Whether to show the script before executing it.
 ////////////////////////////////////////////////////////////////////////////////
 ///// Don't change anything below here unless you know what you're doing. //////
 ////////////////////////////////////////////////////////////////////////////////
+
+
 
 real cursize = -1.0;
 int clearsilks = 0, saved_grid_unit = GRID_UNIT_MIL;
