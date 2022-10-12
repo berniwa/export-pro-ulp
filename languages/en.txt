@@ -187,7 +187,7 @@ settings.setup.dru = Design rules
 comb.res = 600dpi - normal resolution;1200dpi - high resolution;2400dpi - very high resolution
 comb.pcbColor = Green;Red;Black;White;Polyimid
 comb.pcbSiScColor = white silkscreen;yellow silkscreen;red silkscreen;black silkscreen
-comb.pcbPlating = HAL lead free;Any lead free;ENIG
+comb.pcbPlating = HAL lead free;Any lead free;ENIG;Chem Sn;
 
 tab.part = Part
 tab.value = Value

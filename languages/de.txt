@@ -187,7 +187,7 @@ settings.setup.dru = Designregeln
 comb.res = 600dpi - Normale Auflösung;1200dpi - Hohe Auflösung;2400dpi - Extrem hohe Auflösung
 comb.pcbColor = Grüne PCB;Rote PCB;Schwarze PCB;Weiße PCB;Polyimid
 comb.pcbSiScColor = Weiß;Gelb;Rot;Schwarz
-comb.pcbPlating = Verzinnt (bleifrei);Verzinnt (jedes);Vergoldet
+comb.pcbPlating = Verzinnt (bleifrei);Verzinnt (jedes);Vergoldet;Verzinnt (chemisch);
 
 tab.part = Bauteil
 tab.value = Wert

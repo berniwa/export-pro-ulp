@@ -135,7 +135,8 @@ string pcbSpecSilkscreenColor[] = {
 string pcbSpecPlating[] = {
 	"HASL lead free",
 	"any lead free",
-	"ENIG"
+	"ENIG",
+	"Chem Sn"
 };
 
 string PcbType[]					= {"FR4", "Roggers", "Aluminium", "Polyamid"};
